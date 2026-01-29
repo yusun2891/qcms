@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QCMS Wireframe Index</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+        }
+        
+        .header h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .header p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .tag-curriculum {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .tag-content {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .tag-prompt {
+            background: #e7d4f5;
+            color: #5a1d8c;
+        }
+        
+        .tag-usage {
+            background: #d4c5f5;
+            color: #4a2d7a;
+        }
+        
+        .tag-settings {
+            background: #e9ecef;
+            color: #495057;
+        }
+        
+        .link-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        
+        .wireframe-link {
+            display: block;
+            padding: 20px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .wireframe-link.disabled {
+            background: #f1f3f5;
+            border-color: #dee2e6;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .wireframe-link.disabled:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: #dee2e6;
+        }
+        
+        .wireframe-link.disabled::before {
+            display: none;
+        }
+        
+        .wireframe-link:not(.disabled):hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+        }
+        
+        .wireframe-link:not(.disabled)::before {
+            content: '→';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            color: #667eea;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .wireframe-link:not(.disabled):hover::before {
+            opacity: 1;
+            right: 15px;
+        }
+        
+        .link-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #667eea;
+        }
+        
+        .link-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .status-new {
+            background: #667eea;
+            color: white;
+        }
+        
+        .status-done {
+            background: #28a745;
+            color: white;
+        }
+        
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 50px;
+            padding: 20px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>QCMS Wireframes</h1>
+            <p>Quantum Content Management System - Wireframe Navigation</p>
+        </div>
+        
+        <!-- 커리큘럼 관리 -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="section-tag tag-curriculum">커리큘럼 관리</span>
+                Curriculum Management
+            </h2>
+            <div class="link-grid">
+                <a href="qcms_quarter_settings.html" class="wireframe-link">
+                    <div class="link-title">
+                        분기 설정
+                        <span class="status-badge status-done">완료</span>
+                    </div>
+                    <div class="link-desc">학기/분기별 운영 기간 및 설정 관리</div>
+                </a>
+                
+                <a href="qcms_textbook_register.html" class="wireframe-link">
+                    <div class="link-title">
+                        교재 등록
+                        <span class="status-badge status-done">완료</span>
+                    </div>
+                    <div class="link-desc">교재 메타정보(교재명, 레벨, 학년 등) 등록</div>
+                </a>
+                
+                <a href="qcms_curriculum_assign.html" class="wireframe-link">
+                    <div class="link-title">
+                        커리큘럼 배정
+                        <span class="status-badge status-done">완료</span>
+                    </div>
+                    <div class="link-desc">분기/캠퍼스/학년/레벨별 교재 배정</div>
+                </a>
+            </div>
+        </div>
+        
+        <!-- 콘텐츠 관리 -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="section-tag tag-content">콘텐츠 관리</span>
+                Content Management
+            </h2>
+            <div class="link-grid">
+                <a href="qcms_circular_course.html" class="wireframe-link">
+                    <div class="link-title">
+                        Circular Course
+                        <span class="status-badge status-done">완료</span>
+                    </div>
+                    <div class="link-desc">Reading 교재 기반 통합 학습 콘텐츠 등록/관리</div>
+                </a>
+                
+                <a href="qcms_circular_review.html" class="wireframe-link">
+                    <div class="link-title">
+                        Circular Course 복습
+                        <span class="status-badge status-done">완료</span>
+                    </div>
+                    <div class="link-desc">Circular Course 복습 콘텐츠 등록/관리</div>
+                </a>
+                
+                <a href="qcms_retention_course.html" class="wireframe-link">
+                    <div class="link-title">
+                        Retention Course
+                        <span class="status-badge status-done">완료</span>
+                    </div>
+                    <div class="link-desc">어휘 교재 기반 단어 암기 콘텐츠 등록/관리</div>
+                </a>
+                
+                <a href="qcms_retention_review.html" class="wireframe-link">
+                    <div class="link-title">
+                        Retention Course 복습
+                        <span class="status-badge status-done">완료</span>
+                    </div>
+                    <div class="link-desc">Retention Course 복습 콘텐츠 등록/관리</div>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Prompt 관리 -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="section-tag tag-prompt">Prompt 관리</span>
+                Prompt Management
+            </h2>
+            <div class="link-grid">
+                <div class="wireframe-link disabled">
+                    <div class="link-title">
+                        콘텐츠 생성 Prompt
+                    </div>
+                    <div class="link-desc">AI 콘텐츠 자동 생성용 프롬프트 관리</div>
+                </div>
+                
+                <div class="wireframe-link disabled">
+                    <div class="link-title">
+                        학습 모듈 Prompt
+                    </div>
+                    <div class="link-desc">AI 학습 모듈(튜터, 대화 등)용 프롬프트 관리</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 이용 현황 -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="section-tag tag-usage">이용 현황</span>
+                Usage Status
+            </h2>
+            <div class="link-grid">
+                <div class="wireframe-link disabled">
+                    <div class="link-title">
+                        선생님 현황
+                    </div>
+                    <div class="link-desc">선생님별 서비스 이용 현황 조회</div>
+                </div>
+                
+                <div class="wireframe-link disabled">
+                    <div class="link-title">
+                        학생 현황
+                    </div>
+                    <div class="link-desc">학생별 학습 현황 및 통계 조회</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 환경설정 -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="section-tag tag-settings">환경설정</span>
+                System Settings
+            </h2>
+            <div class="link-grid">
+                <div class="wireframe-link disabled">
+                    <div class="link-title">
+                        학습 모듈 설정
+                    </div>
+                    <div class="link-desc">학습 모듈별 설정값 관리</div>
+                </div>
+                
+                <div class="wireframe-link disabled">
+                    <div class="link-title">
+                        미디어 관리
+                    </div>
+                    <div class="link-desc">음원, 이미지 등 미디어 파일 관리</div>
+                </div>
+                
+                <div class="wireframe-link disabled">
+                    <div class="link-title">
+                        팝업창 설정
+                    </div>
+                    <div class="link-desc">서비스 팝업 메시지 설정</div>
+                </div>
+                
+                <div class="wireframe-link disabled">
+                    <div class="link-title">
+                        권한 관리
+                    </div>
+                    <div class="link-desc">사용자 역할 및 메뉴 접근 권한 관리</div>
+                </div>
+                
+                <div class="wireframe-link disabled">
+                    <div class="link-title">
+                        알림 관리
+                    </div>
+                    <div class="link-desc">알림톡, 푸시 알림 설정 관리</div>
+                </div>
+                
+                <div class="wireframe-link disabled">
+                    <div class="link-title">
+                        코드 관리
+                    </div>
+                    <div class="link-desc">시스템 공통 코드 관리</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>QCMS Wireframe Collection © 2025 EduBrain</p>
+        </div>
+    </div>
+</body>
+</html>

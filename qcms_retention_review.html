@@ -1,0 +1,5262 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QCMS - Retention Course 검수</title>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4C55EB;
+      --primary-hover: #3D45D9;
+      --primary-light: #EEF0FF;
+      --font-1: #191F28;
+      --font-2: #4E5968;
+      --font-3: #8B95A1;
+      --font-4: #B0B8C1;
+      --bg-1: #F9FAFB;
+      --bg-2: #F3F4F6;
+      --line-1: #E5E8EB;
+      --line-2: #D1D6DB;
+      --white: #FFFFFF;
+      --success: #10B981;
+      --success-light: #D1FAE5;
+      --warning: #F59E0B;
+      --warning-light: #FEF3C7;
+      --error: #EF4444;
+      --error-light: #FEE2E2;
+      --purple: #7C3AED;
+      --purple-light: #EDE9FE;
+      --blue: #3B82F6;
+      --blue-light: #DBEAFE;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-2);
+      color: var(--font-1);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: var(--white);
+      border-bottom: 1px solid var(--line-1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 10px;
+      background: none;
+      border: none;
+      color: var(--font-2);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .back-btn:hover { background: var(--bg-1); }
+
+    .header-divider {
+      width: 1px;
+      height: 20px;
+      background: var(--line-1);
+    }
+
+    .header-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .header-info-sub {
+      font-size: 12px;
+      color: var(--font-3);
+    }
+
+    .header-info-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--font-1);
+    }
+
+    .header-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .status-badge.status-waiting {
+      background: var(--bg-1);
+      color: var(--font-3);
+    }
+
+    .status-badge.status-reviewing {
+      background: var(--warning-light);
+      color: var(--warning);
+    }
+
+    .status-badge.status-completed {
+      background: var(--success-light);
+      color: var(--success);
+    }
+
+    .status-badge.status-editing {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      height: 34px;
+      padding: 0 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+
+    .btn svg { width: 14px; height: 14px; }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--white);
+    }
+    .btn-primary:hover { background: var(--primary-hover); }
+
+    .btn-secondary {
+      background: var(--white);
+      color: var(--font-2);
+      border: 1px solid var(--line-1);
+    }
+    .btn-secondary:hover { background: var(--bg-1); border-color: var(--line-2); }
+
+    .btn-disabled, .btn:disabled {
+      background: var(--bg-2) !important;
+      color: var(--font-4) !important;
+      border-color: var(--line-1) !important;
+      cursor: not-allowed !important;
+      pointer-events: none;
+    }
+
+    .btn-ghost {
+      background: none;
+      color: var(--font-3);
+      padding: 0 8px;
+    }
+    .btn-ghost:hover { background: var(--bg-1); color: var(--font-2); }
+
+    /* 단어 삭제 버튼 */
+    .btn-delete-word {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--font-3);
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .btn-delete-word:hover {
+      background: var(--error-light);
+      color: var(--error);
+      border-color: var(--error);
+    }
+
+    .btn-sm {
+      height: 28px;
+      padding: 0 10px;
+      font-size: 12px;
+    }
+
+    .btn-xs {
+      height: 24px;
+      padding: 0 8px;
+      font-size: 11px;
+    }
+
+    .btn-icon {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+    }
+
+    .btn-regen {
+      background: var(--bg-1);
+      color: var(--font-2);
+      border: 1px solid var(--line-1);
+    }
+    .btn-regen:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+    .btn-regen.loading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+    .btn-regen.loading svg {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .spin {
+      animation: spin 1s linear infinite;
+    }
+
+    /* ===== LAYOUT ===== */
+    .main {
+      margin-top: 56px;
+      height: calc(100vh - 56px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== TABS ===== */
+    .tabs-wrap {
+      background: var(--white);
+      border-bottom: 1px solid var(--line-1);
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .tabs {
+      display: flex;
+    }
+
+    .tab {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 14px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--font-3);
+      background: none;
+      border: none;
+      cursor: pointer;
+      position: relative;
+    }
+    .tab:hover { color: var(--font-2); }
+    .tab.active { color: var(--primary); }
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--primary);
+    }
+
+    .tab-count {
+      padding: 2px 6px;
+      background: var(--bg-2);
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .tab.active .tab-count {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .tab-issue {
+      padding: 2px 6px;
+      background: var(--error);
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--white);
+    }
+
+    .tab-issue-badge {
+      padding: 2px 6px;
+      background: var(--warning);
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--white);
+      margin-left: 4px;
+    }
+
+    .tabs-action {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pending-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      background: var(--warning-light);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--warning);
+    }
+
+    /* ===== CONTENT LAYOUT ===== */
+    .content-wrapper {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* 좌측 원본 지문 패널 */
+    .source-panel {
+      width: 360px;
+      min-width: 360px;
+      background: var(--white);
+      border-right: 1px solid var(--line-1);
+      display: flex;
+      flex-direction: column;
+      transition: width 0.3s ease, min-width 0.3s ease;
+      overflow: hidden;
+    }
+
+    .source-panel.collapsed {
+      width: 0;
+      min-width: 0;
+      border-right: none;
+    }
+
+    .source-panel.collapsed .source-panel-header,
+    .source-panel.collapsed .source-panel-content {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .source-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line-1);
+      background: var(--bg-1);
+      flex-shrink: 0;
+      transition: opacity 0.2s, visibility 0.2s;
+    }
+
+    .source-panel-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--font-1);
+      white-space: nowrap;
+    }
+
+    .source-panel-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: var(--bg-2);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+
+    .source-panel-toggle:hover {
+      background: var(--line-1);
+    }
+
+    .source-panel-toggle svg {
+      width: 14px;
+      height: 14px;
+      color: var(--font-2);
+    }
+
+    .source-panel-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      transition: opacity 0.2s, visibility 0.2s;
+    }
+
+    .source-page {
+      margin-bottom: 20px;
+    }
+
+    .source-page:last-child {
+      margin-bottom: 0;
+    }
+
+    .source-page-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--font-3);
+      text-transform: uppercase;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--line-1);
+    }
+
+    .source-paragraph {
+      margin-bottom: 16px;
+    }
+
+    .source-paragraph:last-child {
+      margin-bottom: 0;
+    }
+
+    .source-paragraph-label {
+      display: inline-block;
+      padding: 2px 6px;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 10px;
+      font-weight: 600;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+
+    .source-paragraph-text {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--font-1);
+    }
+
+    /* 접힌 상태의 토글 버튼 */
+    .source-toggle-collapsed {
+      position: fixed;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 90px;
+      background: var(--white);
+      border: 1px solid var(--line-1);
+      border-left: none;
+      border-radius: 0 8px 8px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      z-index: 1000;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, background 0.15s;
+    }
+
+    .source-toggle-collapsed:hover {
+      background: var(--bg-1);
+    }
+
+    .source-toggle-collapsed svg {
+      width: 16px;
+      height: 16px;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+
+    .source-toggle-collapsed span {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--font-2);
+    }
+
+    /* 패널이 접혔을 때 토글 버튼 표시 */
+    .content-wrapper.panel-collapsed .source-toggle-collapsed {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* 우측 콘텐츠 영역 */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      position: relative;
+    }
+
+    .content-inner {
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+    .tab-panel.active {
+      display: block;
+    }
+
+    /* ===== CARD ===== */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--line-1);
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line-1);
+      background: var(--bg-1);
+      border-radius: 10px 10px 0 0;
+    }
+
+    .card-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--font-1);
+    }
+
+    .card-num {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--white);
+      border: 1px solid var(--line-2);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--font-2);
+    }
+
+    .card-body {
+      padding: 16px;
+    }
+
+    /* ===== SOURCE TAG ===== */
+    .source-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 8px;
+      background: var(--bg-2);
+      border-radius: 4px;
+      font-size: 11px;
+      color: var(--font-3);
+    }
+
+    .source-tag svg {
+      width: 10px;
+      height: 10px;
+    }
+
+    /* ===== ISSUE BADGE ===== */
+    .issue-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 3px 8px;
+      background: var(--error-light);
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--error);
+    }
+
+    /* ===== EDITABLE ===== */
+    .editable {
+      padding: 8px 10px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--font-1);
+      cursor: text;
+      transition: all 0.15s;
+      min-height: 38px;
+    }
+
+    .editable:hover {
+      background: var(--bg-1);
+      border-color: var(--line-1);
+    }
+
+    .editable:focus {
+      outline: none;
+      background: var(--white);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    .editable.changed {
+      border-color: var(--warning);
+      background: var(--warning-light);
+    }
+
+    .editable-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--font-3);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-bottom: 4px;
+    }
+
+    .field-row {
+      margin-bottom: 14px;
+    }
+
+    .field-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .field-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    /* ===== AUDIO - SIMPLE ===== */
+    .audio-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .audio-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--font-3);
+    }
+
+    .audio-item.need-regen {
+      color: var(--warning);
+    }
+
+    .play-btn {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--font-3);
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .play-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .play-btn svg {
+      width: 10px;
+      height: 10px;
+      fill: var(--white);
+    }
+
+    .play-btn.original {
+      background: var(--purple);
+    }
+
+    .play-btn.tts {
+      background: var(--blue);
+    }
+
+    .play-btn.need-regen {
+      background: var(--warning);
+    }
+
+    .audio-label {
+      font-size: 11px;
+      color: var(--font-4);
+    }
+
+    .audio-time {
+      font-size: 12px;
+      font-family: 'SF Mono', Monaco, monospace;
+      color: var(--font-3);
+    }
+
+    .regen-mini {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      color: var(--warning);
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .regen-mini:hover {
+      background: var(--warning-light);
+    }
+
+    .regen-mini svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* ===== TIMESTAMP RANGE SLIDER ===== */
+    .timestamp-editor {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 8px;
+      padding: 10px 12px;
+      background: var(--bg-1);
+      border-radius: 8px;
+      transition: background 0.2s, border 0.2s;
+      border: 1px solid transparent;
+    }
+
+    .timestamp-editor.changed {
+      background: var(--warning-light);
+      border-color: var(--warning);
+    }
+
+    .timestamp-editor.needs-setup {
+      background: #fef2f2;
+      border-color: var(--danger);
+    }
+
+    .timestamp-editor-label {
+      font-size: 11px;
+      color: var(--font-3);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .range-setup-warning {
+      display: none;
+      align-items: center;
+      gap: 3px;
+      color: var(--danger);
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .range-setup-warning svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .timestamp-editor.needs-setup .range-setup-warning {
+      display: inline-flex;
+    }
+
+    .timestamp-editor.needs-setup .timestamp-editor-label {
+      color: var(--danger);
+    }
+
+    .btn-save-range {
+      background: var(--success);
+      color: var(--white);
+      border: none;
+      padding: 4px 10px;
+      font-size: 11px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+      margin-left: 6px;
+    }
+
+    .btn-save-range:hover {
+      background: #0a9960;
+    }
+
+    .btn-save-range svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .timestamp-editor.changed .btn-save-range {
+      display: inline-flex;
+    }
+
+    .timestamp-editor.needs-setup .btn-save-range {
+      display: inline-flex;
+    }
+
+    .btn-reset-range {
+      background: none;
+      color: var(--font-3);
+      border: none;
+      padding: 4px 6px;
+      font-size: 11px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      transition: all 0.15s;
+      margin-left: 4px;
+    }
+
+    .btn-reset-range:hover {
+      background: var(--bg-2);
+      color: var(--font-1);
+    }
+
+    .timestamp-editor.changed .btn-reset-range {
+      display: inline-flex;
+    }
+
+    .range-slider {
+      flex: 1;
+      position: relative;
+      height: 24px;
+    }
+
+    .range-track {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: var(--line-2);
+      border-radius: 3px;
+      transform: translateY(-50%);
+    }
+
+    .range-selected {
+      position: absolute;
+      top: 50%;
+      height: 6px;
+      background: var(--purple);
+      border-radius: 3px;
+      transform: translateY(-50%);
+    }
+
+    .range-handle {
+      position: absolute;
+      top: 50%;
+      width: 18px;
+      height: 18px;
+      background: var(--white);
+      border: 2px solid var(--purple);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      cursor: grab;
+      z-index: 2;
+      transition: box-shadow 0.15s;
+    }
+
+    .range-handle:hover {
+      box-shadow: 0 0 0 4px var(--purple-light);
+    }
+
+    .range-handle:active {
+      cursor: grabbing;
+      box-shadow: 0 0 0 6px var(--purple-light);
+    }
+
+    .range-handle.start {
+      z-index: 3;
+    }
+
+    .timestamp-inputs {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .timestamp-input {
+      width: 50px;
+      padding: 4px 6px;
+      border: 1px solid var(--line-2);
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: 'SF Mono', Monaco, monospace;
+      text-align: center;
+      background: var(--white);
+    }
+
+    .timestamp-input:focus {
+      outline: none;
+      border-color: var(--purple);
+    }
+
+    .timestamp-sep {
+      color: var(--font-4);
+      font-size: 12px;
+    }
+
+    /* ===== AI COMMENT (STT 패널과 동일한 디자인) ===== */
+    .ai-comment {
+      margin-top: 10px;
+      padding: 12px;
+      background: var(--bg-1);
+      border-radius: 8px;
+      border: 1px solid var(--line-1);
+    }
+
+    .ai-comment.warning {
+      background: var(--warning-light);
+      border-color: var(--warning);
+    }
+
+    .ai-comment-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .ai-comment-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--warning);
+    }
+
+    .ai-comment-title svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .ai-comment-content {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--font-1);
+      padding: 10px 12px;
+      background: var(--white);
+      border-radius: 6px;
+      border: 1px solid var(--line-1);
+    }
+
+    .ai-comment-text {
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--font-2);
+    }
+
+    /* ===== SENTENCE CARD ===== */
+    .sentence-actions {
+      display: flex;
+      gap: 2px;
+    }
+
+    /* ===== WORD CARD ===== */
+    .word-header-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .word-text-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .word-text {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--font-1);
+      padding: 4px 8px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      cursor: text;
+    }
+
+    .word-text:hover {
+      background: var(--bg-1);
+      border-color: var(--line-1);
+    }
+
+    .word-text:focus {
+      outline: none;
+      background: var(--white);
+      border-color: var(--primary);
+    }
+
+    .word-text.changed {
+      background: var(--warning-light);
+      border-color: var(--warning);
+    }
+
+    .btn-regen-word-all {
+      display: none;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--white);
+      background: var(--primary);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-regen-word-all:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-regen-word-all svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .btn-regen-word-all.loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .word-text.changed + .audio-item + .btn-regen-word-all,
+    .word-text.changed ~ .btn-regen-word-all {
+      display: inline-flex;
+    }
+
+    .word-basic-section {
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--line-1);
+    }
+
+    .word-basic-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .word-basic-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--font-2);
+      text-transform: uppercase;
+    }
+
+    .word-section {
+      margin-bottom: 16px;
+    }
+
+    .word-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .word-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid var(--line-1);
+    }
+
+    .word-section-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--font-2);
+      text-transform: uppercase;
+    }
+
+    .word-section-title .badge {
+      padding: 2px 6px;
+      background: var(--bg-2);
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--font-3);
+      text-transform: none;
+    }
+
+    .badge-manual {
+      padding: 2px 6px;
+      background: var(--purple-light);
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--purple);
+      text-transform: none;
+    }
+
+    /* 인라인 수동 입력 라벨 (개별 필드용) */
+    .label-manual {
+      display: inline-flex;
+      padding: 2px 6px;
+      background: var(--purple-light);
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--purple);
+      margin-left: 6px;
+      flex-shrink: 0;
+    }
+
+    /* 품사 필드 */
+    .word-pos {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 8px;
+      padding: 2px 8px;
+      background: var(--bg-1);
+      border: 1px solid var(--line-1);
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--font-2);
+    }
+
+    .word-pos:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: var(--white);
+    }
+
+    /* 예문 레벨 라벨 */
+    .level-label {
+      display: inline-flex;
+      padding: 2px 6px;
+      background: var(--blue-light);
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--blue);
+      margin-left: 6px;
+    }
+
+    /* AI 검수 확인 완료 버튼 */
+    .btn-confirm-review {
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--font-2);
+      background: var(--bg-1);
+      border: 1px solid var(--line-1);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-confirm-review:hover {
+      background: var(--bg-2);
+      border-color: var(--line-2);
+    }
+
+    /* 원문 수정 시 재생성 버튼 */
+    .btn-regen-passage {
+      display: none;
+      align-items: center;
+      gap: 3px;
+      padding: 3px 8px;
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--white);
+      background: var(--primary);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 8px;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+
+    .btn-regen-passage:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-regen-passage svg {
+      width: 10px;
+      height: 10px;
+    }
+
+    .btn-regen-passage.loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .passage-content-wrap {
+      display: flex;
+      align-items: flex-start;
+      gap: 0;
+      flex: 1;
+    }
+
+    .passage-content-wrap .editable {
+      flex: 1;
+    }
+
+    .passage-content-wrap .editable.changed + .btn-regen-passage {
+      display: inline-flex;
+    }
+
+    /* ===== PASSAGE BLANK ===== */
+    .passage-box {
+      background: var(--bg-1);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .passage-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .passage-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .passage-label {
+      width: 60px;
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--font-3);
+      padding-top: 10px;
+    }
+
+    .passage-content {
+      flex: 1;
+    }
+
+    .blank {
+      display: inline-block;
+      padding: 1px 8px;
+      background: var(--warning-light);
+      border-radius: 4px;
+      font-weight: 500;
+      color: var(--warning);
+    }
+
+    .options-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 6px 0;
+    }
+
+    .option {
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      border: 1px solid transparent;
+      cursor: text;
+    }
+
+    .option:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .option.correct {
+      background: var(--success-light);
+      color: var(--success);
+      font-weight: 500;
+    }
+
+    .option.wrong {
+      background: var(--bg-2);
+      color: var(--font-2);
+    }
+
+    .option.flagged {
+      border-color: var(--error);
+    }
+
+    /* ===== EXAMPLE ===== */
+    .example-item {
+      display: flex;
+      gap: 10px;
+      padding: 10px;
+      background: var(--bg-1);
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+
+    .example-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .example-num {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--white);
+      border: 1px solid var(--line-2);
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--font-3);
+      flex-shrink: 0;
+    }
+
+    .example-content {
+      flex: 1;
+    }
+
+    .example-answers {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--line-1);
+    }
+
+    .example-answer-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .example-answer-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--font-3);
+      width: 30px;
+    }
+
+    /* ===== AI MODULE ===== */
+    .module-icon {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--primary-light);
+      border-radius: 6px;
+      color: var(--primary);
+    }
+
+    .module-icon svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .context-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .context-item {
+      padding: 12px;
+      background: var(--bg-1);
+      border-radius: 8px;
+    }
+
+    .context-term {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--font-1);
+      margin-bottom: 4px;
+    }
+
+    /* ===== COMPREHENSION ===== */
+    .comp-item {
+      padding: 14px;
+      background: var(--bg-1);
+      border-radius: 10px;
+      margin-bottom: 12px;
+    }
+
+    .comp-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .comp-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .comp-num {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--primary);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--white);
+      flex-shrink: 0;
+    }
+
+    .comp-question {
+      flex: 1;
+    }
+
+    .comp-body {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .comp-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .comp-label {
+      width: 70px;
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--font-3);
+      padding-top: 10px;
+      text-transform: uppercase;
+    }
+
+    .comp-value {
+      flex: 1;
+    }
+
+    .comp-value.evidence {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .evidence-source {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--primary);
+      padding: 2px 6px;
+      background: var(--primary-light);
+      border-radius: 4px;
+      display: inline-block;
+      width: fit-content;
+    }
+
+    .comp-value.evidence .editable {
+      background: var(--white);
+      border-left: 3px solid var(--primary);
+      border-radius: 0 6px 6px 0;
+    }
+
+    .comp-value.answer .editable {
+      color: var(--success);
+      font-weight: 500;
+    }
+
+    .comp-value.connection .editable {
+      background: var(--primary-light);
+      border-color: transparent;
+    }
+
+    .comp-value.transition .editable {
+      background: var(--success-light);
+      border-left: 3px solid var(--success);
+      border-radius: 0 6px 6px 0;
+    }
+
+    .hints-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .hint-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 8px 10px;
+      background: var(--bg-1);
+      border-radius: 6px;
+    }
+
+    .hint-num {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--warning-light);
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--warning);
+      flex-shrink: 0;
+    }
+
+    .hint-text {
+      flex: 1;
+      font-size: 13px;
+      padding: 2px 0;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      cursor: text;
+    }
+
+    .hint-text:hover {
+      background: var(--white);
+      border-color: var(--line-1);
+    }
+
+    .hint-text:focus {
+      outline: none;
+      background: var(--white);
+      border-color: var(--primary);
+    }
+
+    /* ===== ADD BUTTON ===== */
+    .add-btn {
+      width: 100%;
+      padding: 12px;
+      border: 2px dashed var(--line-2);
+      border-radius: 8px;
+      background: none;
+      color: var(--font-3);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.15s;
+    }
+
+    .add-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--white);
+      border-radius: 12px;
+      width: 560px;
+      max-width: 90vw;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line-1);
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      color: var(--font-3);
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .modal-close:hover {
+      background: var(--bg-1);
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 14px 20px;
+      border-top: 1px solid var(--line-1);
+    }
+
+    .split-hint {
+      padding: 10px 12px;
+      background: var(--primary-light);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--primary);
+      margin-bottom: 12px;
+    }
+
+    .split-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 10px;
+      border: 1px solid var(--line-2);
+      border-radius: 6px;
+      font-size: 14px;
+      line-height: 1.6;
+      font-family: inherit;
+      resize: vertical;
+    }
+
+    .split-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .split-preview {
+      margin-top: 12px;
+    }
+
+    .split-preview-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--font-2);
+      margin-bottom: 8px;
+    }
+
+    .split-preview-item {
+      padding: 8px 10px;
+      background: var(--bg-1);
+      border-left: 3px solid var(--primary);
+      border-radius: 0 6px 6px 0;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    /* ===== UNDO/REDO BUTTON GROUP ===== */
+    .history-btn-group {
+      display: flex;
+      align-items: center;
+      background: var(--bg-1);
+      border: 1px solid var(--line-1);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .history-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 32px;
+      background: none;
+      border: none;
+      color: var(--font-2);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .history-btn:hover:not(:disabled) {
+      background: var(--bg-2);
+      color: var(--font-1);
+    }
+
+    .history-btn:disabled {
+      color: var(--font-4);
+      cursor: not-allowed;
+    }
+
+    .history-btn:first-child {
+      border-right: 1px solid var(--line-1);
+    }
+
+    .history-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .history-count {
+      font-size: 10px;
+      padding: 1px 4px;
+      background: var(--primary);
+      color: var(--white);
+      border-radius: 8px;
+      margin-left: 4px;
+      min-width: 16px;
+      text-align: center;
+    }
+
+    /* ===== SENTENCE LIST CARD HEADER ===== */
+    .sentence-list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line-1);
+      background: var(--bg-1);
+      border-radius: 10px 10px 0 0;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .sentence-list-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sentence-list-header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .header-divider {
+      width: 1px;
+      height: 20px;
+      background: var(--line-2);
+      margin: 0 4px;
+    }
+
+    /* ===== TIMESTAMP AUTO BUTTON ===== */
+    .btn-timestamp-auto {
+      background: var(--purple-light);
+      color: var(--purple);
+      border: 1px solid transparent;
+    }
+
+    .btn-timestamp-auto:hover {
+      background: var(--purple);
+      color: var(--white);
+    }
+
+    .btn-timestamp-auto svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* ===== STT SIMILARITY CHECK ===== */
+    .btn-stt-check {
+      background: var(--blue-light);
+      color: var(--blue);
+      border: 1px solid transparent;
+    }
+
+    .btn-stt-check:hover {
+      background: var(--blue);
+      color: var(--white);
+    }
+
+    .btn-stt-check.loading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .btn-stt-check.loading svg {
+      animation: spin 1s linear infinite;
+    }
+
+    /* Similarity Badge */
+    .similarity-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .similarity-badge.high {
+      background: var(--success-light);
+      color: var(--success);
+    }
+
+    .similarity-badge.medium {
+      background: var(--warning-light);
+      color: var(--warning);
+    }
+
+    .similarity-badge.low {
+      background: var(--error-light);
+      color: var(--error);
+    }
+
+    .similarity-badge svg {
+      width: 10px;
+      height: 10px;
+    }
+
+    /* STT Comparison Panel */
+    .stt-comparison {
+      margin-top: 10px;
+      padding: 12px;
+      background: var(--bg-1);
+      border-radius: 8px;
+      border: 1px solid var(--line-1);
+    }
+
+    .stt-comparison.warning {
+      background: var(--warning-light);
+      border-color: var(--warning);
+    }
+
+    .stt-comparison.error {
+      background: var(--error-light);
+      border-color: var(--error);
+    }
+
+    .stt-comparison.confirmed {
+      background: var(--bg-1);
+      border-color: var(--line-2);
+      opacity: 0.7;
+    }
+
+    .stt-comparison-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .stt-comparison-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--font-2);
+    }
+
+    .stt-comparison-title svg {
+      width: 14px;
+      height: 14px;
+      color: var(--blue);
+    }
+
+    .stt-comparison-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .stt-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .stt-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .stt-label {
+      flex-shrink: 0;
+      width: 60px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--font-3);
+      padding-top: 4px;
+    }
+
+    .stt-content {
+      flex: 1;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--font-1);
+      padding: 6px 10px;
+      background: var(--white);
+      border-radius: 6px;
+      border: 1px solid var(--line-1);
+    }
+
+    .stt-content.current {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .stt-content.stt-result {
+      border-color: var(--blue);
+      background: var(--blue-light);
+    }
+
+    /* Diff highlighting */
+    .diff-add {
+      background: var(--success-light);
+      color: var(--success);
+      padding: 1px 3px;
+      border-radius: 2px;
+    }
+
+    .diff-remove {
+      background: var(--error-light);
+      color: var(--error);
+      text-decoration: line-through;
+      padding: 1px 3px;
+      border-radius: 2px;
+    }
+
+    .stt-suggestion {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: var(--white);
+      border-left: 3px solid var(--blue);
+      border-radius: 0 6px 6px 0;
+      font-size: 12px;
+      color: var(--font-2);
+    }
+
+    .stt-suggestion strong {
+      color: var(--blue);
+    }
+
+    /* Progress indicator for batch check */
+    .stt-progress {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px;
+      background: var(--bg-1);
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--font-2);
+    }
+
+    .stt-progress-bar {
+      width: 80px;
+      height: 4px;
+      background: var(--line-2);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .stt-progress-fill {
+      height: 100%;
+      background: var(--blue);
+      border-radius: 2px;
+      transition: width 0.3s;
+    }
+
+    /* ===== TOAST ===== */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      padding: 10px 20px;
+      background: var(--font-1);
+      color: var(--white);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <button class="back-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        목록
+      </button>
+      <div class="header-divider"></div>
+      <div class="header-info">
+        <span class="header-info-sub">Vocabulary Master · Level 3 · Unit 5</span>
+        <div class="header-title-row">
+          <span class="header-info-title">Week 1 Vocabulary</span>
+          <span class="status-badge status-reviewing" id="contentStatus">검수중</span>
+        </div>
+      </div>
+    </div>
+    <div class="header-right">
+      <!-- Undo/Redo 버튼 그룹 -->
+      <div class="history-btn-group">
+        <button class="history-btn" id="undoBtn" onclick="undo()" disabled title="실행 취소 (Ctrl+Z)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 7v6h6"></path>
+            <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
+          </svg>
+        </button>
+        <button class="history-btn" id="redoBtn" onclick="redo()" disabled title="다시 실행 (Ctrl+Y)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 7v6h-6"></path>
+            <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"></path>
+          </svg>
+        </button>
+      </div>
+      <button class="btn btn-secondary" id="btnTempSave" onclick="tempSave()">임시 저장</button>
+      <button class="btn btn-primary" id="btnComplete" onclick="toggleReviewStatus()">검수 완료</button>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Tabs -->
+    <div class="tabs-wrap">
+      <div class="tabs">
+        <button class="tab active" data-tab="word">
+          단어
+          <span class="tab-count">8</span>
+          <span class="tab-issue">2</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Content Wrapper -->
+    <div class="content-wrapper" id="contentWrapper">
+      <!-- 콘텐츠 영역 -->
+      <div class="content" style="max-width: 100%;">
+        <div class="content-inner">
+        <!-- TAB: 단어 -->
+        <div class="tab-panel active" id="panel-word">
+          <!-- 단어 목록 헤더 -->
+          <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <span style="font-size: 14px; font-weight: 600; color: var(--font-1);">단어 목록</span>
+            <button class="btn btn-sm btn-primary" onclick="addWordSet()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              단어 추가
+            </button>
+          </div>
+
+          <div id="wordList">
+          <!-- Word 1: narrative (수동 입력) -->
+          <div class="card" data-word-id="1">
+            <div class="card-header">
+              <div class="card-header-left">
+                <span class="card-num" style="background: var(--primary); color: var(--white); border: none;">1</span>
+                <div class="word-header-info">
+                  <div class="word-text-wrap">
+                    <span class="word-text" contenteditable="true" data-field="word-1" data-tts="word-1" data-word-id="1" onblur="checkWordChange(this)">narrative</span>
+                    <div class="audio-item" id="tts-word-1">
+                      <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                      <span class="audio-time">0:01</span>
+                    </div>
+                    <button class="btn-regen-word-all" data-word-id="1" onclick="regenerateWordAll(1)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                      콘텐츠 전체 재생성
+                    </button>
+                  </div>
+                  <span class="source-tag">문단1</span>
+                </div>
+              </div>
+              <button class="btn-delete-word" onclick="deleteWordSet(1)" title="단어 삭제">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            </div>
+            <div class="card-body">
+              <!-- 기본 정보 (품사, 한글뜻, 영영풀이) -->
+              <div class="word-basic-section">
+                <div class="word-basic-header">
+                  <span class="word-basic-title">기본 정보</span>
+                  <button class="btn btn-xs btn-regen" onclick="regenerate('word-basic', 1)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                    재생성
+                  </button>
+                </div>
+                <div class="field-row">
+                  <div class="editable-label">품사 <span class="label-manual">수동 입력</span></div>
+                  <div class="editable" contenteditable="true" data-field="word-1-pos" onblur="checkTextChange(this)">noun</div>
+                </div>
+                <div class="field-row">
+                  <div class="editable-label">한글 뜻 <span class="label-manual">수동 입력</span></div>
+                  <div class="editable" contenteditable="true" data-field="word1-kr" data-tts="word1-kr" onblur="checkTextChange(this)">이야기, 서술</div>
+                  <div class="audio-row" style="margin-top: 4px;">
+                    <div class="audio-item" id="tts-word1-kr">
+                      <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                      <span class="audio-label">TTS</span>
+                      <span class="audio-time">0:01</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="field-row">
+                  <div class="editable-label">영영 풀이 <span class="label-manual">수동 입력</span></div>
+                  <div class="editable" contenteditable="true" data-field="word1-en" data-tts="word1-en" onblur="checkTextChange(this)">A spoken or written account of connected events; a story</div>
+                  <div class="audio-row" style="margin-top: 4px;">
+                    <div class="audio-item" id="tts-word1-en">
+                      <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                      <span class="audio-label">TTS</span>
+                      <span class="audio-time">0:03</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- 예문 (빈칸 없음) 2개 -->
+              <div class="word-section">
+                <div class="word-section-header">
+                  <span class="word-section-title">예문 <span class="badge">빈칸 없음</span></span>
+                  <button class="btn btn-xs btn-regen" onclick="regenerate('example-plain', 1)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                    재생성
+                  </button>
+                </div>
+                <div class="example-item">
+                  <span class="example-num">1</span>
+                  <div class="example-content">
+                    <div class="editable" contenteditable="true" style="font-size: 13px;" data-field="w1-ex1" data-tts="w1-ex1" onblur="checkTextChange(this)">The film presents a compelling narrative about a family's struggle during the Great Depression.</div>
+                    <div class="audio-row" style="margin-top: 6px;">
+                      <div class="audio-item" id="tts-w1-ex1">
+                        <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                        <span class="audio-label">TTS</span>
+                        <span class="audio-time">0:04</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="example-item">
+                  <span class="example-num">2</span>
+                  <div class="example-content">
+                    <div class="editable" contenteditable="true" style="font-size: 13px;" data-field="w1-ex2" data-tts="w1-ex2" onblur="checkTextChange(this)">Her narrative of the events differed significantly from his account.</div>
+                    <div class="audio-row" style="margin-top: 6px;">
+                      <div class="audio-item" id="tts-w1-ex2">
+                        <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                        <span class="audio-label">TTS</span>
+                        <span class="audio-time">0:03</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 예문 (빈칸 있음) 2개 -->
+              <div class="word-section">
+                <div class="word-section-header">
+                  <span class="word-section-title">예문 <span class="badge">빈칸 있음</span></span>
+                  <button class="btn btn-xs btn-regen" onclick="regenerate('example-blank', 1)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                    재생성
+                  </button>
+                </div>
+                <!-- 예문 1 (적절한 레벨) -->
+                <div class="example-item" style="flex-direction: column; gap: 8px;">
+                  <div style="display: flex; gap: 10px; width: 100%;">
+                    <span class="example-num">1</span>
+                    <div class="example-content" style="flex: 1;">
+                      <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                        <span class="level-label">적절한 레벨</span>
+                        <span class="label-manual">수동 입력</span>
+                      </div>
+                      <div class="passage-box" style="margin: 0;" data-passage-id="w1-ex3">
+                        <div class="passage-row">
+                          <span class="passage-label">원문장</span>
+                          <div class="passage-content-wrap">
+                            <div class="editable" contenteditable="true" style="font-size: 13px;" data-field="w1-ex3" data-tts="w1-ex3" data-passage-id="w1-ex3" onblur="checkPassageChange(this)">The author's narrative style makes the book easy to read.</div>
+                            <button class="btn-regen-passage" data-passage-id="w1-ex3" onclick="regeneratePassageContent('w1-ex3')">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                              빈칸/보기 재생성
+                            </button>
+                          </div>
+                        </div>
+                        <div class="passage-row">
+                          <span class="passage-label"></span>
+                          <div class="audio-row">
+                            <div class="audio-item" id="tts-w1-ex3">
+                              <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                              <span class="audio-label">TTS</span>
+                              <span class="audio-time">0:03</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="passage-row">
+                          <span class="passage-label">빈칸</span>
+                          <div class="passage-content blank-content" style="font-size: 13px; padding: 8px 0;">
+                            The author's <span class="blank">________</span> style makes the book easy to read.
+                          </div>
+                        </div>
+                        <div class="passage-row">
+                          <span class="passage-label">보기</span>
+                          <div class="options-row">
+                            <span class="option correct" contenteditable="true">narrative</span>
+                            <span class="option wrong" contenteditable="true">numeric</span>
+                            <span class="option wrong" contenteditable="true">negative</span>
+                            <span class="option wrong" contenteditable="true">native</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- 예문 2 (쉬운 레벨) -->
+                <div class="example-item" style="flex-direction: column; gap: 8px;">
+                  <div style="display: flex; gap: 10px; width: 100%;">
+                    <span class="example-num">2</span>
+                    <div class="example-content" style="flex: 1;">
+                      <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                        <span class="level-label">쉬운 레벨</span>
+                      </div>
+                      <div class="passage-box" style="margin: 0;" data-passage-id="w1-ex4">
+                        <div class="passage-row">
+                          <span class="passage-label">원문장</span>
+                          <div class="passage-content-wrap">
+                            <div class="editable" contenteditable="true" style="font-size: 13px;" data-field="w1-ex4" data-tts="w1-ex4" data-passage-id="w1-ex4" onblur="checkPassageChange(this)">Each culture has its own unique narrative traditions.</div>
+                            <button class="btn-regen-passage" data-passage-id="w1-ex4" onclick="regeneratePassageContent('w1-ex4')">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                              빈칸/보기 재생성
+                            </button>
+                          </div>
+                        </div>
+                        <div class="passage-row">
+                          <span class="passage-label"></span>
+                          <div class="audio-row">
+                            <div class="audio-item" id="tts-w1-ex4">
+                              <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                              <span class="audio-label">TTS</span>
+                              <span class="audio-time">0:03</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="passage-row">
+                          <span class="passage-label">빈칸</span>
+                          <div class="passage-content blank-content" style="font-size: 13px; padding: 8px 0;">
+                            Each culture has its own unique <span class="blank">________</span> traditions.
+                          </div>
+                        </div>
+                        <div class="passage-row">
+                          <span class="passage-label">보기</span>
+                          <div class="options-row">
+                            <span class="option correct" contenteditable="true">narrative</span>
+                            <span class="option wrong" contenteditable="true">national</span>
+                            <span class="option wrong" contenteditable="true">natural</span>
+                            <span class="option wrong" contenteditable="true">narrow</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Word 2: preserve (with issue) -->
+          <div class="card" data-word-id="2">
+            <div class="card-header">
+              <div class="card-header-left">
+                <span class="card-num" style="background: var(--primary); color: var(--white); border: none;">2</span>
+                <div class="word-header-info">
+                  <div class="word-text-wrap">
+                    <span class="word-text" contenteditable="true" data-field="word-2" data-tts="word-2" data-word-id="2" onblur="checkWordChange(this)">preserve</span>
+                    <div class="audio-item" id="tts-word-2">
+                      <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                      <span class="audio-time">0:01</span>
+                    </div>
+                    <button class="btn-regen-word-all" data-word-id="2" onclick="regenerateWordAll(2)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                      콘텐츠 전체 재생성
+                    </button>
+                    <span class="issue-badge">이슈 2</span>
+                  </div>
+                  <span class="source-tag">문단1</span>
+                </div>
+              </div>
+              <button class="btn-delete-word" onclick="deleteWordSet(2)" title="단어 삭제">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            </div>
+            <div class="card-body">
+              <!-- 기본 정보 (품사, 한글뜻, 영영풀이) -->
+              <div class="word-basic-section">
+                <div class="word-basic-header">
+                  <span class="word-basic-title">기본 정보</span>
+                  <button class="btn btn-xs btn-regen" onclick="regenerate('word-basic', 2)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                    재생성
+                  </button>
+                </div>
+                <div class="field-row">
+                  <div class="editable-label">품사 <span class="label-manual">수동 입력</span></div>
+                  <div class="editable" contenteditable="true" data-field="word-2-pos" onblur="checkTextChange(this)">verb</div>
+                </div>
+                <div class="field-row">
+                  <div class="editable-label">한글 뜻 <span class="label-manual">수동 입력</span></div>
+                  <div class="editable" contenteditable="true" data-field="word2-kr" data-tts="word2-kr" onblur="checkTextChange(this)">보존하다, 유지하다</div>
+                  <div class="audio-row" style="margin-top: 4px;">
+                    <div class="audio-item" id="tts-word2-kr">
+                      <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                      <span class="audio-label">TTS</span>
+                      <span class="audio-time">0:02</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="field-row">
+                  <div class="editable-label">영영 풀이 <span class="label-manual">수동 입력</span></div>
+                  <div class="editable" contenteditable="true" data-field="word2-en" data-tts="word2-en" onblur="checkTextChange(this)">To maintain something in its original state or in good condition</div>
+                  <div class="audio-row" style="margin-top: 4px;">
+                    <div class="audio-item" id="tts-word2-en">
+                      <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                      <span class="audio-label">TTS</span>
+                      <span class="audio-time">0:04</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- AI 검수 -->
+              <div class="stt-comparison warning" style="margin-bottom: 16px;">
+                <div class="stt-comparison-header">
+                  <div class="stt-comparison-title" style="color: var(--warning);">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    AI 검수
+                  </div>
+                  <button class="btn-confirm-review" onclick="confirmReview(this)">확인 완료</button>
+                </div>
+                <div class="stt-content">1) 예문 3번의 오답 'protect'가 정답과 의미가 유사하여 변별력이 낮습니다. 2) 예문 4번 난이도가 낮습니다.</div>
+              </div>
+              <!-- 예문 (빈칸 없음) 2개 -->
+              <div class="word-section">
+                <div class="word-section-header">
+                  <span class="word-section-title">예문 <span class="badge">빈칸 없음</span></span>
+                  <button class="btn btn-xs btn-regen" onclick="regenerate('example-plain', 2)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                    재생성
+                  </button>
+                </div>
+                <div class="example-item">
+                  <span class="example-num">1</span>
+                  <div class="example-content">
+                    <div class="editable" contenteditable="true" style="font-size: 13px;" data-field="w2-ex1" data-tts="w2-ex1" onblur="checkTextChange(this)">The museum works hard to preserve ancient artifacts for future generations.</div>
+                    <div class="audio-row" style="margin-top: 6px;">
+                      <div class="audio-item" id="tts-w2-ex1">
+                        <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                        <span class="audio-label">TTS</span>
+                        <span class="audio-time">0:04</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="example-item">
+                  <span class="example-num">2</span>
+                  <div class="example-content">
+                    <div class="editable" contenteditable="true" style="font-size: 13px;" data-field="w2-ex2" data-tts="w2-ex2" onblur="checkTextChange(this)">They used salt to preserve meat before refrigerators were invented.</div>
+                    <div class="audio-row" style="margin-top: 6px;">
+                      <div class="audio-item" id="tts-w2-ex2">
+                        <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                        <span class="audio-label">TTS</span>
+                        <span class="audio-time">0:03</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 예문 (빈칸 있음) 2개 -->
+              <div class="word-section">
+                <div class="word-section-header">
+                  <span class="word-section-title">예문 <span class="badge">빈칸 있음</span></span>
+                  <button class="btn btn-xs btn-regen" onclick="regenerate('example-blank', 2)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                    재생성
+                  </button>
+                </div>
+                <!-- 예문 1 (적절한 레벨, 이슈) -->
+                <div class="example-item" style="flex-direction: column; gap: 8px;">
+                  <div style="display: flex; gap: 10px; width: 100%;">
+                    <span class="example-num">1</span>
+                    <div class="example-content" style="flex: 1;">
+                      <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                        <span class="level-label">적절한 레벨</span>
+                        <span class="label-manual">수동 입력</span>
+                      </div>
+                      <div class="passage-box" style="margin: 0;" data-passage-id="w2-ex3">
+                        <div class="passage-row">
+                          <span class="passage-label">원문장</span>
+                          <div class="passage-content-wrap">
+                            <div class="editable" contenteditable="true" style="font-size: 13px;" data-field="w2-ex3" data-tts="w2-ex3" data-passage-id="w2-ex3" onblur="checkPassageChange(this)">It's important to preserve the natural environment.</div>
+                            <button class="btn-regen-passage" data-passage-id="w2-ex3" onclick="regeneratePassageContent('w2-ex3')">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                              빈칸/보기 재생성
+                            </button>
+                          </div>
+                        </div>
+                        <div class="passage-row">
+                          <span class="passage-label"></span>
+                          <div class="audio-row">
+                            <div class="audio-item" id="tts-w2-ex3">
+                              <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                              <span class="audio-label">TTS</span>
+                              <span class="audio-time">0:03</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="passage-row">
+                          <span class="passage-label">빈칸</span>
+                          <div class="passage-content blank-content" style="font-size: 13px; padding: 8px 0;">
+                            It's important to <span class="blank">________</span> the natural environment.
+                          </div>
+                        </div>
+                        <div class="passage-row">
+                          <span class="passage-label">보기</span>
+                          <div class="options-row">
+                            <span class="option correct" contenteditable="true">preserve</span>
+                            <span class="option wrong" contenteditable="true">prevent</span>
+                            <span class="option wrong" contenteditable="true">prefer</span>
+                            <span class="option wrong flagged" contenteditable="true">protect</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- 예문 2 (쉬운 레벨, 이슈) -->
+                <div class="example-item" style="flex-direction: column; gap: 8px;">
+                  <div style="display: flex; gap: 10px; width: 100%;">
+                    <span class="example-num">2</span>
+                    <div class="example-content" style="flex: 1;">
+                      <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                        <span class="level-label">쉬운 레벨</span>
+                      </div>
+                      <div class="passage-box" style="margin: 0;" data-passage-id="w2-ex4">
+                        <div class="passage-row">
+                          <span class="passage-label">원문장</span>
+                          <div class="passage-content-wrap">
+                            <div class="editable" contenteditable="true" style="font-size: 13px;" data-field="w2-ex4" data-tts="w2-ex4" data-passage-id="w2-ex4" onblur="checkPassageChange(this)">We must preserve our cultural traditions.</div>
+                            <button class="btn-regen-passage" data-passage-id="w2-ex4" onclick="regeneratePassageContent('w2-ex4')">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                              빈칸/보기 재생성
+                            </button>
+                          </div>
+                        </div>
+                        <div class="passage-row">
+                          <span class="passage-label"></span>
+                          <div class="audio-row">
+                            <div class="audio-item" id="tts-w2-ex4">
+                              <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                              <span class="audio-label">TTS</span>
+                              <span class="audio-time">0:02</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="passage-row">
+                          <span class="passage-label">빈칸</span>
+                          <div class="passage-content blank-content" style="font-size: 13px; padding: 8px 0;">
+                            We must <span class="blank">________</span> our cultural traditions.
+                          </div>
+                        </div>
+                        <div class="passage-row">
+                          <span class="passage-label">보기</span>
+                          <div class="options-row">
+                            <span class="option correct" contenteditable="true">preserve</span>
+                            <span class="option wrong" contenteditable="true">present</span>
+                            <span class="option wrong" contenteditable="true">pretend</span>
+                            <span class="option wrong" contenteditable="true">predict</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Word 3: entertainment (AI 생성) -->
+          <div class="card" data-word-id="3">
+            <div class="card-header">
+              <div class="card-header-left">
+                <span class="card-num" style="background: var(--primary); color: var(--white); border: none;">3</span>
+                <div class="word-header-info">
+                  <div class="word-text-wrap">
+                    <span class="word-text" contenteditable="true" data-field="word-3" data-tts="word-3" data-word-id="3" onblur="checkWordChange(this)">entertainment</span>
+                    <div class="audio-item" id="tts-word-3">
+                      <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                      <span class="audio-time">0:01</span>
+                    </div>
+                    <button class="btn-regen-word-all" data-word-id="3" onclick="regenerateWordAll(3)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                      콘텐츠 전체 재생성
+                    </button>
+                  </div>
+                  <span class="source-tag">문단1</span>
+                </div>
+              </div>
+              <button class="btn-delete-word" onclick="deleteWordSet(3)" title="단어 삭제">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            </div>
+            <div class="card-body">
+              <!-- 기본 정보 (품사, 한글뜻, 영영풀이) - AI 생성 -->
+              <div class="word-basic-section">
+                <div class="word-basic-header">
+                  <span class="word-basic-title">기본 정보</span>
+                  <button class="btn btn-xs btn-regen" onclick="regenerate('word-basic', 3)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                    재생성
+                  </button>
+                </div>
+                <div class="field-row">
+                  <div class="editable-label">품사</div>
+                  <div class="editable" contenteditable="true" data-field="word-3-pos" onblur="checkTextChange(this)">noun</div>
+                </div>
+                <div class="field-row">
+                  <div class="editable-label">한글 뜻</div>
+                  <div class="editable" contenteditable="true" data-field="word3-kr" data-tts="word3-kr" onblur="checkTextChange(this)">오락, 즐거움</div>
+                  <div class="audio-row" style="margin-top: 4px;">
+                    <div class="audio-item" id="tts-word3-kr">
+                      <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                      <span class="audio-label">TTS</span>
+                      <span class="audio-time">0:01</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="field-row">
+                  <div class="editable-label">영영 풀이</div>
+                  <div class="editable" contenteditable="true" data-field="word3-en" data-tts="word3-en" onblur="checkTextChange(this)">The action of providing or being provided with amusement or enjoyment</div>
+                  <div class="audio-row" style="margin-top: 4px;">
+                    <div class="audio-item" id="tts-word3-en">
+                      <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                      <span class="audio-label">TTS</span>
+                      <span class="audio-time">0:04</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- 예문 (빈칸 없음) 2개 -->
+              <div class="word-section">
+                <div class="word-section-header">
+                  <span class="word-section-title">예문 <span class="badge">빈칸 없음</span></span>
+                  <button class="btn btn-xs btn-regen" onclick="regenerate('example-plain', 3)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                    재생성
+                  </button>
+                </div>
+                <div class="example-item">
+                  <span class="example-num">1</span>
+                  <div class="example-content">
+                    <div class="editable" contenteditable="true" style="font-size: 13px;" data-field="w3-ex1" data-tts="w3-ex1" onblur="checkTextChange(this)">The entertainment industry has grown rapidly in recent years.</div>
+                    <div class="audio-row" style="margin-top: 6px;">
+                      <div class="audio-item" id="tts-w3-ex1">
+                        <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                        <span class="audio-label">TTS</span>
+                        <span class="audio-time">0:03</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="example-item">
+                  <span class="example-num">2</span>
+                  <div class="example-content">
+                    <div class="editable" contenteditable="true" style="font-size: 13px;" data-field="w3-ex2" data-tts="w3-ex2" onblur="checkTextChange(this)">Video games are a popular form of entertainment for young people.</div>
+                    <div class="audio-row" style="margin-top: 6px;">
+                      <div class="audio-item" id="tts-w3-ex2">
+                        <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                        <span class="audio-label">TTS</span>
+                        <span class="audio-time">0:04</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 예문 (빈칸 있음) 2개 -->
+              <div class="word-section">
+                <div class="word-section-header">
+                  <span class="word-section-title">예문 <span class="badge">빈칸 있음</span></span>
+                  <button class="btn btn-xs btn-regen" onclick="regenerate('example-blank', 3)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                    재생성
+                  </button>
+                </div>
+                <!-- 예문 1 (적절한 레벨) -->
+                <div class="example-item" style="flex-direction: column; gap: 8px;">
+                  <div style="display: flex; gap: 10px; width: 100%;">
+                    <span class="example-num">1</span>
+                    <div class="example-content" style="flex: 1;">
+                      <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                        <span class="level-label">적절한 레벨</span>
+                      </div>
+                      <div class="passage-box" style="margin: 0;" data-passage-id="w3-ex3">
+                        <div class="passage-row">
+                          <span class="passage-label">원문장</span>
+                          <div class="passage-content-wrap">
+                            <div class="editable" contenteditable="true" style="font-size: 13px;" data-field="w3-ex3" data-tts="w3-ex3" data-passage-id="w3-ex3" onblur="checkPassageChange(this)">Movies provide entertainment for millions of people worldwide.</div>
+                            <button class="btn-regen-passage" data-passage-id="w3-ex3" onclick="regeneratePassageContent('w3-ex3')">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                              빈칸/보기 재생성
+                            </button>
+                          </div>
+                        </div>
+                        <div class="passage-row">
+                          <span class="passage-label"></span>
+                          <div class="audio-row">
+                            <div class="audio-item" id="tts-w3-ex3">
+                              <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                              <span class="audio-label">TTS</span>
+                              <span class="audio-time">0:03</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="passage-row">
+                          <span class="passage-label">빈칸</span>
+                          <div class="passage-content blank-content" style="font-size: 13px; padding: 8px 0;">
+                            Movies provide <span class="blank">________</span> for millions of people worldwide.
+                          </div>
+                        </div>
+                        <div class="passage-row">
+                          <span class="passage-label">보기</span>
+                          <div class="options-row">
+                            <span class="option correct" contenteditable="true">entertainment</span>
+                            <span class="option wrong" contenteditable="true">equipment</span>
+                            <span class="option wrong" contenteditable="true">establishment</span>
+                            <span class="option wrong" contenteditable="true">engagement</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- 예문 2 (쉬운 레벨) -->
+                <div class="example-item" style="flex-direction: column; gap: 8px;">
+                  <div style="display: flex; gap: 10px; width: 100%;">
+                    <span class="example-num">2</span>
+                    <div class="example-content" style="flex: 1;">
+                      <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                        <span class="level-label">쉬운 레벨</span>
+                      </div>
+                      <div class="passage-box" style="margin: 0;" data-passage-id="w3-ex4">
+                        <div class="passage-row">
+                          <span class="passage-label">원문장</span>
+                          <div class="passage-content-wrap">
+                            <div class="editable" contenteditable="true" style="font-size: 13px;" data-field="w3-ex4" data-tts="w3-ex4" data-passage-id="w3-ex4" onblur="checkPassageChange(this)">Reading is both educational and a source of entertainment.</div>
+                            <button class="btn-regen-passage" data-passage-id="w3-ex4" onclick="regeneratePassageContent('w3-ex4')">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                              빈칸/보기 재생성
+                            </button>
+                          </div>
+                        </div>
+                        <div class="passage-row">
+                          <span class="passage-label"></span>
+                          <div class="audio-row">
+                            <div class="audio-item" id="tts-w3-ex4">
+                              <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                              <span class="audio-label">TTS</span>
+                              <span class="audio-time">0:03</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="passage-row">
+                          <span class="passage-label">빈칸</span>
+                          <div class="passage-content blank-content" style="font-size: 13px; padding: 8px 0;">
+                            Reading is both educational and a source of <span class="blank">________</span>.
+                          </div>
+                        </div>
+                        <div class="passage-row">
+                          <span class="passage-label">보기</span>
+                          <div class="options-row">
+                            <span class="option correct" contenteditable="true">entertainment</span>
+                            <span class="option wrong" contenteditable="true">encouragement</span>
+                            <span class="option wrong" contenteditable="true">excitement</span>
+                            <span class="option wrong" contenteditable="true">employment</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Split Modal -->
+  <div class="modal-overlay" id="splitModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">문장 나누기</span>
+        <button class="modal-close" onclick="closeSplitModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="split-hint">💡 나누고 싶은 위치에서 엔터(줄바꿈)를 입력하세요. 나눠진 각 문장의 TTS는 재생성이 필요합니다.</div>
+        <textarea class="split-textarea" id="splitTextarea" oninput="updateSplitPreview()"></textarea>
+        <div class="split-preview" id="splitPreview"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeSplitModal()">취소</button>
+        <button class="btn btn-primary" onclick="confirmSplit()">나누기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ===== SOURCE PANEL =====
+    function toggleSourcePanel() {
+      const panel = document.getElementById('sourcePanel');
+      const wrapper = document.getElementById('contentWrapper');
+      panel.classList.toggle('collapsed');
+      wrapper.classList.toggle('panel-collapsed');
+    }
+
+    // State
+    let currentSplitId = null;
+    let sentenceIdCounter = 5;
+    let wordIdCounter = 4;
+    let originalTexts = {};
+    let pendingTTS = new Set();
+    let activeHandle = null;
+    
+    // ===== WORD SET MANAGEMENT =====
+    function addWordSet() {
+      const wordList = document.getElementById('wordList');
+      const newId = wordIdCounter++;
+      
+      const wordCard = document.createElement('div');
+      wordCard.className = 'card';
+      wordCard.dataset.wordId = newId;
+      wordCard.innerHTML = `
+        <div class="card-header">
+          <div class="card-header-left">
+            <span class="card-num" style="background: var(--primary); color: var(--white); border: none;">${newId}</span>
+            <div class="word-header-info">
+              <div class="word-text-wrap">
+                <span class="word-text" contenteditable="true" data-field="word-${newId}" data-tts="word-${newId}" data-word-id="${newId}" onblur="checkWordChange(this)">new word</span>
+                <div class="audio-item" id="tts-word-${newId}">
+                  <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                  <span class="audio-time">0:01</span>
+                </div>
+                <button class="btn-regen-word-all" data-word-id="${newId}" onclick="regenerateWordAll(${newId})">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                  콘텐츠 전체 재생성
+                </button>
+              </div>
+              <span class="source-tag">문단1</span>
+            </div>
+          </div>
+          <button class="btn-delete-word" onclick="deleteWordSet(${newId})" title="단어 삭제">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </button>
+        </div>
+        <div class="card-body">
+          <!-- 기본 정보 -->
+          <div class="word-basic-section">
+            <div class="word-basic-header">
+              <span class="word-basic-title">기본 정보</span>
+              <button class="btn btn-xs btn-regen" onclick="regenerate('word-basic', ${newId})">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                재생성
+              </button>
+            </div>
+            <div class="field-row">
+              <div class="editable-label">한글 뜻</div>
+              <div class="editable" contenteditable="true" data-field="word${newId}-kr" data-tts="word${newId}-kr" onblur="checkTextChange(this)">단어 뜻을 입력하세요</div>
+              <div class="audio-row" style="margin-top: 4px;">
+                <div class="audio-item" id="tts-word${newId}-kr">
+                  <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                  <span class="audio-label">TTS</span>
+                  <span class="audio-time">0:01</span>
+                </div>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="editable-label">영영 풀이</div>
+              <div class="editable" contenteditable="true" data-field="word${newId}-en" data-tts="word${newId}-en" onblur="checkTextChange(this)">Enter English definition</div>
+              <div class="audio-row" style="margin-top: 4px;">
+                <div class="audio-item" id="tts-word${newId}-en">
+                  <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                  <span class="audio-label">TTS</span>
+                  <span class="audio-time">0:03</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- 예문 (빈칸 없음) 2개 -->
+          <div class="word-section">
+            <div class="word-section-header">
+              <span class="word-section-title">예문 <span class="badge">빈칸 없음</span></span>
+              <button class="btn btn-xs btn-regen" onclick="regenerate('example-plain', ${newId})">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                재생성
+              </button>
+            </div>
+            <div class="example-item">
+              <span class="example-num">1</span>
+              <div class="example-content">
+                <div class="editable" contenteditable="true" style="font-size: 13px;" data-field="w${newId}-ex1" data-tts="w${newId}-ex1" onblur="checkTextChange(this)">예문 1을 입력하세요.</div>
+                <div class="audio-row" style="margin-top: 6px;">
+                  <div class="audio-item" id="tts-w${newId}-ex1">
+                    <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                    <span class="audio-label">TTS</span>
+                    <span class="audio-time">0:03</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="example-item">
+              <span class="example-num">2</span>
+              <div class="example-content">
+                <div class="editable" contenteditable="true" style="font-size: 13px;" data-field="w${newId}-ex2" data-tts="w${newId}-ex2" onblur="checkTextChange(this)">예문 2를 입력하세요.</div>
+                <div class="audio-row" style="margin-top: 6px;">
+                  <div class="audio-item" id="tts-w${newId}-ex2">
+                    <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                    <span class="audio-label">TTS</span>
+                    <span class="audio-time">0:03</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 예문 (빈칸 있음) 2개 -->
+          <div class="word-section">
+            <div class="word-section-header">
+              <span class="word-section-title">예문 <span class="badge">빈칸 있음</span></span>
+              <button class="btn btn-xs btn-regen" onclick="regenerate('example-blank', ${newId})">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                재생성
+              </button>
+            </div>
+            <!-- 예문 3 -->
+            <div class="example-item" style="flex-direction: column; gap: 8px;">
+              <div style="display: flex; gap: 10px; width: 100%;">
+                <span class="example-num">3</span>
+                <div class="example-content" style="flex: 1;">
+                  <div class="passage-box" style="margin: 0;" data-passage-id="w${newId}-ex3">
+                    <div class="passage-row">
+                      <span class="passage-label">원문장</span>
+                      <div class="passage-content-wrap">
+                        <div class="editable" contenteditable="true" style="font-size: 13px;" data-field="w${newId}-ex3" data-tts="w${newId}-ex3" data-passage-id="w${newId}-ex3" onblur="checkPassageChange(this)">빈칸 예문 3을 입력하세요.</div>
+                        <button class="btn-regen-passage" data-passage-id="w${newId}-ex3" onclick="regeneratePassageContent('w${newId}-ex3')">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                          빈칸/보기 재생성
+                        </button>
+                      </div>
+                    </div>
+                    <div class="passage-row">
+                      <span class="passage-label"></span>
+                      <div class="audio-row">
+                        <div class="audio-item" id="tts-w${newId}-ex3">
+                          <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                          <span class="audio-label">TTS</span>
+                          <span class="audio-time">0:03</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="passage-row">
+                      <span class="passage-label">빈칸</span>
+                      <div class="passage-content blank-content" style="font-size: 13px; padding: 8px 0;">
+                        <span class="blank">________</span>을(를) 포함한 문장
+                      </div>
+                    </div>
+                    <div class="passage-row">
+                      <span class="passage-label">보기</span>
+                      <div class="options-row">
+                        <span class="option correct" contenteditable="true">정답</span>
+                        <span class="option wrong" contenteditable="true">오답1</span>
+                        <span class="option wrong" contenteditable="true">오답2</span>
+                        <span class="option wrong" contenteditable="true">오답3</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- 예문 4 -->
+            <div class="example-item" style="flex-direction: column; gap: 8px;">
+              <div style="display: flex; gap: 10px; width: 100%;">
+                <span class="example-num">4</span>
+                <div class="example-content" style="flex: 1;">
+                  <div class="passage-box" style="margin: 0;" data-passage-id="w${newId}-ex4">
+                    <div class="passage-row">
+                      <span class="passage-label">원문장</span>
+                      <div class="passage-content-wrap">
+                        <div class="editable" contenteditable="true" style="font-size: 13px;" data-field="w${newId}-ex4" data-tts="w${newId}-ex4" data-passage-id="w${newId}-ex4" onblur="checkPassageChange(this)">빈칸 예문 4를 입력하세요.</div>
+                        <button class="btn-regen-passage" data-passage-id="w${newId}-ex4" onclick="regeneratePassageContent('w${newId}-ex4')">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                          빈칸/보기 재생성
+                        </button>
+                      </div>
+                    </div>
+                    <div class="passage-row">
+                      <span class="passage-label"></span>
+                      <div class="audio-row">
+                        <div class="audio-item" id="tts-w${newId}-ex4">
+                          <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                          <span class="audio-label">TTS</span>
+                          <span class="audio-time">0:03</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="passage-row">
+                      <span class="passage-label">빈칸</span>
+                      <div class="passage-content blank-content" style="font-size: 13px; padding: 8px 0;">
+                        <span class="blank">________</span>을(를) 포함한 문장
+                      </div>
+                    </div>
+                    <div class="passage-row">
+                      <span class="passage-label">보기</span>
+                      <div class="options-row">
+                        <span class="option correct" contenteditable="true">정답</span>
+                        <span class="option wrong" contenteditable="true">오답1</span>
+                        <span class="option wrong" contenteditable="true">오답2</span>
+                        <span class="option wrong" contenteditable="true">오답3</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      wordList.appendChild(wordCard);
+      renumberWordCards();
+      showToast('단어가 추가되었습니다.');
+      
+      // Focus on the word input
+      setTimeout(() => {
+        const wordText = wordCard.querySelector('.word-text');
+        if (wordText) {
+          wordText.focus();
+          document.execCommand('selectAll', false, null);
+        }
+      }, 100);
+    }
+    
+    function deleteWordSet(wordId) {
+      console.log('deleteWordSet called with:', wordId);
+      const card = document.querySelector('.card[data-word-id="' + wordId + '"]');
+      console.log('Found card:', card);
+      if (!card) {
+        console.log('Card not found');
+        return;
+      }
+      
+      const wordTextEl = card.querySelector('.word-text');
+      const wordText = wordTextEl ? wordTextEl.textContent : 'word';
+      console.log('Word text:', wordText);
+      
+      if (confirm('단어를 삭제하시겠습니까?\n\n이 단어와 관련된 모든 콘텐츠(예문, 빈칸 등)가 삭제됩니다.')) {
+        card.remove();
+        renumberWordCards();
+        showToast('단어가 삭제되었습니다.');
+      }
+    }
+    
+    function renumberWordCards() {
+      const cards = document.querySelectorAll('#wordList > .card');
+      cards.forEach((card, index) => {
+        const num = card.querySelector('.card-num');
+        if (num) num.textContent = index + 1;
+      });
+      
+      // Update tab count
+      const tabCount = document.querySelector('.tab[data-tab="word"] .tab-count');
+      if (tabCount) tabCount.textContent = cards.length;
+    }
+    
+    // Undo/Redo History Stack
+    const undoStack = [];
+    const redoStack = [];
+    const MAX_HISTORY = 50;
+    
+    // Content Status: 'reviewing', 'completed', 'editing'
+    let contentStatus = 'reviewing';
+
+    // ===== UNDO/REDO SYSTEM =====
+    function saveState(actionType, data) {
+      const state = {
+        type: actionType,
+        timestamp: Date.now(),
+        data: JSON.parse(JSON.stringify(data))
+      };
+      
+      undoStack.push(state);
+      if (undoStack.length > MAX_HISTORY) {
+        undoStack.shift();
+      }
+      
+      // Clear redo stack on new action
+      redoStack.length = 0;
+      
+      updateHistoryButtons();
+    }
+
+    function undo() {
+      if (undoStack.length === 0) return;
+      
+      const state = undoStack.pop();
+      redoStack.push(getCurrentState(state.type, state.data));
+      
+      applyState(state);
+      updateHistoryButtons();
+      showToast('실행 취소됨');
+    }
+
+    function redo() {
+      if (redoStack.length === 0) return;
+      
+      const state = redoStack.pop();
+      undoStack.push(getCurrentState(state.type, state.data));
+      
+      applyState(state);
+      updateHistoryButtons();
+      showToast('다시 실행됨');
+    }
+
+    function getCurrentState(type, refData) {
+      // Get current state for the same element/field
+      if (type === 'text_edit') {
+        const el = document.querySelector(`[data-field="${refData.field}"]`);
+        return {
+          type: 'text_edit',
+          timestamp: Date.now(),
+          data: {
+            field: refData.field,
+            text: el ? el.textContent : refData.text
+          }
+        };
+      } else if (type === 'timestamp_edit') {
+        const slider = document.querySelector(`.sentence-card[data-id="${refData.sentenceId}"] .range-slider`);
+        return {
+          type: 'timestamp_edit',
+          timestamp: Date.now(),
+          data: {
+            sentenceId: refData.sentenceId,
+            start: slider ? parseInt(slider.dataset.start) : refData.start,
+            end: slider ? parseInt(slider.dataset.end) : refData.end
+          }
+        };
+      } else if (type === 'timestamp_auto') {
+        // Save all current timestamps
+        const timestamps = [];
+        document.querySelectorAll('.sentence-card .range-slider').forEach(slider => {
+          const card = slider.closest('.sentence-card');
+          timestamps.push({
+            sentenceId: card.dataset.id,
+            start: parseInt(slider.dataset.start),
+            end: parseInt(slider.dataset.end)
+          });
+        });
+        return {
+          type: 'timestamp_auto',
+          timestamp: Date.now(),
+          data: { timestamps }
+        };
+      }
+      return state;
+    }
+
+    function applyState(state) {
+      if (state.type === 'text_edit') {
+        const el = document.querySelector(`[data-field="${state.data.field}"]`);
+        if (el) {
+          el.textContent = state.data.text;
+          checkTextChange(el);
+        }
+      } else if (state.type === 'timestamp_edit') {
+        const slider = document.querySelector(`.sentence-card[data-id="${state.data.sentenceId}"] .range-slider`);
+        if (slider) {
+          const min = parseInt(slider.dataset.min) || 0;
+          const max = parseInt(slider.dataset.max) || 60;
+          updateSliderUI(slider, state.data.start, state.data.end, min, max);
+        }
+      } else if (state.type === 'timestamp_auto') {
+        state.data.timestamps.forEach(ts => {
+          const slider = document.querySelector(`.sentence-card[data-id="${ts.sentenceId}"] .range-slider`);
+          if (slider) {
+            const min = parseInt(slider.dataset.min) || 0;
+            const max = parseInt(slider.dataset.max) || 60;
+            updateSliderUI(slider, ts.start, ts.end, min, max);
+          }
+        });
+      }
+    }
+
+    function updateHistoryButtons() {
+      const undoBtn = document.getElementById('undoBtn');
+      const redoBtn = document.getElementById('redoBtn');
+      
+      undoBtn.disabled = undoStack.length === 0;
+      redoBtn.disabled = redoStack.length === 0;
+    }
+
+    // Keyboard shortcuts for Undo/Redo
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+      } else if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        redo();
+      }
+    });
+
+    // ===== TIMESTAMP AUTO APPLY =====
+    async function autoApplyTimestamp() {
+      // Save current state before auto apply
+      const currentTimestamps = [];
+      document.querySelectorAll('.sentence-card .range-slider').forEach(slider => {
+        const card = slider.closest('.sentence-card');
+        currentTimestamps.push({
+          sentenceId: card.dataset.id,
+          start: parseInt(slider.dataset.start),
+          end: parseInt(slider.dataset.end)
+        });
+      });
+      saveState('timestamp_auto', { timestamps: currentTimestamps });
+
+      // Get all sentence cards in order
+      const sentenceCards = document.querySelectorAll('#sentenceList > .sentence-card');
+      
+      if (sentenceCards.length === 0) {
+        showToast('적용할 문장이 없습니다.');
+        return;
+      }
+
+      // Calculate total audio duration (from first slider's max)
+      const firstSlider = sentenceCards[0].querySelector('.range-slider');
+      const totalDuration = parseInt(firstSlider.dataset.max) || 60;
+      
+      // Calculate average duration per sentence
+      const avgDuration = Math.floor(totalDuration / sentenceCards.length);
+      
+      let currentStart = 0;
+      
+      sentenceCards.forEach((card, index) => {
+        const slider = card.querySelector('.range-slider');
+        const timestampEditor = card.querySelector('.timestamp-editor');
+        if (!slider) return;
+        
+        const min = parseInt(slider.dataset.min) || 0;
+        const max = parseInt(slider.dataset.max) || totalDuration;
+        
+        // Calculate end time (last sentence gets remaining time)
+        let end;
+        if (index === sentenceCards.length - 1) {
+          end = totalDuration;
+        } else {
+          end = currentStart + avgDuration;
+        }
+        
+        // Update slider UI
+        updateSliderUI(slider, currentStart, end, min, max);
+        
+        // Update original values and remove needs-setup
+        if (timestampEditor) {
+          timestampEditor.dataset.originalStart = currentStart;
+          timestampEditor.dataset.originalEnd = end;
+          timestampEditor.classList.remove('needs-setup');
+          timestampEditor.classList.remove('changed');
+        }
+        
+        // Move start for next sentence
+        currentStart = end;
+      });
+
+      showToast(`${sentenceCards.length}개 문장에 원본 구간 적용 완료. STT 검수 진행 중...`);
+      
+      // Run STT check after timestamp auto apply
+      await runSTTCheckForAllSentences();
+    }
+    
+    // STT check for all sentences (used after auto timestamp)
+    async function runSTTCheckForAllSentences() {
+      const sentenceCards = document.querySelectorAll('#sentenceList > .sentence-card');
+      
+      for (const card of sentenceCards) {
+        const sentenceId = card.dataset.id;
+        const fieldId = `sentence-${sentenceId}`;
+        const textEl = card.querySelector('.editable');
+        const slider = card.querySelector('.range-slider');
+        
+        if (!textEl || !slider) continue;
+        
+        const currentText = textEl.textContent.trim();
+        const start = parseInt(slider.dataset.start);
+        const end = parseInt(slider.dataset.end);
+        
+        // Remove existing STT comparison
+        card.querySelectorAll('.stt-comparison').forEach(el => el.remove());
+        card.querySelectorAll('.similarity-badge').forEach(el => el.remove());
+        
+        // Simulate STT API call
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Get mock STT result or generate one
+        const sttResult = mockSTTResults[fieldId] || { text: currentText, confidence: 0.95 };
+        const similarity = calculateSimilarity(currentText, sttResult.text);
+        
+        // Update UI with result
+        updateSimilarityUI(card, fieldId, currentText, sttResult, similarity, start, end);
+      }
+      
+      // Hide timestamp auto button after completion
+      const timestampBtn = document.getElementById('timestampAutoBtn');
+      if (timestampBtn) timestampBtn.style.display = 'none';
+      
+      // Hide divider if both buttons are hidden
+      const regenAllBtn = document.getElementById('regenAllBtn');
+      const divider = document.getElementById('headerDivider');
+      if (regenAllBtn && regenAllBtn.style.display === 'none' && divider) {
+        divider.style.display = 'none';
+      }
+      
+      showToast('STT 검수가 완료되었습니다.');
+    }
+
+    // ===== STT SIMILARITY CHECK =====
+    // Mock STT results for demo (in production, this would call actual STT API)
+    const mockSTTResults = {
+      'sentence-1': {
+        text: 'Storytelling is one of the oldest forms of human communication, dating back thousands of years to when our ancestors gathered around fires to share tales of the hunt.',
+        confidence: 0.95
+      },
+      'sentence-2': {
+        text: 'These narratives served not only as entertainment but also as a means of preserving history, passing down cultural values, and teaching important life lessons to younger generation.',
+        confidence: 0.87
+      },
+      'sentence-3': {
+        text: 'Today, despite the rise of digital media and instant communication, the fundamental human need for stories remain unchanged.',
+        confidence: 0.78
+      },
+      'sentence-4': {
+        text: 'We still gather, whether physically or virtually, to hear and tell stories that move us.',
+        confidence: 0.92
+      }
+    };
+
+    // Check similarity for all sentences
+    async function checkAllSimilarity() {
+      const btn = document.getElementById('sttCheckBtn');
+      const progress = document.getElementById('sttProgress');
+      const progressFill = document.getElementById('sttProgressFill');
+      const progressText = document.getElementById('sttProgressText');
+      
+      const sentenceCards = document.querySelectorAll('#sentenceList > .sentence-card');
+      if (sentenceCards.length === 0) {
+        showToast('검증할 문장이 없습니다.');
+        return;
+      }
+
+      // Start loading state
+      btn.classList.add('loading');
+      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> 분석중...`;
+      progress.style.display = 'flex';
+
+      let processed = 0;
+      const total = sentenceCards.length;
+      let lowSimilarityCount = 0;
+
+      for (const card of sentenceCards) {
+        const sentenceId = card.dataset.id;
+        
+        // Simulate API call delay
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Check similarity for this sentence
+        const result = await checkSingleSimilarity(card, `sentence-${sentenceId}`);
+        if (result && result.similarity < 80) {
+          lowSimilarityCount++;
+        }
+
+        processed++;
+        const percent = Math.round((processed / total) * 100);
+        progressFill.style.width = percent + '%';
+        progressText.textContent = `${processed}/${total}`;
+      }
+
+      // Reset button state
+      btn.classList.remove('loading');
+      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg> 유사도 검증`;
+      
+      setTimeout(() => {
+        progress.style.display = 'none';
+        progressFill.style.width = '0%';
+      }, 1000);
+
+      if (lowSimilarityCount > 0) {
+        showToast(`⚠️ ${lowSimilarityCount}개 문장의 유사도가 낮습니다. 확인이 필요합니다.`);
+      } else {
+        showToast(`${total}개 문장 검증 완료. 모두 정상입니다.`);
+      }
+    }
+
+    // Check similarity for a single sentence
+    async function checkSingleSimilarity(card, fieldId) {
+      const textEl = card.querySelector(`[data-field="${fieldId}"]`);
+      if (!textEl) return null;
+
+      const currentText = textEl.textContent.trim();
+      const slider = card.querySelector('.range-slider');
+      const start = slider ? parseInt(slider.dataset.start) : 0;
+      const end = slider ? parseInt(slider.dataset.end) : 0;
+
+      // Get STT result (mock for demo)
+      const sttResult = mockSTTResults[fieldId] || generateMockSTT(currentText);
+      
+      // Calculate similarity
+      const similarity = calculateSimilarity(currentText, sttResult.text);
+      
+      // Update UI
+      updateSimilarityUI(card, fieldId, currentText, sttResult, similarity, start, end);
+
+      return { similarity, sttResult };
+    }
+
+    // Generate mock STT result with slight variations
+    function generateMockSTT(originalText) {
+      // Simulate STT with 90-98% accuracy
+      const words = originalText.split(' ');
+      const errorRate = Math.random() * 0.1; // 0-10% error rate
+      
+      const modifiedWords = words.map(word => {
+        if (Math.random() < errorRate) {
+          // Randomly modify word
+          const modifications = [
+            () => word.slice(0, -1), // Remove last char
+            () => word + 's', // Add 's'
+            () => word.replace(/e/g, 'a'), // Replace vowel
+          ];
+          return modifications[Math.floor(Math.random() * modifications.length)]();
+        }
+        return word;
+      });
+
+      return {
+        text: modifiedWords.join(' '),
+        confidence: 0.85 + Math.random() * 0.13
+      };
+    }
+
+    // Calculate text similarity (Levenshtein-based)
+    function calculateSimilarity(text1, text2) {
+      const s1 = text1.toLowerCase().trim();
+      const s2 = text2.toLowerCase().trim();
+      
+      if (s1 === s2) return 100;
+      
+      const longer = s1.length > s2.length ? s1 : s2;
+      const shorter = s1.length > s2.length ? s2 : s1;
+      
+      if (longer.length === 0) return 100;
+      
+      const distance = levenshteinDistance(longer, shorter);
+      return Math.round((1 - distance / longer.length) * 100);
+    }
+
+    // Levenshtein distance algorithm
+    function levenshteinDistance(s1, s2) {
+      const m = s1.length;
+      const n = s2.length;
+      const dp = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+
+      for (let i = 0; i <= m; i++) dp[i][0] = i;
+      for (let j = 0; j <= n; j++) dp[0][j] = j;
+
+      for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+          if (s1[i - 1] === s2[j - 1]) {
+            dp[i][j] = dp[i - 1][j - 1];
+          } else {
+            dp[i][j] = Math.min(
+              dp[i - 1][j] + 1,
+              dp[i][j - 1] + 1,
+              dp[i - 1][j - 1] + 1
+            );
+          }
+        }
+      }
+      return dp[m][n];
+    }
+
+    // Update UI with similarity result
+    function updateSimilarityUI(card, fieldId, currentText, sttResult, similarity, start, end) {
+      const cardHeader = card.querySelector('.card-header-left');
+      const cardBody = card.querySelector('.card-body');
+
+      // Remove existing similarity elements
+      card.querySelectorAll('.similarity-badge, .stt-comparison').forEach(el => el.remove());
+
+      // Determine similarity level
+      let level, levelClass, levelText;
+      if (similarity >= 90) {
+        level = 'high';
+        levelClass = 'high';
+        levelText = '높음';
+      } else if (similarity >= 70) {
+        level = 'medium';
+        levelClass = 'medium';
+        levelText = '중간';
+      } else {
+        level = 'low';
+        levelClass = 'low';
+        levelText = '낮음';
+      }
+
+      // Add similarity badge to header
+      const badge = document.createElement('span');
+      badge.className = `similarity-badge ${levelClass}`;
+      badge.textContent = levelText;
+      badge.title = 'STT 유사도';
+      cardHeader.appendChild(badge);
+
+      // Add comparison panel only if similarity < 90% (중간, 낮음)
+      if (similarity < 90) {
+        const comparisonPanel = document.createElement('div');
+        comparisonPanel.className = `stt-comparison ${similarity < 70 ? 'error' : similarity < 90 ? 'warning' : ''}`;
+        
+        comparisonPanel.innerHTML = `
+          <div class="stt-comparison-header">
+            <div class="stt-comparison-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              </svg>
+              STT 분석 결과 (${formatTime(start)} ~ ${formatTime(end)})
+            </div>
+            <button class="btn-confirm-review" onclick="confirmReview(this)">확인 완료</button>
+          </div>
+          <div class="stt-content stt-result">${sttResult.text}</div>
+          ${similarity < 80 ? `
+          <div class="stt-suggestion">
+            <strong>💡 제안:</strong> 원본 구간이 맞지 않을 수 있습니다. 
+            원본 음원을 재생하여 구간을 조정하거나, 텍스트를 수정해주세요.
+          </div>
+          ` : ''}
+        `;
+        
+        // Store STT text for apply function
+        comparisonPanel.dataset.sttText = sttResult.text;
+        
+        cardBody.appendChild(comparisonPanel);
+      }
+
+      // Mark card as having issue if low similarity
+      if (similarity < 70) {
+        card.classList.add('has-issue');
+      }
+    }
+
+    // Generate diff HTML highlighting differences
+    function generateDiffHtml(text1, text2) {
+      // Simple word-level diff
+      const words1 = text1.split(' ');
+      const words2 = text2.split(' ');
+      
+      let html = '';
+      const maxLen = Math.max(words1.length, words2.length);
+      
+      for (let i = 0; i < maxLen; i++) {
+        const w1 = words1[i] || '';
+        const w2 = words2[i] || '';
+        
+        if (w1.toLowerCase() === w2.toLowerCase()) {
+          html += w1 + ' ';
+        } else if (!w1) {
+          html += `<span class="diff-add">${w2}</span> `;
+        } else if (!w2) {
+          html += `<span class="diff-remove">${w1}</span> `;
+        } else {
+          html += `<span class="diff-remove">${w1}</span> <span class="diff-add">${w2}</span> `;
+        }
+      }
+      
+      return html.trim();
+    }
+
+    // Apply STT text to editable field
+    function applySttText(btn, fieldId) {
+      const card = btn.closest('.sentence-card');
+      const comparison = card.querySelector('.stt-comparison');
+      const textEl = card.querySelector(`[data-field="${fieldId}"]`);
+      
+      if (!comparison || !textEl) return;
+      
+      const sttText = comparison.dataset.sttText;
+      
+      // Save current state for undo
+      saveState('text_edit', { field: fieldId, text: textEl.textContent });
+      
+      // Apply STT text
+      textEl.textContent = sttText;
+      textEl.classList.add('changed');
+      
+      // Mark TTS for regeneration
+      const ttsField = textEl.dataset.tts;
+      if (ttsField) {
+        const ttsContainer = document.getElementById('tts-' + ttsField);
+        if (ttsContainer) {
+          markTTSNeedRegen(ttsContainer, ttsField);
+          pendingTTS.add(ttsField);
+          updatePendingBadge();
+        }
+      }
+      
+      // Update similarity badge to 100%
+      const badge = card.querySelector('.similarity-badge');
+      if (badge) {
+        badge.className = 'similarity-badge high';
+        badge.textContent = '높음';
+      }
+      
+      // Remove comparison panel
+      comparison.remove();
+      
+      showToast('STT 결과가 적용되었습니다. TTS 재생성이 필요합니다.');
+    }
+
+    // Dismiss comparison panel
+    function dismissComparison(btn) {
+      const comparison = btn.closest('.stt-comparison');
+      if (comparison) {
+        comparison.remove();
+      }
+    }
+
+    // AI 검수 확인 완료
+    function confirmReview(btn) {
+      const comparison = btn.closest('.stt-comparison');
+      if (comparison) {
+        // 해당 카드의 이슈 배지 업데이트
+        const card = btn.closest('.card');
+        if (card) {
+          const issueBadge = card.querySelector('.issue-badge');
+          if (issueBadge) {
+            const currentCount = parseInt(issueBadge.textContent.replace(/[^0-9]/g, '')) || 1;
+            if (currentCount <= 1) {
+              issueBadge.remove();
+            } else {
+              issueBadge.textContent = `이슈 ${currentCount - 1}`;
+            }
+          }
+        }
+        
+        // 패널 제거
+        comparison.remove();
+        
+        // 상단 상태 배지 업데이트
+        updateHeaderStatusBadge();
+        
+        // 탭 이슈 배지 업데이트
+        updateTabIssueBadges();
+        
+        // 재검수 완료 버튼 상태 업데이트
+        updateReReviewButton();
+        
+        showToast('검수 확인이 완료되었습니다.');
+      }
+    }
+    
+    // 상단 상태 배지 업데이트
+    function updateHeaderStatusBadge() {
+      const statusBadge = document.getElementById('contentStatus');
+      if (!statusBadge) return;
+      
+      // 전체 이슈 개수 계산
+      const totalIssues = document.querySelectorAll('.stt-comparison').length;
+      
+      if (contentStatus === 'reviewing' || statusBadge.textContent.includes('검수 대기')) {
+        if (totalIssues > 0) {
+          statusBadge.innerHTML = `검수 대기 <span style="color: var(--warning);">⚠️${totalIssues}</span>`;
+        } else {
+          statusBadge.textContent = '검수 대기';
+        }
+      }
+    }
+    
+    // 탭 이슈 배지 업데이트
+    function updateTabIssueBadges() {
+      // 문장 탭 이슈 카운트
+      const sentenceIssues = document.querySelectorAll('#panel-sentence .stt-comparison').length;
+      const sentenceTab = document.querySelector('.tab[data-tab="sentence"]');
+      if (sentenceTab) {
+        let badge = sentenceTab.querySelector('.tab-issue-badge');
+        if (sentenceIssues > 0) {
+          if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'tab-issue-badge';
+            sentenceTab.appendChild(badge);
+          }
+          badge.textContent = sentenceIssues;
+        } else if (badge) {
+          badge.remove();
+        }
+      }
+      
+      // 단어 탭 이슈 카운트
+      const wordIssues = document.querySelectorAll('#panel-word .stt-comparison').length;
+      const wordTab = document.querySelector('.tab[data-tab="word"]');
+      if (wordTab) {
+        let badge = wordTab.querySelector('.tab-issue-badge');
+        if (wordIssues > 0) {
+          if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'tab-issue-badge';
+            wordTab.appendChild(badge);
+          }
+          badge.textContent = wordIssues;
+        } else if (badge) {
+          badge.remove();
+        }
+      }
+      
+      // MS04 탭 이슈 카운트
+      const ms04Issues = document.querySelectorAll('#panel-ms04 .stt-comparison').length;
+      const ms04Tab = document.querySelector('.tab[data-tab="ms04"]');
+      if (ms04Tab) {
+        let badge = ms04Tab.querySelector('.tab-issue-badge');
+        if (ms04Issues > 0) {
+          if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'tab-issue-badge';
+            ms04Tab.appendChild(badge);
+          }
+          badge.textContent = ms04Issues;
+        } else if (badge) {
+          badge.remove();
+        }
+      }
+    }
+
+    // Check single sentence similarity (for individual button)
+    function checkSentenceSimilarity(sentenceId) {
+      const card = document.querySelector(`.sentence-card[data-id="${sentenceId}"]`);
+      if (card) {
+        checkSingleSimilarity(card, `sentence-${sentenceId}`);
+        showToast('유사도 검증이 완료되었습니다.');
+      }
+    }
+
+    // Status Toggle
+    let hasChangesAfterComplete = false; // 검수 완료 후 수정 여부
+    
+    function toggleReviewStatus() {
+      const statusBadge = document.getElementById('contentStatus');
+      const btnComplete = document.getElementById('btnComplete');
+      const btnTempSave = document.getElementById('btnTempSave');
+
+      if (contentStatus === 'reviewing') {
+        // 검수중 → 검수 완료
+        contentStatus = 'completed';
+        hasChangesAfterComplete = false;
+        statusBadge.textContent = '검수 완료';
+        statusBadge.className = 'status-badge status-completed';
+        btnComplete.textContent = '재검수 완료';
+        btnComplete.disabled = true;
+        btnComplete.classList.add('btn-disabled');
+        btnTempSave.style.display = 'none';
+        showToast('검수가 완료되었습니다.');
+      } else if (contentStatus === 'completed' && btnComplete.textContent === '재검수 완료') {
+        // 재검수 완료 클릭
+        if (!hasChangesAfterComplete) {
+          showToast('수정된 내용이 없습니다.');
+          return;
+        }
+        
+        const confirmed = confirm('재검수를 완료하시겠습니까?\n\n재검수 완료를 누르면 학생에게 적용되어 기존 콘텐츠가 덮어씌워집니다.');
+        if (!confirmed) return;
+        
+        // 저장 처리
+        hasChangesAfterComplete = false;
+        btnComplete.disabled = true;
+        btnComplete.classList.add('btn-disabled');
+        showToast('재검수가 완료되었습니다.');
+      }
+    }
+    
+    // 검수 완료 후 수정 감지
+    function markChangeAfterComplete() {
+      if (contentStatus === 'completed') {
+        hasChangesAfterComplete = true;
+        updateReReviewButton();
+      }
+    }
+    
+    // 재검수 완료 버튼 활성화 조건 체크
+    function updateReReviewButton() {
+      const btnComplete = document.getElementById('btnComplete');
+      if (contentStatus !== 'completed' || btnComplete.textContent !== '재검수 완료') return;
+      
+      // 조건: 수정 발생 + 이슈 없음
+      const hasIssues = document.querySelectorAll('.issue-badge').length > 0;
+      const canReReview = hasChangesAfterComplete && !hasIssues;
+      
+      btnComplete.disabled = !canReReview;
+      if (canReReview) {
+        btnComplete.classList.remove('btn-disabled');
+      } else {
+        btnComplete.classList.add('btn-disabled');
+      }
+    }
+
+    // Init
+    document.addEventListener('DOMContentLoaded', () => {
+      // Store original texts
+      document.querySelectorAll('[data-field]').forEach(el => {
+        originalTexts[el.dataset.field] = el.textContent.trim();
+      });
+
+      // Tab switching
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+          tab.classList.add('active');
+          document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+        });
+      });
+
+      // Initialize range sliders
+      initRangeSliders();
+      
+      // 초기 상태 배지 업데이트
+      updateHeaderStatusBadge();
+      updateTabIssueBadges();
+    });
+
+    // Range Slider
+    function initRangeSliders() {
+      document.querySelectorAll('.range-slider').forEach(slider => {
+        const min = parseInt(slider.dataset.min) || 0;
+        const max = parseInt(slider.dataset.max) || 60;
+        const start = parseInt(slider.dataset.start) || 0;
+        const end = parseInt(slider.dataset.end) || 10;
+
+        const track = slider.querySelector('.range-track');
+        const selected = slider.querySelector('.range-selected');
+        const startHandle = slider.querySelector('.range-handle.start');
+        const endHandle = slider.querySelector('.range-handle.end');
+        const timestampEditor = slider.closest('.timestamp-editor');
+        const inputs = timestampEditor.querySelectorAll('.timestamp-input');
+
+        updateSliderUI(slider, start, end, min, max);
+
+        // Handle drag
+        [startHandle, endHandle].forEach((handle, idx) => {
+          handle.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            activeHandle = { slider, handle, isStart: idx === 0, min, max };
+            document.addEventListener('mousemove', onHandleDrag);
+            document.addEventListener('mouseup', onHandleUp);
+          });
+        });
+
+        // Input change
+        inputs.forEach((input, idx) => {
+          input.addEventListener('change', () => {
+            const time = parseTime(input.value);
+            const currentStart = parseInt(slider.dataset.start);
+            const currentEnd = parseInt(slider.dataset.end);
+
+            if (idx === 0) {
+              // Start input
+              let newStart = Math.min(Math.max(time, min), currentEnd - 1);
+              slider.dataset.start = newStart;
+              updateSliderUI(slider, newStart, currentEnd, min, max);
+            } else {
+              // End input
+              let newEnd = Math.max(Math.min(time, max), currentStart + 1);
+              slider.dataset.end = newEnd;
+              updateSliderUI(slider, currentStart, newEnd, min, max);
+            }
+            
+            // Check if changed and play audio
+            checkRangeChanged(timestampEditor);
+            playRangePreview(slider);
+          });
+        });
+      });
+    }
+
+    // Check if range has changed from original
+    function checkRangeChanged(timestampEditor) {
+      const slider = timestampEditor.querySelector('.range-slider');
+      const originalStart = parseInt(timestampEditor.dataset.originalStart);
+      const originalEnd = parseInt(timestampEditor.dataset.originalEnd);
+      const currentStart = parseInt(slider.dataset.start);
+      const currentEnd = parseInt(slider.dataset.end);
+
+      if (currentStart !== originalStart || currentEnd !== originalEnd) {
+        timestampEditor.classList.add('changed');
+      } else {
+        timestampEditor.classList.remove('changed');
+      }
+    }
+
+    // Play audio preview for the selected range
+    function playRangePreview(slider) {
+      const start = parseInt(slider.dataset.start);
+      const end = parseInt(slider.dataset.end);
+      
+      // In production, this would actually play the audio segment
+      // For demo, we'll show a toast
+      showToast(`🔊 재생 중: ${formatTime(start)} ~ ${formatTime(end)}`);
+      
+      // Simulate audio playback indicator
+      const timestampEditor = slider.closest('.timestamp-editor');
+      timestampEditor.style.boxShadow = '0 0 0 2px var(--purple)';
+      setTimeout(() => {
+        timestampEditor.style.boxShadow = '';
+      }, (end - start) * 100); // Simulated duration
+    }
+
+    // Save range changes
+    function saveRange(btn) {
+      const timestampEditor = btn.closest('.timestamp-editor');
+      const slider = timestampEditor.querySelector('.range-slider');
+      const currentStart = parseInt(slider.dataset.start);
+      const currentEnd = parseInt(slider.dataset.end);
+
+      // Update original values
+      timestampEditor.dataset.originalStart = currentStart;
+      timestampEditor.dataset.originalEnd = currentEnd;
+
+      // Remove changed state
+      timestampEditor.classList.remove('changed');
+
+      // Remove needs-setup state if exists
+      timestampEditor.classList.remove('needs-setup');
+
+      showToast('원본 구간이 저장되었습니다.');
+    }
+
+    // Reset range to original values
+    function resetRange(btn) {
+      const timestampEditor = btn.closest('.timestamp-editor');
+      const slider = timestampEditor.querySelector('.range-slider');
+      const originalStart = parseInt(timestampEditor.dataset.originalStart);
+      const originalEnd = parseInt(timestampEditor.dataset.originalEnd);
+      const min = parseInt(slider.dataset.min) || 0;
+      const max = parseInt(slider.dataset.max) || 60;
+
+      // Restore original values
+      updateSliderUI(slider, originalStart, originalEnd, min, max);
+
+      // Remove changed state
+      timestampEditor.classList.remove('changed');
+
+      showToast('원래대로 복원되었습니다.');
+    }
+
+    // Get adjacent sentence timestamp boundaries
+    function getAdjacentBoundaries(slider) {
+      const sentenceCard = slider.closest('.sentence-card');
+      if (!sentenceCard) {
+        return { prevEnd: null, nextStart: null };
+      }
+
+      const currentOrder = parseInt(sentenceCard.dataset.order);
+      const allCards = Array.from(document.querySelectorAll('.sentence-card')).sort((a, b) => 
+        parseInt(a.dataset.order) - parseInt(b.dataset.order)
+      );
+
+      let prevEnd = null;
+      let nextStart = null;
+
+      allCards.forEach(card => {
+        const order = parseInt(card.dataset.order);
+        const cardSlider = card.querySelector('.range-slider');
+        if (!cardSlider) return;
+
+        if (order === currentOrder - 1) {
+          prevEnd = parseInt(cardSlider.dataset.end);
+        }
+        if (order === currentOrder + 1) {
+          nextStart = parseInt(cardSlider.dataset.start);
+        }
+      });
+
+      return { prevEnd, nextStart };
+    }
+
+    function onHandleDrag(e) {
+      if (!activeHandle) return;
+
+      const { slider, isStart, min, max } = activeHandle;
+      const rect = slider.getBoundingClientRect();
+      const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      const value = Math.round(min + percent * (max - min));
+
+      const currentStart = parseInt(slider.dataset.start);
+      const currentEnd = parseInt(slider.dataset.end);
+
+      if (isStart) {
+        // Start handle - can't go past end handle
+        let newStart = Math.min(value, currentEnd - 1);
+        newStart = Math.max(newStart, min);
+        slider.dataset.start = newStart;
+        updateSliderUI(slider, newStart, currentEnd, min, max);
+      } else {
+        // End handle - can't go before start handle
+        let newEnd = Math.max(value, currentStart + 1);
+        newEnd = Math.min(newEnd, max);
+        slider.dataset.end = newEnd;
+        updateSliderUI(slider, currentStart, newEnd, min, max);
+      }
+    }
+
+    function onHandleUp() {
+      if (activeHandle) {
+        const slider = activeHandle.slider;
+        const timestampEditor = slider.closest('.timestamp-editor');
+        
+        // Check if changed and play audio
+        checkRangeChanged(timestampEditor);
+        playRangePreview(slider);
+      }
+      
+      activeHandle = null;
+      document.removeEventListener('mousemove', onHandleDrag);
+      document.removeEventListener('mouseup', onHandleUp);
+    }
+
+    function updateSliderUI(slider, start, end, min, max) {
+      const selected = slider.querySelector('.range-selected');
+      const startHandle = slider.querySelector('.range-handle.start');
+      const endHandle = slider.querySelector('.range-handle.end');
+      const timestampEditor = slider.closest('.timestamp-editor');
+      const inputs = timestampEditor.querySelectorAll('.timestamp-input');
+
+      const startPercent = ((start - min) / (max - min)) * 100;
+      const endPercent = ((end - min) / (max - min)) * 100;
+
+      selected.style.left = startPercent + '%';
+      selected.style.width = (endPercent - startPercent) + '%';
+      startHandle.style.left = startPercent + '%';
+      endHandle.style.left = endPercent + '%';
+
+      if (inputs.length >= 2) {
+        inputs[0].value = formatTime(start);
+        inputs[1].value = formatTime(end);
+      }
+
+      slider.dataset.start = start;
+      slider.dataset.end = end;
+
+      // Update duration display
+      const fieldRow = slider.closest('.field-row') || slider.closest('.card-body');
+      const durationDisplay = fieldRow?.querySelector('.range-duration');
+      if (durationDisplay) {
+        const duration = end - start;
+        durationDisplay.textContent = formatTime(duration);
+      }
+    }
+
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function parseTime(str) {
+      const parts = str.split(':');
+      if (parts.length === 2) {
+        return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+      }
+      return 0;
+    }
+
+    // Check text change for TTS
+    function checkTextChange(el) {
+      const field = el.dataset.field;
+      const ttsField = el.dataset.tts;
+      if (!field) return;
+
+      const currentText = el.textContent.trim();
+      const originalText = originalTexts[field];
+      const ttsContainer = document.getElementById('tts-' + ttsField);
+
+      // Save to undo stack if text changed
+      if (currentText !== originalText && !el.dataset.undoSaved) {
+        saveState('text_edit', { field: field, text: originalText });
+        el.dataset.undoSaved = 'true';
+      }
+
+      if (currentText !== originalText) {
+        el.classList.add('changed');
+        if (ttsContainer) {
+          markTTSNeedRegen(ttsContainer, ttsField);
+          pendingTTS.add(ttsField);
+        }
+        markChangeAfterComplete(); // 검수 완료 후 수정 감지
+      } else {
+        el.classList.remove('changed');
+        el.dataset.undoSaved = '';
+        if (ttsContainer) {
+          restoreTTS(ttsContainer);
+          pendingTTS.delete(ttsField);
+        }
+      }
+
+      updatePendingBadge();
+    }
+
+    // Check word change
+    function checkWordChange(el) {
+      const field = el.dataset.field;
+      const ttsField = el.dataset.tts;
+      const wordId = el.dataset.wordId;
+      if (!field) return;
+
+      const currentText = el.textContent.trim();
+      const originalText = originalTexts[field];
+      const ttsContainer = document.getElementById('tts-' + ttsField);
+      const regenAllBtn = el.closest('.word-text-wrap')?.querySelector('.btn-regen-word-all');
+
+      if (currentText !== originalText) {
+        el.classList.add('changed');
+        if (ttsContainer) {
+          markTTSNeedRegen(ttsContainer, ttsField);
+          pendingTTS.add(ttsField);
+        }
+        // Show regen all button
+        if (regenAllBtn) {
+          regenAllBtn.style.display = 'inline-flex';
+        }
+        markChangeAfterComplete(); // 검수 완료 후 수정 감지
+      } else {
+        el.classList.remove('changed');
+        if (ttsContainer) {
+          restoreTTS(ttsContainer);
+          pendingTTS.delete(ttsField);
+        }
+        // Hide regen all button
+        if (regenAllBtn) {
+          regenAllBtn.style.display = 'none';
+        }
+      }
+
+      updatePendingBadge();
+    }
+    
+    // 단어 관련 콘텐츠 전체 재생성
+    async function regenerateWordAll(wordId) {
+      const btn = document.querySelector(`.btn-regen-word-all[data-word-id="${wordId}"]`);
+      const wordCard = document.querySelector(`[data-word-id="${wordId}"]`);
+      const wordTextEl = wordCard?.querySelector('.word-text');
+      const newWord = wordTextEl?.textContent.trim();
+      
+      if (!btn || !wordCard || !newWord) return;
+      
+      // 수동 입력 데이터 체크
+      const hasManualInput = wordCard.querySelector('.label-manual') !== null;
+      if (hasManualInput) {
+        const confirmed = confirm('콘텐츠를 재생성하시겠습니까?\n\n수동 입력한 데이터가 삭제되고 AI가 새로 생성합니다.');
+        if (!confirmed) return;
+      }
+      
+      btn.classList.add('loading');
+      const originalHTML = btn.innerHTML;
+      btn.innerHTML = `<svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> 생성 중...`;
+      
+      // Step 1: 단어 TTS 재생성
+      showToast(`"${newWord}" 콘텐츠 생성 중... (1/4 단어 TTS)`);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const wordTts = wordCard.querySelector(`#tts-word-${wordId}`);
+      if (wordTts) {
+        wordTts.innerHTML = `
+          <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+          <span class="audio-time">0:01</span>
+        `;
+      }
+      
+      // Step 2: 기본 정보 재생성 (한글뜻, 영영풀이)
+      showToast(`"${newWord}" 콘텐츠 생성 중... (2/4 기본 정보)`);
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // 한글 뜻 업데이트 (데모)
+      const krMeaningEl = wordCard.querySelector(`[data-field="word${wordId}-kr"]`);
+      if (krMeaningEl) {
+        const meanings = {
+          'story': '이야기',
+          'tale': '이야기, 동화',
+          'account': '설명, 기술',
+          'preserve': '보존하다, 유지하다',
+          'narrative': '이야기, 서술'
+        };
+        krMeaningEl.textContent = meanings[newWord.toLowerCase()] || '(뜻)';
+        
+        const krTts = wordCard.querySelector(`#tts-word${wordId}-kr`);
+        if (krTts) {
+          krTts.innerHTML = `
+            <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+            <span class="audio-label">TTS</span>
+            <span class="audio-time">0:01</span>
+          `;
+        }
+      }
+      
+      // 영영 풀이 업데이트
+      const enMeaningEl = wordCard.querySelector(`[data-field="word${wordId}-en"]`);
+      if (enMeaningEl) {
+        enMeaningEl.textContent = `A spoken or written account related to "${newWord}"`;
+        
+        const enTts = wordCard.querySelector(`#tts-word${wordId}-en`);
+        if (enTts) {
+          enTts.innerHTML = `
+            <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+            <span class="audio-label">TTS</span>
+            <span class="audio-time">0:03</span>
+          `;
+        }
+      }
+      
+      // Step 3: 지문 내 빈칸 & 예문 재생성
+      showToast(`"${newWord}" 콘텐츠 생성 중... (3/4 예문)`);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // 지문 내 빈칸 업데이트
+      const passageEl = wordCard.querySelector(`[data-field="w${wordId}-passage"]`);
+      if (passageEl) {
+        passageEl.textContent = `The ${newWord} was captivating and held everyone's attention throughout.`;
+      }
+      
+      // 빈칸 문장 업데이트
+      const blankRow = wordCard.querySelector('.blank')?.closest('.passage-row');
+      if (blankRow) {
+        const blankContent = blankRow.querySelector('.passage-content');
+        if (blankContent) {
+          blankContent.innerHTML = `The <span class="blank">________</span> was captivating and held everyone's attention throughout.`;
+        }
+      }
+      
+      // 보기 업데이트
+      const optionsRow = wordCard.querySelector('.options-row');
+      if (optionsRow) {
+        optionsRow.innerHTML = `
+          <span class="option correct" contenteditable="true">${newWord}</span>
+          <span class="option wrong" contenteditable="true">mystery</span>
+          <span class="option wrong" contenteditable="true">question</span>
+          <span class="option wrong" contenteditable="true">problem</span>
+        `;
+      }
+      
+      // 예문 업데이트
+      const ex1El = wordCard.querySelector(`[data-field="w${wordId}-ex1"]`);
+      if (ex1El) {
+        ex1El.textContent = `The author's ${newWord} style makes complex topics accessible to young readers.`;
+      }
+      
+      const ex2El = wordCard.querySelector(`[data-field="w${wordId}-ex2"]`);
+      if (ex2El) {
+        ex2El.textContent = `She developed her ${newWord} skills through years of practice and dedication.`;
+      }
+      
+      // Step 4: 모든 TTS 재생성
+      showToast(`"${newWord}" 콘텐츠 생성 중... (4/4 TTS 생성)`);
+      await new Promise(resolve => setTimeout(resolve, 600));
+      
+      // 모든 TTS 완료 표시
+      wordCard.querySelectorAll('.audio-item').forEach(item => {
+        if (item.querySelector('.need-regen')) {
+          item.innerHTML = `
+            <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+            <span class="audio-label">TTS</span>
+            <span class="audio-time">0:0${Math.floor(Math.random() * 5) + 2}</span>
+          `;
+        }
+      });
+      
+      // 완료 처리
+      wordTextEl.classList.remove('changed');
+      originalTexts[`word-${wordId}`] = newWord;
+      pendingTTS.delete(`word-${wordId}`);
+      
+      // 수동 입력 라벨 모두 제거 (AI가 새로 생성했으므로)
+      wordCard.querySelectorAll('.label-manual').forEach(label => label.remove());
+      
+      btn.classList.remove('loading');
+      btn.innerHTML = originalHTML;
+      btn.style.display = 'none';
+      
+      showToast('재생성이 완료되었습니다.');
+    }
+    
+    // 원문 변경 체크 (지문 내 빈칸, 예문 빈칸 있음)
+    function checkPassageChange(el) {
+      const field = el.dataset.field;
+      const ttsField = el.dataset.tts;
+      const passageId = el.dataset.passageId;
+      if (!field) return;
+
+      const currentText = el.textContent.trim();
+      const originalText = originalTexts[field];
+      const ttsContainer = document.getElementById('tts-' + ttsField);
+      const regenBtn = el.parentElement?.querySelector('.btn-regen-passage');
+
+      if (currentText !== originalText) {
+        el.classList.add('changed');
+        if (ttsContainer) {
+          markTTSNeedRegen(ttsContainer, ttsField);
+          pendingTTS.add(ttsField);
+        }
+        // Show regen passage button
+        if (regenBtn) {
+          regenBtn.style.display = 'inline-flex';
+        }
+        markChangeAfterComplete(); // 검수 완료 후 수정 감지
+      } else {
+        el.classList.remove('changed');
+        if (ttsContainer) {
+          restoreTTS(ttsContainer);
+          pendingTTS.delete(ttsField);
+        }
+        // Hide regen passage button
+        if (regenBtn) {
+          regenBtn.style.display = 'none';
+        }
+      }
+
+      updatePendingBadge();
+    }
+    
+    // 빈칸/보기 재생성 (원문 기반)
+    async function regeneratePassageContent(passageId) {
+      const btn = document.querySelector(`.btn-regen-passage[data-passage-id="${passageId}"]`);
+      const passageBox = document.querySelector(`[data-passage-id="${passageId}"].passage-box`) || 
+                         btn?.closest('.passage-box');
+      const textEl = document.querySelector(`[data-passage-id="${passageId}"].editable`);
+      
+      if (!btn || !passageBox || !textEl) return;
+      
+      const originalText = textEl.textContent.trim();
+      
+      btn.classList.add('loading');
+      const originalHTML = btn.innerHTML;
+      btn.innerHTML = `<svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>`;
+      
+      showToast('빈칸 및 보기 재생성 중...');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Find target word (for demo, find first word that could be a vocabulary word)
+      const words = originalText.split(/\s+/);
+      const targetWord = words.find(w => w.length > 5 && /^[a-zA-Z]+$/.test(w)) || words[Math.floor(words.length / 2)];
+      const cleanWord = targetWord.replace(/[^a-zA-Z]/g, '');
+      
+      // Update blank content
+      const blankContent = passageBox.querySelector('.blank-content');
+      if (blankContent) {
+        const blankSentence = originalText.replace(new RegExp(cleanWord, 'i'), '<span class="blank">________</span>');
+        blankContent.innerHTML = blankSentence;
+      }
+      
+      // Update options
+      const optionsRow = passageBox.querySelector('.options-row');
+      if (optionsRow) {
+        // Generate fake wrong options (in production, AI generates these)
+        const wrongOptions = generateWrongOptions(cleanWord);
+        optionsRow.innerHTML = `
+          <span class="option correct" contenteditable="true">${cleanWord}</span>
+          <span class="option wrong" contenteditable="true">${wrongOptions[0]}</span>
+          <span class="option wrong" contenteditable="true">${wrongOptions[1]}</span>
+          <span class="option wrong" contenteditable="true">${wrongOptions[2]}</span>
+        `;
+      }
+      
+      // Update TTS
+      const ttsContainer = passageBox.querySelector('.audio-item[id^="tts-"]');
+      if (ttsContainer) {
+        ttsContainer.innerHTML = `
+          <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+          <span class="audio-label">TTS</span>
+          <span class="audio-time">0:0${Math.floor(originalText.length / 20) + 2}</span>
+        `;
+      }
+      
+      // Clear changed state
+      textEl.classList.remove('changed');
+      originalTexts[textEl.dataset.field] = originalText;
+      pendingTTS.delete(textEl.dataset.tts);
+      
+      btn.classList.remove('loading');
+      btn.innerHTML = originalHTML;
+      btn.style.display = 'none';
+      
+      showToast('재생성이 완료되었습니다.');
+    }
+    
+    // Generate wrong options for blanks (demo)
+    function generateWrongOptions(correctWord) {
+      const similarWords = {
+        'narrative': ['numeric', 'negative', 'native'],
+        'narratives': ['novels', 'articles', 'documents'],
+        'preserve': ['prevent', 'present', 'pretend'],
+        'entertainment': ['environment', 'enrollment', 'enhancement'],
+        'traditions': ['transitions', 'transactions', 'translations'],
+        'style': ['scale', 'skill', 'spell'],
+        'culture': ['capture', 'creature', 'curtain']
+      };
+      
+      if (similarWords[correctWord.toLowerCase()]) {
+        return similarWords[correctWord.toLowerCase()];
+      }
+      
+      // Default fallback
+      return ['option1', 'option2', 'option3'];
+    }
+
+    function markTTSNeedRegen(container, field) {
+      container.classList.add('need-regen');
+      container.innerHTML = `
+        <button class="play-btn need-regen"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+        <span class="audio-label" style="color: var(--warning);">재생성 필요</span>
+        <button class="regen-mini" onclick="regenerateSingleTTS('${field}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+        </button>
+      `;
+    }
+
+    function restoreTTS(container) {
+      container.classList.remove('need-regen');
+      container.innerHTML = `
+        <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+        <span class="audio-label">TTS</span>
+        <span class="audio-time">0:05</span>
+      `;
+    }
+
+    function updatePendingBadge() {
+      // 이 함수는 이제 pendingTTS 상태만 추적 (버튼 표시는 showSentenceActionButtons에서 처리)
+    }
+    
+    // 문장 나누기/합치기 후 액션 버튼 표시
+    function showSentenceActionButtons() {
+      const timestampBtn = document.getElementById('timestampAutoBtn');
+      const regenAllBtn = document.getElementById('regenAllBtn');
+      const divider = document.getElementById('headerDivider');
+      
+      if (timestampBtn) timestampBtn.style.display = 'inline-flex';
+      if (regenAllBtn) regenAllBtn.style.display = 'inline-flex';
+      if (divider) divider.style.display = 'block';
+    }
+    
+    // 액션 버튼 숨기기
+    function hideSentenceActionButtons() {
+      const timestampBtn = document.getElementById('timestampAutoBtn');
+      const regenAllBtn = document.getElementById('regenAllBtn');
+      const divider = document.getElementById('headerDivider');
+      
+      if (timestampBtn) timestampBtn.style.display = 'none';
+      if (regenAllBtn) regenAllBtn.style.display = 'none';
+      if (divider) divider.style.display = 'none';
+    }
+
+    function regenerateSingleTTS(field) {
+      const ttsContainer = document.getElementById('tts-' + field);
+      const textEl = document.querySelector(`[data-tts="${field}"]`);
+
+      if (ttsContainer) {
+        ttsContainer.innerHTML = `
+          <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+          <span class="audio-label">생성중...</span>
+        `;
+      }
+
+      setTimeout(() => {
+        restoreTTS(ttsContainer);
+        if (textEl) {
+          textEl.classList.remove('changed');
+          originalTexts[textEl.dataset.field] = textEl.textContent.trim();
+          
+          // Remove TTS 필요 badge
+          const card = textEl.closest('.sentence-card');
+          if (card) {
+            const badge = card.querySelector('.issue-badge');
+            if (badge && badge.textContent === 'TTS 필요') {
+              badge.remove();
+            }
+          }
+        }
+        pendingTTS.delete(field);
+        updatePendingBadge();
+        
+        // Hide action buttons if no more pending TTS
+        if (pendingTTS.size === 0) {
+          hideSentenceActionButtons();
+        }
+        
+        showToast('TTS가 재생성되었습니다.');
+      }, 1500);
+    }
+
+    function regenerateAllTTS() {
+      const btn = document.getElementById('regenAllBtn');
+      btn.classList.add('loading');
+      const count = pendingTTS.size;
+
+      setTimeout(() => {
+        pendingTTS.forEach(field => {
+          const ttsContainer = document.getElementById('tts-' + field);
+          const textEl = document.querySelector(`[data-tts="${field}"]`);
+          if (ttsContainer) restoreTTS(ttsContainer);
+          if (textEl) {
+            textEl.classList.remove('changed');
+            originalTexts[textEl.dataset.field] = textEl.textContent.trim();
+            
+            // Remove TTS 필요 badge
+            const card = textEl.closest('.sentence-card');
+            if (card) {
+              const badge = card.querySelector('.issue-badge');
+              if (badge && badge.textContent === 'TTS 필요') {
+                badge.remove();
+              }
+            }
+          }
+        });
+
+        pendingTTS.clear();
+        updatePendingBadge();
+        btn.classList.remove('loading');
+        
+        // Hide action buttons after TTS regeneration complete
+        hideSentenceActionButtons();
+        
+        showToast(`${count}개 TTS가 재생성되었습니다.`);
+      }, 2000);
+    }
+
+    // Regenerate content
+    async function regenerate(type, id) {
+      const btn = event.target.closest('.btn-regen');
+      if (!btn || btn.classList.contains('loading')) return;
+
+      // 수동 입력 체크가 필요한 타입들
+      const manualCheckTypes = ['word-basic', 'example-blank'];
+      
+      if (manualCheckTypes.includes(type) && id) {
+        const wordCard = document.querySelector(`[data-word-id="${id}"]`);
+        if (wordCard) {
+          let hasManualInput = false;
+          
+          if (type === 'word-basic') {
+            // 기본 정보 섹션 내 수동 입력 라벨 확인
+            const basicSection = wordCard.querySelector('.word-basic-section');
+            hasManualInput = basicSection?.querySelector('.label-manual') !== null;
+          } else if (type === 'example-blank') {
+            // 예문 (빈칸 있음) 섹션 내 수동 입력 라벨 확인
+            const exampleSections = wordCard.querySelectorAll('.word-section');
+            exampleSections.forEach(section => {
+              if (section.querySelector('.badge')?.textContent.includes('빈칸 있음')) {
+                if (section.querySelector('.label-manual')) {
+                  hasManualInput = true;
+                }
+              }
+            });
+          }
+          
+          if (hasManualInput) {
+            const confirmed = confirm('콘텐츠를 재생성하시겠습니까?\n\n수동 입력한 데이터가 삭제되고 AI가 새로 생성합니다.');
+            if (!confirmed) return;
+          }
+        }
+      }
+
+      btn.classList.add('loading');
+      const original = btn.innerHTML;
+      
+      if (type === 'sentences') {
+        // 문장 분리 재생성 - 확인 Alert 표시
+        btn.classList.remove('loading');
+        const confirmed = confirm('문장 분리를 재생성하시겠습니까?\n\n기존 문장, 타임스탬프, TTS가 모두 삭제되고 새로 생성됩니다.');
+        if (!confirmed) return;
+        
+        btn.classList.add('loading');
+        // 문장 분리 재생성 - 전체 프로세스 진행
+        btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> 문장 분리 중...`;
+        
+        await regenerateSentences();
+        
+        btn.classList.remove('loading');
+        btn.innerHTML = original;
+      } else {
+        btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> 생성중...`;
+
+        setTimeout(() => {
+          // 수동 입력 라벨 제거 (AI가 새로 생성했으므로)
+          if (manualCheckTypes.includes(type) && id) {
+            const wordCard = document.querySelector(`[data-word-id="${id}"]`);
+            if (wordCard) {
+              if (type === 'word-basic') {
+                // 기본 정보 섹션의 수동 입력 라벨 제거 (품사, 한글 뜻, 영영 풀이)
+                const basicSection = wordCard.querySelector('.word-basic-section');
+                basicSection?.querySelectorAll('.label-manual').forEach(label => label.remove());
+              } else if (type === 'example-blank') {
+                // 예문 (빈칸 있음) 섹션의 수동 입력 라벨 제거
+                const exampleSections = wordCard.querySelectorAll('.word-section');
+                exampleSections.forEach(section => {
+                  if (section.querySelector('.badge')?.textContent.includes('빈칸 있음')) {
+                    section.querySelectorAll('.label-manual').forEach(label => label.remove());
+                  }
+                });
+              }
+            }
+          }
+          
+          btn.classList.remove('loading');
+          btn.innerHTML = original;
+          showToast('재생성이 완료되었습니다.');
+        }, 2000);
+      }
+    }
+    
+    // 문장 분리 재생성 - 전체 프로세스
+    async function regenerateSentences() {
+      const sentenceList = document.getElementById('sentenceList');
+      const btn = document.querySelector('.btn-regen[onclick*="sentences"]');
+      
+      // Step 1: 문장 분리 (AI가 새로 분리)
+      showToast('1/5 문장 분리 중...');
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // 기존 문장 카드 모두 제거
+      sentenceList.querySelectorAll('.sentence-card').forEach(card => card.remove());
+      
+      // 새로운 문장 생성 (데모용 - 실제로는 AI가 분리)
+      const newSentences = [
+        { text: 'Storytelling is one of the oldest forms of human communication.', source: '문단1' },
+        { text: 'It dates back thousands of years to when our ancestors gathered around fires to share tales of the hunt.', source: '문단1' },
+        { text: 'These narratives served not only as entertainment but also as a means of preserving history.', source: '문단1' },
+        { text: 'They passed down cultural values and taught important life lessons to younger generations.', source: '문단1' },
+        { text: 'Today, despite the rise of digital media and instant communication, the fundamental human need for stories remains unchanged.', source: '문단2' },
+        { text: 'From podcasts to social media, we continue to share our experiences through narrative structures.', source: '문단2' }
+      ];
+      
+      const addBtn = sentenceList.querySelector('.add-btn');
+      newSentences.forEach((sentence, index) => {
+        const newId = sentenceIdCounter++;
+        const card = createSentenceCardForRegen(newId, sentence.text, sentence.source);
+        sentenceList.insertBefore(card, addBtn);
+      });
+      
+      // Step 2: TTS 생성
+      if (btn) btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> TTS 생성 중...`;
+      showToast('2/5 TTS 생성 중...');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // TTS 생성 완료 표시
+      document.querySelectorAll('.sentence-card .audio-item[id^="tts-"]').forEach(item => {
+        const id = item.id.replace('tts-', '');
+        item.innerHTML = `
+          <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+          <span class="audio-label">TTS</span>
+          <span class="audio-time">0:0${Math.floor(Math.random() * 5) + 4}</span>
+        `;
+      });
+      
+      // Step 3: Timestamp 자동 배분
+      if (btn) btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> 원본 구간 설정 중...`;
+      showToast('3/5 원본 구간 설정 중...');
+      await new Promise(resolve => setTimeout(resolve, 600));
+      
+      // Timestamp 자동 배분
+      const sentenceCards = document.querySelectorAll('#sentenceList > .sentence-card');
+      const totalDuration = 60;
+      const avgDuration = Math.floor(totalDuration / sentenceCards.length);
+      let currentStart = 0;
+      
+      sentenceCards.forEach((card, index) => {
+        const slider = card.querySelector('.range-slider');
+        const timestampEditor = card.querySelector('.timestamp-editor');
+        if (!slider) return;
+        
+        const end = (index === sentenceCards.length - 1) ? totalDuration : currentStart + avgDuration;
+        updateSliderUI(slider, currentStart, end, 0, totalDuration);
+        
+        if (timestampEditor) {
+          timestampEditor.dataset.originalStart = currentStart;
+          timestampEditor.dataset.originalEnd = end;
+          timestampEditor.classList.remove('needs-setup');
+        }
+        
+        // Update duration display
+        const durationDisplay = card.querySelector('.range-duration');
+        if (durationDisplay) durationDisplay.textContent = formatTime(end - currentStart);
+        
+        currentStart = end;
+      });
+      
+      initRangeSliders();
+      
+      // Step 4: STT 검수
+      if (btn) btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> STT 검수 중...`;
+      showToast('4/5 STT 검수 중...');
+      
+      // STT 검수 진행
+      for (const card of sentenceCards) {
+        const sentenceId = card.dataset.id;
+        const fieldId = `sentence-${sentenceId}`;
+        const textEl = card.querySelector('.editable');
+        const slider = card.querySelector('.range-slider');
+        
+        if (!textEl || !slider) continue;
+        
+        const currentText = textEl.textContent.trim();
+        const start = parseInt(slider.dataset.start);
+        const end = parseInt(slider.dataset.end);
+        
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        // Mock STT - 랜덤 유사도 생성
+        const similarity = Math.floor(Math.random() * 20) + 80; // 80-99%
+        const sttResult = { text: currentText, confidence: similarity / 100 };
+        
+        if (similarity < 90) {
+          // STT 결과 표시 (중간, 낮음)
+          updateSimilarityUI(card, fieldId, currentText, sttResult, similarity, start, end);
+        } else {
+          // 기존 similarity 관련 요소 제거
+          card.querySelectorAll('.similarity-badge, .stt-comparison').forEach(el => el.remove());
+          
+          // 높은 유사도 - 배지만 표시, 패널 없음
+          const headerLeft = card.querySelector('.card-header-left');
+          const badge = document.createElement('span');
+          badge.className = 'similarity-badge high';
+          badge.title = 'STT 유사도';
+          badge.textContent = '높음';
+          headerLeft.appendChild(badge);
+        }
+      }
+      
+      // Step 5: AI 검수
+      if (btn) btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> AI 검수 중...`;
+      showToast('5/5 AI 검수 중...');
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // AI 검수 결과 추가 (일부 문장에만)
+      const cardsArray = Array.from(sentenceCards);
+      const longSentence = cardsArray.find(card => {
+        const text = card.querySelector('.editable')?.textContent || '';
+        return text.length > 100;
+      });
+      
+      if (longSentence) {
+        const cardBody = longSentence.querySelector('.card-body');
+        const aiComment = document.createElement('div');
+        aiComment.className = 'stt-comparison warning';
+        aiComment.innerHTML = `
+          <div class="stt-comparison-header">
+            <div class="stt-comparison-title" style="color: var(--warning);">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              AI 검수
+            </div>
+            <button class="btn-confirm-review" onclick="confirmReview(this)">확인 완료</button>
+          </div>
+          <div class="stt-content">문장이 길어 학습자 이해가 어려울 수 있습니다. 두 문장으로 나누는 것을 권장합니다.</div>
+        `;
+        cardBody.appendChild(aiComment);
+        
+        // Add issue badge
+        longSentence.classList.add('has-issue');
+        const headerLeft = longSentence.querySelector('.card-header-left');
+        if (!headerLeft.querySelector('.issue-badge')) {
+          const badge = document.createElement('span');
+          badge.className = 'issue-badge';
+          badge.textContent = '이슈 1';
+          headerLeft.appendChild(badge);
+        }
+      }
+      
+      renumberSentences();
+      updatePendingBadge();
+      
+      showToast('문장 분리가 재생성되었습니다.');
+    }
+    
+    // 재생성용 문장 카드 생성 (TTS 로딩 상태로)
+    function createSentenceCardForRegen(id, text, source) {
+      const card = document.createElement('div');
+      card.className = 'card sentence-card';
+      card.dataset.id = id;
+      card.dataset.order = id;
+      card.style.marginBottom = '12px';
+      
+      card.innerHTML = `
+        <div class="card-header" style="padding: 10px 12px;">
+          <div class="card-header-left">
+            <span class="card-num">${id}</span>
+            <span class="source-tag">${source}</span>
+          </div>
+          <div class="sentence-actions">
+            <button class="btn btn-ghost btn-icon" title="위 문장과 합치기" onclick="mergeWithPrevious(${id})">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 11 12 6 7 11"></polyline><polyline points="17 18 12 13 7 18"></polyline></svg>
+            </button>
+            <button class="btn btn-ghost btn-icon" title="문장 나누기" onclick="openSplitModal(${id})">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="5 12 12 19 19 12"></polyline></svg>
+            </button>
+            <button class="btn btn-ghost btn-icon" title="삭제" onclick="deleteSentence(${id})">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+          </div>
+        </div>
+        <div class="card-body" style="padding: 12px;">
+          <div class="editable" contenteditable="true" data-field="sentence-${id}" data-tts="sentence-${id}" id="sentenceText${id}" onblur="checkTextChange(this)">${text}</div>
+          <div class="audio-row">
+            <div class="audio-item">
+              <button class="play-btn original" onclick="playOriginalRange(this)"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+              <span class="audio-label">원본</span>
+              <span class="audio-time range-duration">--:--</span>
+            </div>
+            <div class="audio-item" id="tts-sentence-${id}">
+              <button class="play-btn need-regen"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+              <span class="audio-label" style="color: var(--font-3);">생성 중...</span>
+            </div>
+          </div>
+          <div class="timestamp-editor" data-original-start="0" data-original-end="5">
+            <span class="timestamp-editor-label">원본 구간</span>
+            <div class="range-slider" data-min="0" data-max="60" data-start="0" data-end="5">
+              <div class="range-track"></div>
+              <div class="range-selected"></div>
+              <div class="range-handle start"></div>
+              <div class="range-handle end"></div>
+            </div>
+            <div class="timestamp-inputs">
+              <input type="text" class="timestamp-input" value="00:00">
+              <span class="timestamp-sep">~</span>
+              <input type="text" class="timestamp-input" value="00:05">
+            </div>
+            <button class="btn-save-range" onclick="saveRange(this)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              저장
+            </button>
+            <button class="btn-reset-range" onclick="resetRange(this)" title="원래대로">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+            </button>
+          </div>
+        </div>
+      `;
+      
+      return card;
+    }
+
+    // Split modal
+    function openSplitModal(id) {
+      currentSplitId = id;
+      const textEl = document.getElementById('sentenceText' + id) || document.querySelector(`[data-id="${id}"] .editable`);
+      const text = textEl ? textEl.textContent : '';
+      document.getElementById('splitTextarea').value = text;
+      document.getElementById('splitPreview').innerHTML = '';
+      document.getElementById('splitModal').classList.add('show');
+    }
+
+    function closeSplitModal() {
+      document.getElementById('splitModal').classList.remove('show');
+      currentSplitId = null;
+    }
+
+    function updateSplitPreview() {
+      const lines = document.getElementById('splitTextarea').value.split('\n').filter(l => l.trim());
+      const preview = document.getElementById('splitPreview');
+
+      if (lines.length <= 1) {
+        preview.innerHTML = '';
+        return;
+      }
+
+      let html = '<div class="split-preview-title">미리보기 (' + lines.length + '개) - 각 문장의 TTS가 재생성됩니다.</div>';
+      lines.forEach((line, i) => {
+        html += '<div class="split-preview-item"><strong>' + (i + 1) + '.</strong> ' + line.trim() + '</div>';
+      });
+      preview.innerHTML = html;
+    }
+
+    function mergeWithPrevious(id) {
+      const currentCard = document.querySelector(`.sentence-card[data-id="${id}"]`);
+      if (!currentCard) return;
+
+      // Find previous card
+      const allCards = Array.from(document.querySelectorAll('#sentenceList > .sentence-card'));
+      const currentIndex = allCards.indexOf(currentCard);
+      
+      if (currentIndex <= 0) {
+        showToast('합칠 이전 문장이 없습니다.');
+        return;
+      }
+
+      const prevCard = allCards[currentIndex - 1];
+      const prevTextEl = prevCard.querySelector('.editable');
+      const currentTextEl = currentCard.querySelector('.editable');
+
+      if (!prevTextEl || !currentTextEl) return;
+
+      // Merge text
+      const mergedText = prevTextEl.textContent.trim() + ' ' + currentTextEl.textContent.trim();
+      prevTextEl.textContent = mergedText;
+
+      // Remove STT comparison and AI comment from previous card
+      prevCard.querySelectorAll('.stt-comparison').forEach(el => el.remove());
+      prevCard.querySelectorAll('.similarity-badge').forEach(el => el.remove());
+      
+      // Remove has-issue class and issue-badge
+      prevCard.classList.remove('has-issue');
+      prevCard.querySelectorAll('.issue-badge').forEach(el => el.remove());
+
+      // Mark timestamp-editor as needing setup
+      const prevTimestampEditor = prevCard.querySelector('.timestamp-editor');
+      if (prevTimestampEditor) {
+        prevTimestampEditor.classList.add('needs-setup');
+        // Add warning icon if not exists
+        if (!prevTimestampEditor.querySelector('.range-setup-warning')) {
+          const label = prevTimestampEditor.querySelector('.timestamp-editor-label');
+          if (label) {
+            const warning = document.createElement('span');
+            warning.className = 'range-setup-warning';
+            warning.innerHTML = `
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              설정 필요
+            `;
+            label.after(warning);
+          }
+        }
+      }
+
+      // Mark previous card TTS as needing regeneration
+      const prevTtsItem = prevCard.querySelector('.audio-item[id^="tts-"]');
+      if (prevTtsItem) {
+        const ttsId = prevTtsItem.id.replace('tts-', '');
+        pendingTTS.add(ttsId);
+        prevTtsItem.innerHTML = `
+          <button class="play-btn need-regen"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+          <span class="audio-label" style="color: var(--warning);">재생성 필요</span>
+          <button class="regen-mini" onclick="regenerateSingleTTS('${ttsId}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          </button>
+        `;
+      }
+
+      // Add TTS 필요 badge to previous card
+      const prevHeaderLeft = prevCard.querySelector('.card-header-left');
+      if (prevHeaderLeft && !prevHeaderLeft.querySelector('.issue-badge')) {
+        const badge = document.createElement('span');
+        badge.className = 'issue-badge';
+        badge.style.background = 'var(--warning-light)';
+        badge.style.color = 'var(--warning)';
+        badge.textContent = 'TTS 필요';
+        prevHeaderLeft.appendChild(badge);
+      }
+
+      // Remove current card
+      currentCard.remove();
+
+      updatePendingBadge();
+      renumberSentences();
+      
+      // 상단 상태 배지 및 탭 이슈 배지 업데이트
+      updateHeaderStatusBadge();
+      updateTabIssueBadges();
+      
+      // 재검수 완료 버튼 상태 업데이트
+      updateReReviewButton();
+      
+      // 검수 완료 후 수정 감지
+      markChangeAfterComplete();
+      
+      // Show action buttons after merge
+      showSentenceActionButtons();
+
+      showToast('문장이 합쳐졌습니다. TTS 재생성 및 원본 구간 설정이 필요합니다.');
+    }
+
+    function deleteSentence(id) {
+      const card = document.querySelector(`.sentence-card[data-id="${id}"]`);
+      if (!card) return;
+
+      if (confirm('문장을 삭제하시겠습니까?\n\n이 문장을 삭제하면 관련 음원 데이터도 함께 삭제됩니다.')) {
+        card.remove();
+        renumberSentences();
+        
+        // 상단 상태 배지 및 탭 이슈 배지 업데이트
+        updateHeaderStatusBadge();
+        updateTabIssueBadges();
+        
+        // 재검수 완료 버튼 상태 업데이트
+        updateReReviewButton();
+        
+        // 검수 완료 후 수정 감지
+        markChangeAfterComplete();
+        
+        showToast('문장이 삭제되었습니다.');
+      }
+    }
+
+    function addSentence() {
+      const sentenceList = document.getElementById('sentenceList');
+      const newId = sentenceIdCounter++;
+      const newCard = createSentenceCard(newId, '새 문장을 입력하세요.', '문단1', true);
+      
+      const addBtn = sentenceList.querySelector('.add-btn');
+      sentenceList.insertBefore(newCard, addBtn);
+      
+      pendingTTS.add(`sentence-${newId}`);
+      
+      // Reinitialize range sliders
+      initRangeSliders();
+      
+      updatePendingBadge();
+      renumberSentences();
+      
+      showToast('문장이 추가되었습니다. TTS 재생성이 필요합니다.');
+    }
+
+    // Play original audio for selected range
+    function playOriginalRange(btn) {
+      const fieldRow = btn.closest('.field-row') || btn.closest('.card-body');
+      const slider = fieldRow.querySelector('.range-slider');
+      
+      if (!slider) return;
+      
+      const start = parseInt(slider.dataset.start);
+      const end = parseInt(slider.dataset.end);
+      
+      // Visual feedback
+      btn.style.transform = 'scale(0.9)';
+      setTimeout(() => btn.style.transform = '', 100);
+      
+      showToast(`원본 음원 재생: ${formatTime(start)} ~ ${formatTime(end)}`);
+      
+      // In real implementation, this would play the audio segment
+      // audioPlayer.currentTime = start;
+      // audioPlayer.play();
+      // setTimeout(() => audioPlayer.pause(), (end - start) * 1000);
+    }
+
+    // Confirm split with TTS regeneration
+    function confirmSplit() {
+      const lines = document.getElementById('splitTextarea').value.split('\n').filter(l => l.trim());
+      if (lines.length <= 1) {
+        showToast('나눌 문장이 없습니다.');
+        return;
+      }
+
+      // Get the original card
+      const originalCard = document.querySelector(`.sentence-card[data-id="${currentSplitId}"]`);
+      if (!originalCard) {
+        showToast('원본 문장을 찾을 수 없습니다.');
+        closeSplitModal();
+        return;
+      }
+      
+      const sentenceList = document.getElementById('sentenceList');
+      const sourceTag = originalCard.querySelector('.source-tag')?.textContent || '문단1';
+      
+      // Get the next sibling to insert before (preserve position)
+      const nextSibling = originalCard.nextElementSibling;
+      
+      // Remove original card (this also removes STT comparison and AI comment)
+      originalCard.remove();
+      
+      // Create new cards for each split sentence
+      lines.forEach((line, index) => {
+        const newId = sentenceIdCounter++;
+        const newCard = createSentenceCard(newId, line.trim(), sourceTag, true);
+        
+        // Insert at original position
+        if (nextSibling) {
+          sentenceList.insertBefore(newCard, nextSibling);
+        } else {
+          // If no next sibling, insert before add button
+          const addBtn = sentenceList.querySelector('.add-btn');
+          sentenceList.insertBefore(newCard, addBtn);
+        }
+        
+        // Mark TTS as needing regeneration
+        pendingTTS.add(`sentence-${newId}`);
+      });
+      
+      // Reinitialize range sliders for new cards
+      initRangeSliders();
+      
+      updatePendingBadge();
+      renumberSentences();
+      
+      // 상단 상태 배지 및 탭 이슈 배지 업데이트
+      updateHeaderStatusBadge();
+      updateTabIssueBadges();
+      
+      // 재검수 완료 버튼 상태 업데이트
+      updateReReviewButton();
+      
+      // 검수 완료 후 수정 감지
+      markChangeAfterComplete();
+      
+      // Show action buttons after split
+      showSentenceActionButtons();
+      
+      showToast(`${lines.length}개 문장으로 나눠졌습니다. TTS 재생성이 필요합니다.`);
+      closeSplitModal();
+    }
+
+    // Create sentence card
+    function createSentenceCard(id, text, source, needsTTS) {
+      const card = document.createElement('div');
+      card.className = 'card sentence-card';
+      card.dataset.id = id;
+      card.dataset.order = id; // Will be updated by renumberSentences
+      card.style.marginBottom = '12px';
+      
+      const ttsStatus = needsTTS ? `
+        <button class="play-btn need-regen"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+        <span class="audio-label" style="color: var(--warning);">재생성 필요</span>
+        <button class="regen-mini" onclick="regenerateSingleTTS('sentence-${id}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+        </button>
+      ` : `
+        <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+        <span class="audio-label">TTS</span>
+        <span class="audio-time">0:05</span>
+      `;
+      
+      card.innerHTML = `
+        <div class="card-header" style="padding: 10px 12px;">
+          <div class="card-header-left">
+            <span class="card-num">${id}</span>
+            <span class="source-tag">${source}</span>
+            ${needsTTS ? '<span class="issue-badge" style="background: var(--warning-light); color: var(--warning);">TTS 필요</span>' : ''}
+          </div>
+          <div class="sentence-actions">
+            <button class="btn btn-ghost btn-icon" title="위 문장과 합치기" onclick="mergeWithPrevious(${id})">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 11 12 6 7 11"></polyline><polyline points="17 18 12 13 7 18"></polyline></svg>
+            </button>
+            <button class="btn btn-ghost btn-icon" title="문장 나누기" onclick="openSplitModal(${id})">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="5 12 12 19 19 12"></polyline></svg>
+            </button>
+            <button class="btn btn-ghost btn-icon" title="삭제" onclick="deleteSentence(${id})">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+          </div>
+        </div>
+        <div class="card-body" style="padding: 12px;">
+          <div class="editable" contenteditable="true" data-field="sentence-${id}" data-tts="sentence-${id}" id="sentenceText${id}" onblur="checkTextChange(this)">${text}</div>
+          <div class="audio-row">
+            <div class="audio-item">
+              <button class="play-btn original" onclick="playOriginalRange(this)"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+              <span class="audio-label">원본</span>
+              <span class="audio-time">--:--</span>
+            </div>
+            <div class="audio-item ${needsTTS ? 'need-regen' : ''}" id="tts-sentence-${id}">
+              ${ttsStatus}
+            </div>
+          </div>
+          <div class="timestamp-editor needs-setup" data-original-start="0" data-original-end="5">
+            <span class="timestamp-editor-label">원본 구간</span>
+            <span class="range-setup-warning">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              설정 필요
+            </span>
+            <div class="range-slider" data-min="0" data-max="60" data-start="0" data-end="5">
+              <div class="range-track"></div>
+              <div class="range-selected"></div>
+              <div class="range-handle start"></div>
+              <div class="range-handle end"></div>
+            </div>
+            <div class="timestamp-inputs">
+              <input type="text" class="timestamp-input" value="00:00">
+              <span class="timestamp-sep">~</span>
+              <input type="text" class="timestamp-input" value="00:05">
+            </div>
+            <button class="btn-save-range" onclick="saveRange(this)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              저장
+            </button>
+            <button class="btn-reset-range" onclick="resetRange(this)" title="원래대로">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+            </button>
+          </div>
+        </div>
+      `;
+      
+      // Store original text
+      originalTexts[`sentence-${id}`] = text;
+      
+      // Initialize range slider after adding to DOM
+      setTimeout(() => {
+        const slider = card.querySelector('.range-slider');
+        if (slider) initSingleRangeSlider(slider);
+      }, 0);
+      
+      return card;
+    }
+
+    // Initialize single range slider
+    function initSingleRangeSlider(slider) {
+      const min = parseInt(slider.dataset.min) || 0;
+      const max = parseInt(slider.dataset.max) || 60;
+      const start = parseInt(slider.dataset.start) || 0;
+      const end = parseInt(slider.dataset.end) || 10;
+
+      updateSliderUI(slider, start, end, min, max);
+
+      const startHandle = slider.querySelector('.range-handle.start');
+      const endHandle = slider.querySelector('.range-handle.end');
+      const inputs = slider.parentElement.querySelectorAll('.timestamp-input');
+
+      [startHandle, endHandle].forEach((handle, idx) => {
+        handle.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          activeHandle = { slider, handle, isStart: idx === 0, min, max };
+          document.addEventListener('mousemove', onHandleDrag);
+          document.addEventListener('mouseup', onHandleUp);
+        });
+      });
+
+      inputs.forEach((input, idx) => {
+        input.addEventListener('change', () => {
+          const time = parseTime(input.value);
+          const currentStart = parseInt(slider.dataset.start);
+          const currentEnd = parseInt(slider.dataset.end);
+
+          if (idx === 0) {
+            const newStart = Math.min(time, currentEnd - 1);
+            slider.dataset.start = newStart;
+            updateSliderUI(slider, newStart, currentEnd, min, max);
+          } else {
+            const newEnd = Math.max(time, currentStart + 1);
+            slider.dataset.end = newEnd;
+            updateSliderUI(slider, currentStart, newEnd, min, max);
+          }
+        });
+      });
+    }
+
+    // Renumber sentences
+    function renumberSentences() {
+      const cards = document.querySelectorAll('#sentenceList > .card.sentence-card');
+      cards.forEach((card, index) => {
+        const num = card.querySelector('.card-num');
+        if (num) num.textContent = index + 1;
+        card.dataset.order = index + 1;
+        
+        // 첫 번째 문장의 "위 문장과 합치기" 버튼 비활성화 처리
+        const mergeBtn = card.querySelector('.sentence-actions .btn-ghost[title="위 문장과 합치기"]');
+        if (mergeBtn) {
+          const cardId = card.dataset.id;
+          if (index === 0) {
+            // 첫 번째 문장: 비활성화
+            mergeBtn.disabled = true;
+            mergeBtn.style.opacity = '0.3';
+            mergeBtn.setAttribute('onclick', '');
+          } else {
+            // 나머지 문장: 활성화
+            mergeBtn.disabled = false;
+            mergeBtn.style.opacity = '1';
+            mergeBtn.setAttribute('onclick', `mergeWithPrevious(${cardId})`);
+          }
+        }
+      });
+    }
+
+    // 임시 저장
+    function tempSave() {
+      // 변경사항 저장 처리 (시뮬레이션)
+      showToast('임시 저장되었습니다.');
+      
+      // Undo/Redo 히스토리 초기화
+      undoStack = [];
+      redoStack = [];
+      document.getElementById('undoBtn').disabled = true;
+      document.getElementById('redoBtn').disabled = true;
+      
+      // 변경 하이라이트 제거
+      document.querySelectorAll('.field-changed').forEach(el => {
+        el.classList.remove('field-changed');
+      });
+    }
+
+    // Toast
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+  </script>
+</body>
+</html>

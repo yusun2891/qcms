@@ -1,0 +1,3445 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QCMS - 교재 등록</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-blue: #4C55EB;
+      --primary-blue-hover: #3D45D9;
+      --font-1: #191F28;
+      --font-2: #4E5968;
+      --font-3: #8B95A1;
+      --bg-f9: #F9FAFB;
+      --bg-f6: #F6F7F9;
+      --bg-f3: #F3F4F6;
+      --line-e: #E5E8EB;
+      --line-d: #D1D6DB;
+      --white: #FFFFFF;
+      --success: #22C55E;
+      --warning: #F59E0B;
+      --error: #EF4444;
+      
+      --gnb-width-expanded: 224px;
+      --gnb-width-collapsed: 56px;
+      --transition-fast: 0.15s ease;
+      --transition-normal: 0.25s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-f6);
+      color: var(--font-1);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* GNB */
+    .gnb {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--gnb-width-expanded);
+      height: 100vh;
+      background: var(--white);
+      border-right: 1px solid var(--line-e);
+      display: flex;
+      flex-direction: column;
+      transition: width var(--transition-normal);
+      z-index: 100;
+    }
+
+    .gnb.collapsed {
+      width: var(--gnb-width-collapsed);
+    }
+
+    .gnb-header {
+      height: 56px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+
+    .gnb-header:hover {
+      background: var(--bg-f9);
+    }
+
+    .gnb-logo {
+      display: flex;
+      align-items: center;
+      opacity: 1;
+      transition: opacity var(--transition-fast);
+    }
+
+    .gnb.collapsed .gnb-logo {
+      opacity: 0;
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .gnb-logo-text {
+      font-size: 18px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .gnb-logo-text span:first-child {
+      color: var(--primary-blue);
+    }
+
+    .gnb-logo-text span:last-child {
+      color: var(--font-1);
+    }
+
+    .gnb-hamburger {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      opacity: 0;
+      position: absolute;
+      pointer-events: none;
+      transition: opacity var(--transition-fast);
+    }
+
+    .gnb.collapsed .gnb-hamburger {
+      opacity: 1;
+      position: relative;
+      pointer-events: auto;
+    }
+
+    .gnb-hamburger span {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background: var(--font-1);
+      border-radius: 1px;
+    }
+
+    .gnb-nav {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 8px 0;
+    }
+
+    .gnb-nav::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .gnb-nav::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .gnb-nav::-webkit-scrollbar-thumb {
+      background: var(--line-d);
+      border-radius: 2px;
+    }
+
+    .menu-group {
+      margin-bottom: 4px;
+      position: relative;
+    }
+
+    .menu-group-header {
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+      position: relative;
+    }
+
+    .menu-group-header:hover {
+      background: var(--bg-f9);
+    }
+
+    .menu-group-header.active {
+      background: var(--bg-f3);
+    }
+
+    .menu-icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-icon svg {
+      width: 20px;
+      height: 20px;
+      color: var(--font-2);
+      transition: color var(--transition-fast);
+    }
+
+    .menu-group-header:hover .menu-icon svg,
+    .menu-group-header.active .menu-icon svg {
+      color: var(--primary-blue);
+    }
+
+    .menu-group-title {
+      margin-left: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--font-1);
+      white-space: nowrap;
+      flex: 1;
+      opacity: 1;
+      transition: opacity var(--transition-fast);
+    }
+
+    .gnb.collapsed .menu-group-title {
+      opacity: 0;
+    }
+
+    .menu-arrow {
+      width: 16px;
+      height: 16px;
+      transition: transform var(--transition-fast), opacity var(--transition-fast);
+    }
+
+    .menu-arrow svg {
+      width: 16px;
+      height: 16px;
+      color: var(--font-3);
+    }
+
+    .gnb.collapsed .menu-arrow {
+      opacity: 0;
+    }
+
+    .menu-group.open .menu-arrow {
+      transform: rotate(180deg);
+    }
+
+    .submenu {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height var(--transition-normal);
+    }
+
+    .menu-group.open .submenu {
+      max-height: 500px;
+    }
+
+    .gnb.collapsed .submenu {
+      max-height: 0 !important;
+    }
+
+    .submenu-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px 8px 52px;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+      text-decoration: none;
+    }
+
+    .submenu-item:hover {
+      background: var(--bg-f9);
+    }
+
+    .submenu-item.active {
+      background: var(--bg-f3);
+    }
+
+    .submenu-item-text {
+      font-size: 13px;
+      color: var(--font-2);
+      white-space: nowrap;
+    }
+
+    .submenu-item.active .submenu-item-text {
+      color: var(--primary-blue);
+      font-weight: 500;
+    }
+
+    /* Floating Submenu */
+    .floating-submenu {
+      position: fixed;
+      background: var(--white);
+      border: 1px solid var(--line-e);
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      padding: 8px 0;
+      min-width: 180px;
+      z-index: 150;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(-8px);
+      transition: all var(--transition-fast);
+    }
+
+    .floating-submenu.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+
+    .floating-submenu-title {
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--font-3);
+      border-bottom: 1px solid var(--line-e);
+      margin-bottom: 4px;
+    }
+
+    .floating-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+      text-decoration: none;
+    }
+
+    .floating-item:hover {
+      background: var(--bg-f9);
+    }
+
+    .floating-item.active {
+      background: var(--bg-f3);
+    }
+
+    .floating-item-text {
+      font-size: 13px;
+      color: var(--font-2);
+    }
+
+    .floating-item.active .floating-item-text {
+      color: var(--primary-blue);
+      font-weight: 500;
+    }
+
+    /* Main Content */
+    .main-wrapper {
+      margin-left: var(--gnb-width-expanded);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: margin-left var(--transition-normal);
+    }
+
+    .gnb.collapsed ~ .main-wrapper {
+      margin-left: var(--gnb-width-collapsed);
+    }
+
+    .fixed-header {
+      flex-shrink: 0;
+      background: var(--bg-f6);
+      padding: 16px 24px 0 24px;
+    }
+
+    .page-header {
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .page-header-left {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--font-1);
+    }
+
+    .page-description {
+      font-size: 13px;
+      color: var(--font-3);
+    }
+
+    .content-card {
+      background: var(--white);
+      border-radius: 12px;
+      border: 1px solid var(--line-e);
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      margin: 0 24px 24px 24px;
+    }
+
+    .toolbar {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line-e);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .filter-section {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      width: 16px;
+      height: 16px;
+      color: var(--font-3);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 240px;
+      height: 32px;
+      padding: 0 12px 0 32px;
+      border: 1px solid var(--line-d);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--font-1);
+      transition: border-color var(--transition-fast);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary-blue);
+    }
+
+    .search-input::placeholder {
+      color: var(--font-3);
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .filter-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--font-3);
+    }
+
+    .filter-select {
+      min-width: 120px;
+      height: 32px;
+      padding: 0 28px 0 10px;
+      border: 1px solid var(--line-d);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--font-1);
+      background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238B95A1' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 8px center;
+      appearance: none;
+      cursor: pointer;
+      transition: border-color var(--transition-fast);
+    }
+
+    .filter-select:hover {
+      border-color: var(--font-3);
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--primary-blue);
+    }
+
+    .filter-reset-btn {
+      height: 32px;
+      padding: 0 12px;
+      background: var(--white);
+      border: 1px solid var(--line-d);
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--font-2);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all var(--transition-fast);
+    }
+
+    .filter-reset-btn:hover {
+      background: var(--bg-f9);
+      border-color: var(--font-3);
+    }
+
+    .filter-reset-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .btn {
+      height: 32px;
+      padding: 0 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-primary {
+      background: var(--primary-blue);
+      border: none;
+      color: var(--white);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-blue-hover);
+    }
+
+    .btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .table-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .table-header {
+      flex-shrink: 0;
+      background: var(--bg-f9);
+      border-bottom: 1px solid var(--line-e);
+    }
+
+    .table-header table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table-header th {
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--font-2);
+      white-space: nowrap;
+    }
+
+    .table-body {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .table-body table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table-body td {
+      padding: 10px 12px;
+      font-size: 13px;
+      color: var(--font-1);
+      border-bottom: 1px solid var(--line-e);
+    }
+
+    .table-body tr {
+      cursor: pointer;
+    }
+
+    .table-body tr:hover td {
+      background: var(--bg-f9);
+    }
+
+    .table-body tr:last-child td {
+      border-bottom: none;
+    }
+
+    .col-no { width: 50px; text-align: center; }
+    .col-id { width: 90px; }
+    .col-course { width: 80px; }
+    .col-name { width: auto; min-width: 180px; }
+    .col-status { width: 80px; }
+    .col-publisher { width: 110px; }
+    .col-structure { width: 120px; }
+    .col-modules { width: 160px; }
+    .col-unit { width: 80px; }
+    .col-contents { width: 90px; text-align: center; }
+    .col-modified { width: 140px; }
+    .col-created { width: 140px; }
+
+    /* Clickable Row */
+    .data-table tbody tr {
+      cursor: pointer;
+    }
+
+    .data-table tbody tr:hover {
+      background: var(--bg-f9);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1F2937;
+      color: var(--white);
+      padding: 12px 20px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      z-index: 200;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast-icon {
+      width: 18px;
+      height: 18px;
+      color: var(--success);
+    }
+
+    .toast-message {
+      font-size: 14px;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .status-active {
+      background: #DCFCE7;
+      color: #166534;
+    }
+
+    .status-inactive {
+      background: var(--bg-f3);
+      color: var(--font-3);
+    }
+
+    .pagination-wrapper {
+      flex-shrink: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      border-top: 1px solid var(--line-e);
+      background: var(--white);
+    }
+
+    .pagination-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pagination-info span {
+      font-size: 12px;
+      color: var(--font-2);
+    }
+
+    .page-size-select {
+      height: 28px;
+      padding: 0 24px 0 8px;
+      border: 1px solid var(--line-d);
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--font-1);
+      background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B95A1' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 6px center;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .pagination-pages {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .page-btn {
+      min-width: 28px;
+      height: 28px;
+      padding: 0 6px;
+      border: 1px solid var(--line-d);
+      border-radius: 4px;
+      background: var(--white);
+      font-size: 12px;
+      color: var(--font-2);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .page-btn:hover {
+      background: var(--bg-f9);
+      border-color: var(--font-3);
+    }
+
+    .page-btn.active {
+      background: var(--primary-blue);
+      border-color: var(--primary-blue);
+      color: var(--white);
+    }
+
+    .page-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .page-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Side Peek Modal */
+    .side-peek-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 200;
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--transition-fast);
+    }
+
+    .side-peek-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .side-peek {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 50vw;
+      min-width: 560px;
+      height: 100vh;
+      background: var(--white);
+      box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+      transform: translateX(100%);
+      transition: transform var(--transition-normal);
+      display: flex;
+      flex-direction: column;
+      z-index: 201;
+    }
+
+    .side-peek-overlay.show .side-peek {
+      transform: translateX(0);
+    }
+
+    .side-peek-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--line-e);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .side-peek-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--font-1);
+    }
+
+    .side-peek-close {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      transition: background var(--transition-fast);
+    }
+
+    .side-peek-close:hover {
+      background: var(--bg-f3);
+    }
+
+    .side-peek-close svg {
+      width: 20px;
+      height: 20px;
+      color: var(--font-2);
+    }
+
+    .side-peek-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    .side-peek-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--line-e);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .side-peek-footer-left {
+      display: flex;
+      gap: 8px;
+    }
+
+    .side-peek-footer-right {
+      display: flex;
+      gap: 8px;
+    }
+
+    .form-section {
+      margin-bottom: 28px;
+    }
+
+    .form-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--font-1);
+      margin-bottom: 6px;
+    }
+
+    .form-section-title .required {
+      color: var(--error);
+      margin-left: 2px;
+    }
+
+    .form-section-desc {
+      font-size: 12px;
+      color: var(--font-3);
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .form-section-desc .desc-note {
+      color: var(--primary-blue);
+      font-size: 11px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .form-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-group {
+      flex: 1;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--font-2);
+      margin-bottom: 6px;
+    }
+
+    .form-input {
+      width: 100%;
+      height: 36px;
+      padding: 0 12px;
+      border: 1px solid var(--line-d);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--font-1);
+      transition: border-color var(--transition-fast);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary-blue);
+    }
+
+    .form-input::placeholder {
+      color: var(--font-3);
+    }
+
+    .form-select {
+      width: 100%;
+      height: 36px;
+      padding: 0 32px 0 12px;
+      border: 1px solid var(--line-d);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--font-1);
+      background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238B95A1' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 10px center;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .form-select:focus {
+      outline: none;
+      border-color: var(--primary-blue);
+    }
+
+    .form-textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 10px 12px;
+      border: 1px solid var(--line-d);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--font-1);
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--primary-blue);
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 20px;
+    }
+
+    .radio-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .radio-item input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary-blue);
+      cursor: pointer;
+    }
+
+    .radio-item label {
+      font-size: 13px;
+      color: var(--font-1);
+      cursor: pointer;
+    }
+
+    .radio-item-desc {
+      font-size: 11px;
+      color: var(--font-3);
+      margin-left: 22px;
+      margin-top: 2px;
+    }
+
+    .radio-vertical {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .radio-vertical .radio-item-wrapper {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .publisher-extra {
+      margin-top: 8px;
+      display: none;
+    }
+
+    .publisher-extra.show {
+      display: block;
+    }
+
+    .module-group {
+      margin-bottom: 16px;
+      padding: 12px;
+      background: var(--bg-f9);
+      border-radius: 8px;
+    }
+
+    .module-group:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Module Action Buttons */
+    .module-action-buttons {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .module-action-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      background: var(--white);
+      border: 1px solid var(--line-d);
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--font-2);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .module-action-btn:hover {
+      background: var(--bg-f9);
+      border-color: var(--font-3);
+    }
+
+    .module-action-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Module List Flat Layout */
+    .module-list-flat {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* Module Checkbox List */
+    .module-checkbox-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 12px;
+      background: var(--bg-f9);
+      border-radius: 8px;
+    }
+
+    .module-checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: var(--white);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+
+    .module-checkbox-item:hover {
+      background: #F0F4FF;
+    }
+
+    .module-checkbox-item input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary-blue);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .module-checkbox-id {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary-blue);
+      min-width: 42px;
+    }
+
+    .module-checkbox-name {
+      font-size: 13px;
+      color: var(--font-1);
+    }
+
+    .module-group-header {
+      margin-bottom: 10px;
+    }
+
+    .module-group-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .module-group-badge.vocabulary {
+      background: #F3E8FF;
+      color: #7C3AED;
+    }
+
+    .module-group-badge.listening {
+      background: #FEF3C7;
+      color: #D97706;
+    }
+
+    .module-group-badge.speaking {
+      background: #DCFCE7;
+      color: #16A34A;
+    }
+
+    /* Retention Module Section */
+    .retention-module-section {
+      margin-bottom: 20px;
+      padding: 16px;
+      background: var(--white);
+      border: 1px solid var(--line-e);
+      border-radius: 10px;
+    }
+
+    .retention-module-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .retention-section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .retention-section-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .retention-section-badge.first {
+      background: #DBEAFE;
+      color: #1D4ED8;
+    }
+
+    .retention-section-badge.repeat {
+      background: #FEF3C7;
+      color: #D97706;
+    }
+
+    .retention-section-desc {
+      font-size: 12px;
+      color: var(--font-3);
+    }
+
+    .retention-module-section .module-group {
+      margin-bottom: 0;
+      padding: 10px;
+      background: var(--bg-f9);
+    }
+
+    .module-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .module-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--bg-f3);
+      border: 1px solid var(--line-d);
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--font-2);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      user-select: none;
+    }
+
+    .module-chip:hover {
+      border-color: var(--primary-blue);
+    }
+
+    .module-chip.selected {
+      background: #EEF0FF;
+      border-color: var(--primary-blue);
+      color: var(--primary-blue);
+    }
+
+    .module-chip .order-badge {
+      width: 18px;
+      height: 18px;
+      background: var(--primary-blue);
+      color: var(--white);
+      border-radius: 50%;
+      font-size: 10px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .schedule-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--line-e);
+    }
+
+    .schedule-tab {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--font-3);
+      background: none;
+      border: none;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all var(--transition-fast);
+    }
+
+    .schedule-tab:hover {
+      color: var(--font-2);
+    }
+
+    .schedule-tab.active {
+      color: var(--primary-blue);
+      border-bottom-color: var(--primary-blue);
+    }
+
+    .schedule-content {
+      display: none;
+    }
+
+    .schedule-content.active {
+      display: block;
+    }
+
+    /* Selected Modules Summary */
+    .selected-modules-summary {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--bg-f9);
+      border-radius: 6px;
+      margin-bottom: 16px;
+    }
+
+    .summary-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--font-3);
+      flex-shrink: 0;
+    }
+
+    .summary-value {
+      font-size: 12px;
+      color: var(--font-1);
+    }
+
+    .summary-value.empty {
+      color: var(--font-3);
+      font-style: italic;
+    }
+
+    /* Session Allocation */
+    .session-allocation-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .session-allocation-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      background: var(--bg-f9);
+      border-radius: 6px;
+    }
+
+    .session-num {
+      width: 50px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--font-1);
+      flex-shrink: 0;
+    }
+
+    .session-input-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .session-count-input {
+      width: 56px;
+      height: 32px;
+      padding: 0 8px;
+      border: 1px solid var(--line-d);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--font-1);
+      text-align: center;
+    }
+
+    .session-count-input:focus {
+      outline: none;
+      border-color: var(--primary-blue);
+    }
+
+    .session-input-suffix {
+      font-size: 12px;
+      color: var(--font-3);
+    }
+
+    .session-modules-preview {
+      flex: 1;
+      font-size: 12px;
+      color: var(--font-2);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .session-modules-preview.empty {
+      color: var(--font-3);
+      font-style: italic;
+    }
+
+    .session-modules-preview.overflow {
+      color: #DC2626;
+    }
+
+    /* Allocation Status Colors */
+    .allocation-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--bg-f9);
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+
+    .allocation-status-text {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .allocation-status.valid {
+      background: #DCFCE7;
+    }
+
+    .allocation-status.valid .allocation-status-text {
+      color: #16A34A;
+    }
+
+    .allocation-status.over {
+      background: #FEE2E2;
+    }
+
+    .allocation-status.over .allocation-status-text {
+      color: #DC2626;
+    }
+
+    .allocation-status.under {
+      background: #FEF3C7;
+    }
+
+    .allocation-status.under .allocation-status-text {
+      color: #D97706;
+    }
+
+    .allocation-warning {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background: #FEF3C7;
+      border-radius: 6px;
+      margin-top: 8px;
+    }
+
+    .allocation-warning svg {
+      width: 16px;
+      height: 16px;
+      color: #D97706;
+      flex-shrink: 0;
+    }
+
+    .allocation-warning span {
+      font-size: 12px;
+      color: #92400E;
+    }
+
+    .conditional-section {
+      display: none;
+    }
+
+    .conditional-section.show {
+      display: block;
+    }
+
+    .modal-btn {
+      height: 36px;
+      padding: 0 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .modal-btn-cancel {
+      background: var(--white);
+      border: 1px solid var(--line-d);
+      color: var(--font-2);
+    }
+
+    .modal-btn-cancel:hover {
+      background: var(--bg-f9);
+    }
+
+    .modal-btn-confirm {
+      background: var(--primary-blue);
+      border: none;
+      color: var(--white);
+    }
+
+    .modal-btn-confirm:hover:not(:disabled) {
+      background: var(--primary-blue-hover);
+    }
+
+    .modal-btn-confirm:disabled {
+      background: var(--line-d);
+      color: var(--font-3);
+      cursor: not-allowed;
+    }
+
+    .modal-btn-delete {
+      background: var(--white);
+      border: 1px solid var(--error);
+      color: var(--error);
+    }
+
+    .modal-btn-delete:hover {
+      background: #FEF2F2;
+    }
+
+    .modal-btn-delete:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .modal-btn-delete:disabled:hover {
+      background: var(--white);
+    }
+
+    .confirm-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--transition-fast);
+    }
+
+    .confirm-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .confirm-modal {
+      background: var(--white);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      transform: translateY(-20px);
+      transition: transform var(--transition-normal);
+    }
+
+    .confirm-overlay.show .confirm-modal {
+      transform: translateY(0);
+    }
+
+    .confirm-body {
+      padding: 28px 24px;
+      text-align: center;
+    }
+
+    .confirm-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 16px;
+      background: #FEE2E2;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .confirm-icon svg {
+      width: 24px;
+      height: 24px;
+      color: var(--error);
+    }
+
+    .confirm-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--font-1);
+      margin-bottom: 8px;
+    }
+
+    .confirm-message {
+      font-size: 13px;
+      color: var(--font-2);
+      line-height: 1.5;
+    }
+
+    .confirm-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--line-e);
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+  <!-- GNB -->
+  <nav class="gnb" id="gnb">
+    <div class="gnb-header" id="gnbHeader">
+      <div class="gnb-logo">
+        <div class="gnb-logo-text">
+          <span>Q</span><span>CMS</span>
+        </div>
+      </div>
+      <div class="gnb-hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+
+    <div class="gnb-nav">
+      <!-- 커리큘럼 관리 -->
+      <div class="menu-group open" data-menu="curriculum">
+        <div class="menu-group-header active">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+          </div>
+          <span class="menu-group-title">커리큘럼 관리</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item" href="#" data-page="quarter-settings">
+            <span class="submenu-item-text">분기 설정</span>
+          </a>
+          <a class="submenu-item active" href="#" data-page="textbook-register">
+            <span class="submenu-item-text">교재 등록</span>
+          </a>
+          <a class="submenu-item" href="#" data-page="curriculum-assign">
+            <span class="submenu-item-text">커리큘럼 배정</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- 콘텐츠 관리 -->
+      <div class="menu-group" data-menu="contents">
+        <div class="menu-group-header">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+              <polyline points="2 17 12 22 22 17"></polyline>
+              <polyline points="2 12 12 17 22 12"></polyline>
+            </svg>
+          </div>
+          <span class="menu-group-title">콘텐츠 관리</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item" href="#" data-page="circular-course">
+            <span class="submenu-item-text">Circular Course</span>
+          </a>
+          <a class="submenu-item" href="#" data-page="retention-course">
+            <span class="submenu-item-text">Retention Course</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Prompt 관리 -->
+      <div class="menu-group" data-menu="prompt">
+        <div class="menu-group-header">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="4 17 10 11 4 5"></polyline>
+              <line x1="12" y1="19" x2="20" y2="19"></line>
+            </svg>
+          </div>
+          <span class="menu-group-title">Prompt 관리</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item" href="#" data-page="content-prompt">
+            <span class="submenu-item-text">콘텐츠 생성 Prompt</span>
+          </a>
+          <a class="submenu-item" href="#" data-page="module-prompt">
+            <span class="submenu-item-text">학습 모듈 Prompt</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- 이용 현황 -->
+      <div class="menu-group" data-menu="usage">
+        <div class="menu-group-header">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+          </div>
+          <span class="menu-group-title">이용 현황</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item" href="#" data-page="teacher-status">
+            <span class="submenu-item-text">선생님 현황</span>
+          </a>
+          <a class="submenu-item" href="#" data-page="student-status">
+            <span class="submenu-item-text">학생 현황</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- 환경설정 -->
+      <div class="menu-group" data-menu="settings">
+        <div class="menu-group-header">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </div>
+          <span class="menu-group-title">환경설정</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item" href="#" data-page="module-settings">
+            <span class="submenu-item-text">학습 모듈 설정</span>
+          </a>
+          <a class="submenu-item" href="#" data-page="media-manage">
+            <span class="submenu-item-text">미디어 관리</span>
+          </a>
+          <a class="submenu-item" href="#" data-page="popup-settings">
+            <span class="submenu-item-text">팝업창 설정</span>
+          </a>
+          <a class="submenu-item" href="#" data-page="permission-manage">
+            <span class="submenu-item-text">권한 관리</span>
+          </a>
+          <a class="submenu-item" href="#" data-page="notification-manage">
+            <span class="submenu-item-text">알림 관리</span>
+          </a>
+          <a class="submenu-item" href="#" data-page="code-manage">
+            <span class="submenu-item-text">코드 관리</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Floating Submenu -->
+  <div class="floating-submenu" id="floatingSubmenu"></div>
+
+  <!-- Main Content -->
+  <main class="main-wrapper">
+    <div class="fixed-header">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1 class="page-title">교재 등록</h1>
+          <p class="page-description">교재 메타정보를 등록하고 관리합니다.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openSidePeek('add')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          교재 등록
+        </button>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="toolbar">
+        <div class="filter-section">
+          <div class="search-box">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <input type="text" class="search-input" id="searchInput" placeholder="교재명, 출판사명으로 검색">
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">코스</span>
+            <select class="filter-select" id="courseFilter">
+              <option value="">전체</option>
+              <option value="circular">Circular</option>
+              <option value="retention">Retention</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">상태</span>
+            <select class="filter-select" id="statusFilter">
+              <option value="">전체</option>
+              <option value="active">사용중</option>
+              <option value="inactive">미사용</option>
+            </select>
+          </div>
+          <button class="filter-reset-btn" onclick="resetFilters()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+              <path d="M3 3v5h5"></path>
+            </svg>
+            초기화
+          </button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <div class="table-header">
+          <table>
+            <thead>
+              <tr>
+                <th class="col-no">No.</th>
+                <th class="col-id">교재ID</th>
+                <th class="col-course">코스</th>
+                <th class="col-name">교재명</th>
+                <th class="col-status">상태</th>
+                <th class="col-publisher">출판사</th>
+                <th class="col-structure">계층 구조</th>
+                <th class="col-modules">사용 학습 모듈</th>
+                <th class="col-unit">구분1</th>
+                <th class="col-contents">등록 콘텐츠</th>
+                <th class="col-modified">최근 수정</th>
+                <th class="col-created">등록 정보</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+
+        <div class="table-body">
+          <table>
+            <tbody id="tableBody">
+              <tr onclick="openSidePeek('edit', this)">
+                <td class="col-no">1</td>
+                <td class="col-id">TBC0001</td>
+                <td class="col-course">Circular</td>
+                <td class="col-name">Wonders 3.1</td>
+                <td class="col-status"><span class="status-badge status-active">사용중 (23)</span></td>
+                <td class="col-publisher">DYB 자체교재</td>
+                <td class="col-structure">Week > Section</td>
+                <td class="col-modules">MV01, MV02, ML01, MS01</td>
+                <td class="col-unit">4 Week</td>
+                <td class="col-contents">5</td>
+                <td class="col-modified">홍길동, 2026-01-15</td>
+                <td class="col-created">김철수, 2026-01-10</td>
+              </tr>
+              <tr onclick="openSidePeek('edit', this)">
+                <td class="col-no">2</td>
+                <td class="col-id">TBR0001</td>
+                <td class="col-course">Retention</td>
+                <td class="col-name">English Coach E5 Athena</td>
+                <td class="col-status"><span class="status-badge status-inactive">미사용</span></td>
+                <td class="col-publisher">DYB 자체교재</td>
+                <td class="col-structure">Module</td>
+                <td class="col-modules">MV01, MV02, MV03</td>
+                <td class="col-unit">14 Module</td>
+                <td class="col-contents">14</td>
+                <td class="col-modified">이영희, 2026-01-14</td>
+                <td class="col-created">박지민, 2026-01-08</td>
+              </tr>
+              <tr onclick="openSidePeek('edit', this)">
+                <td class="col-no">3</td>
+                <td class="col-id">TBC0002</td>
+                <td class="col-course">Circular</td>
+                <td class="col-name">Reading Explorer 2</td>
+                <td class="col-status"><span class="status-badge status-active">사용중 (8)</span></td>
+                <td class="col-publisher">National Geographic</td>
+                <td class="col-structure">Unit > Lesson</td>
+                <td class="col-modules">MV01, ML01, ML02, MS01, MS02</td>
+                <td class="col-unit">12 Unit</td>
+                <td class="col-contents">24</td>
+                <td class="col-modified">김철수, 2026-01-13</td>
+                <td class="col-created">홍길동, 2026-01-05</td>
+              </tr>
+              <tr onclick="openSidePeek('edit', this)">
+                <td class="col-no">4</td>
+                <td class="col-id">TBC0003</td>
+                <td class="col-course">Circular</td>
+                <td class="col-name">Oxford Reading Tree Stage 5</td>
+                <td class="col-status"><span class="status-badge status-inactive">미사용</span></td>
+                <td class="col-publisher">Oxford</td>
+                <td class="col-structure">Book > Page</td>
+                <td class="col-modules">MV01, MV02</td>
+                <td class="col-unit">30 Book</td>
+                <td class="col-contents">28</td>
+                <td class="col-modified">-</td>
+                <td class="col-created">김영수, 2026-01-03</td>
+              </tr>
+              <tr onclick="openSidePeek('edit', this)">
+                <td class="col-no">5</td>
+                <td class="col-id">TBR0002</td>
+                <td class="col-course">Retention</td>
+                <td class="col-name">Word Master 중등 기초</td>
+                <td class="col-status"><span class="status-badge status-active">사용중 (12)</span></td>
+                <td class="col-publisher">이투스북</td>
+                <td class="col-structure">Day</td>
+                <td class="col-modules">MV01, MV02, MV03, MV04</td>
+                <td class="col-unit">40 Day</td>
+                <td class="col-contents">40</td>
+                <td class="col-modified">박지민, 2026-01-12</td>
+                <td class="col-created">이영희, 2026-01-02</td>
+              </tr>
+              <tr onclick="openSidePeek('edit', this)">
+                <td class="col-no">6</td>
+                <td class="col-id">TBC0004</td>
+                <td class="col-course">Circular</td>
+                <td class="col-name">Bricks Reading 100</td>
+                <td class="col-status"><span class="status-badge status-active">사용중 (5)</span></td>
+                <td class="col-publisher">사회평론</td>
+                <td class="col-structure">Unit > Lesson</td>
+                <td class="col-modules">MV01, MV02, ML01, MS01</td>
+                <td class="col-unit">20 Unit</td>
+                <td class="col-contents">40</td>
+                <td class="col-modified">홍길동, 2026-01-11</td>
+                <td class="col-created">김철수, 2026-01-01</td>
+              </tr>
+              <tr onclick="openSidePeek('edit', this)">
+                <td class="col-no">7</td>
+                <td class="col-id">TBR0003</td>
+                <td class="col-course">Retention</td>
+                <td class="col-name">능률 VOCA 어원편</td>
+                <td class="col-status"><span class="status-badge status-inactive">미사용</span></td>
+                <td class="col-publisher">NE능률</td>
+                <td class="col-structure">Day</td>
+                <td class="col-modules">MV01, MV02, MV03, MV04, MV05</td>
+                <td class="col-unit">60 Day</td>
+                <td class="col-contents">60</td>
+                <td class="col-modified">이영희, 2026-01-10</td>
+                <td class="col-created">박지민, 2025-12-28</td>
+              </tr>
+              <tr onclick="openSidePeek('edit', this)">
+                <td class="col-no">8</td>
+                <td class="col-id">TBC0005</td>
+                <td class="col-course">Circular</td>
+                <td class="col-name">Reading Champion 3</td>
+                <td class="col-status"><span class="status-badge status-active">사용중 (3)</span></td>
+                <td class="col-publisher">YBM</td>
+                <td class="col-structure">Chapter > Section</td>
+                <td class="col-modules">MV01, MV02, ML01, ML02, MS01, MS02</td>
+                <td class="col-unit">16 Chapter</td>
+                <td class="col-contents">32</td>
+                <td class="col-modified">김영수, 2026-01-09</td>
+                <td class="col-created">홍길동, 2025-12-25</td>
+              </tr>
+              <tr onclick="openSidePeek('edit', this)">
+                <td class="col-no">9</td>
+                <td class="col-id">TBR0004</td>
+                <td class="col-course">Retention</td>
+                <td class="col-name">경선식 영단어 초스피드 암기법</td>
+                <td class="col-status"><span class="status-badge status-inactive">미사용</span></td>
+                <td class="col-publisher">경선식에듀</td>
+                <td class="col-structure">Unit</td>
+                <td class="col-modules">MV01, MV02, MV03</td>
+                <td class="col-unit">50 Unit</td>
+                <td class="col-contents">45</td>
+                <td class="col-modified">-</td>
+                <td class="col-created">이영희, 2025-12-20</td>
+              </tr>
+              <tr onclick="openSidePeek('edit', this)">
+                <td class="col-no">10</td>
+                <td class="col-id">TBC0006</td>
+                <td class="col-course">Circular</td>
+                <td class="col-name">Subject Link Starter 1</td>
+                <td class="col-status"><span class="status-badge status-active">사용중 (7)</span></td>
+                <td class="col-publisher">Build & Grow</td>
+                <td class="col-structure">Unit</td>
+                <td class="col-modules">MV01, MV02, MV03, ML01, MS01</td>
+                <td class="col-unit">8 Unit</td>
+                <td class="col-contents">8</td>
+                <td class="col-modified">박지민, 2026-01-08</td>
+                <td class="col-created">김철수, 2025-12-18</td>
+              </tr>
+              <tr onclick="openSidePeek('edit', this)">
+                <td class="col-no">11</td>
+                <td class="col-id">TBR0005</td>
+                <td class="col-course">Retention</td>
+                <td class="col-name">HEE Vocabulary Level 3</td>
+                <td class="col-status"><span class="status-badge status-active">사용중 (15)</span></td>
+                <td class="col-publisher">DYB 자체교재</td>
+                <td class="col-structure">Unit</td>
+                <td class="col-modules">MV01, MV02, MV03, MV04, MV05, MV06</td>
+                <td class="col-unit">25 Unit</td>
+                <td class="col-contents">25</td>
+                <td class="col-modified">홍길동, 2026-01-07</td>
+                <td class="col-created">이영희, 2025-12-15</td>
+              </tr>
+              <tr onclick="openSidePeek('edit', this)">
+                <td class="col-no">12</td>
+                <td class="col-id">TBC0007</td>
+                <td class="col-course">Circular</td>
+                <td class="col-name">Smart Reading Basic</td>
+                <td class="col-status"><span class="status-badge status-inactive">미사용</span></td>
+                <td class="col-publisher">A*List</td>
+                <td class="col-structure">Unit > Lesson</td>
+                <td class="col-modules">MV01, MV02, ML01, MS01, MS04</td>
+                <td class="col-unit">10 Unit</td>
+                <td class="col-contents">20</td>
+                <td class="col-modified">김영수, 2026-01-06</td>
+                <td class="col-created">박지민, 2025-12-12</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="pagination-wrapper">
+        <div class="pagination-info">
+          <span>총 <strong>48</strong>개</span>
+          <select class="page-size-select">
+            <option value="30" selected>30개</option>
+            <option value="50">50개</option>
+            <option value="80">80개</option>
+            <option value="100">100개</option>
+            <option value="200">200개</option>
+          </select>
+        </div>
+        <div class="pagination-pages">
+          <button class="page-btn" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Side Peek Modal -->
+  <div class="side-peek-overlay" id="sidePeekOverlay" onclick="closeSidePeek(event)">
+    <div class="side-peek" onclick="event.stopPropagation()">
+      <div class="side-peek-header">
+        <h2 class="side-peek-title" id="sidePeekTitle">교재 등록</h2>
+        <button class="side-peek-close" onclick="closeSidePeek()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="side-peek-body">
+        <!-- Course 선택 -->
+        <div class="form-section">
+          <div class="form-section-title">Course 선택 <span class="required">*</span></div>
+          <div class="form-section-desc">콘텐츠 유형을 선택하세요. 선택에 따라 입력 항목이 달라집니다.</div>
+          <div class="radio-group">
+            <div class="radio-item">
+              <input type="radio" name="course" id="courseCircular" value="circular" onchange="onCourseChange(); validateForm();">
+              <label for="courseCircular">Circular Course</label>
+            </div>
+            <div class="radio-item">
+              <input type="radio" name="course" id="courseRetention" value="retention" onchange="onCourseChange(); validateForm();">
+              <label for="courseRetention">Retention Course</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 교재명 -->
+        <div class="form-section">
+          <div class="form-section-title">교재명 <span class="required">*</span></div>
+          <div class="form-section-desc">등록할 교재의 이름을 입력하세요.</div>
+          <input type="text" class="form-input" id="textbookName" placeholder="예: Wonders 3.1" oninput="validateForm()">
+        </div>
+
+        <!-- 출판사 -->
+        <div class="form-section">
+          <div class="form-section-title">출판사 <span class="required">*</span></div>
+          <div class="form-section-desc">교재의 출판사를 선택하세요.</div>
+          <select class="form-select" id="publisherSelect" onchange="onPublisherChange(); validateForm();">
+            <option value="">선택하세요</option>
+            <option value="dyb">DYB 자체교재</option>
+            <option value="external">외부교재</option>
+          </select>
+          <div class="publisher-extra" id="publisherExtra">
+            <input type="text" class="form-input" id="publisherName" placeholder="출판사명을 입력하세요" style="margin-top: 8px;" oninput="validateForm()">
+          </div>
+        </div>
+
+        <!-- 계층 구조 설정 -->
+        <div class="form-section">
+          <div class="form-section-title">계층 구조 설정 <span class="required">*</span></div>
+          <div class="form-section-desc">교재의 구조를 정의하세요. 예: Unit > Lesson, Week > Day 등</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">구분1 (상위) <span class="required">*</span></label>
+              <input type="text" class="form-input" id="structure1" placeholder="예: Unit, Week, Module" oninput="onStructureChange(); validateForm();">
+            </div>
+            <div class="form-group">
+              <label class="form-label">구분2 (하위, 선택)</label>
+              <input type="text" class="form-input" id="structure2" placeholder="예: Lesson, Section, Day">
+            </div>
+          </div>
+        </div>
+
+        <!-- 구분1 개수 -->
+        <div class="form-section">
+          <div class="form-section-title"><span id="structure1Label">구분1</span> 개수 <span class="required">*</span></div>
+          <div class="form-section-desc">교재에 포함된 <span id="structure1LabelDesc">구분1</span>의 총 개수를 입력하세요.</div>
+          <input type="number" class="form-input" id="structureCount" placeholder="예: 12" style="width: 120px;" oninput="validateForm()">
+        </div>
+
+        <!-- 콘텐츠 설정 (Circular만) -->
+        <div class="form-section conditional-section" id="contentSettingSection">
+          <div class="form-section-title">콘텐츠 설정 <span class="required">*</span></div>
+          <div class="form-section-desc">지문 분할 방식을 선택하세요. 교재 특성에 맞게 설정합니다.</div>
+          <div class="radio-group radio-vertical">
+            <div class="radio-item-wrapper">
+              <div class="radio-item">
+                <input type="radio" name="contentType" id="contentParagraph" value="paragraph" onchange="validateForm()">
+                <label for="contentParagraph">문단 (Paragraph)</label>
+              </div>
+              <div class="radio-item-desc">논리적 단락 기준으로 분할 (높은 레벨, 아카데믹 교재)</div>
+            </div>
+            <div class="radio-item-wrapper">
+              <div class="radio-item">
+                <input type="radio" name="contentType" id="contentPage" value="page" onchange="validateForm()">
+                <label for="contentPage">페이지 (Page)</label>
+              </div>
+              <div class="radio-item-desc">책 페이지 기준으로 분할 (스토리북, 쉬운 레벨 교재)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 사용 모듈 선택 - Circular Course -->
+        <div class="form-section conditional-section" id="moduleSelectionCircular">
+          <div class="form-section-title">사용 학습 모듈 선택 <span class="required">*</span></div>
+          <div class="form-section-desc">이 교재에서 사용할 학습 모듈을 선택하세요. (최소 2개 선택)</div>
+          
+          <!-- 전체 선택/해제 버튼 -->
+          <div class="module-action-buttons">
+            <button type="button" class="module-action-btn" onclick="selectAllModules('circular')">전체 선택</button>
+            <button type="button" class="module-action-btn" onclick="clearAllModules('circular')">선택 해제</button>
+          </div>
+
+          <div class="module-checkbox-list">
+            <label class="module-checkbox-item" data-module="ML01" data-course="circular">
+              <input type="checkbox" onchange="toggleModuleCheckbox(this)">
+              <span class="module-checkbox-id">ML01</span>
+              <span class="module-checkbox-name">지문 듣고 단어 수집 <span style="color:#D97706;font-size:11px;">· 1회차 고정</span></span>
+            </label>
+            <label class="module-checkbox-item" data-module="MV01" data-course="circular">
+              <input type="checkbox" onchange="toggleModuleCheckbox(this)">
+              <span class="module-checkbox-id">MV01</span>
+              <span class="module-checkbox-name">아는 단어 체크</span>
+            </label>
+            <label class="module-checkbox-item" data-module="MV02" data-course="circular">
+              <input type="checkbox" onchange="toggleModuleCheckbox(this)">
+              <span class="module-checkbox-id">MV02</span>
+              <span class="module-checkbox-name">플래시카드</span>
+            </label>
+            <label class="module-checkbox-item" data-module="MV03" data-course="circular">
+              <input type="checkbox" onchange="toggleModuleCheckbox(this)">
+              <span class="module-checkbox-id">MV03</span>
+              <span class="module-checkbox-name">단어 뜻 맞추기</span>
+            </label>
+            <label class="module-checkbox-item" data-module="MV04" data-course="circular">
+              <input type="checkbox" onchange="toggleModuleCheckbox(this)">
+              <span class="module-checkbox-id">MV04</span>
+              <span class="module-checkbox-name">뜻 보고 단어 맞추기</span>
+            </label>
+            <label class="module-checkbox-item" data-module="MV05" data-course="circular">
+              <input type="checkbox" onchange="toggleModuleCheckbox(this)">
+              <span class="module-checkbox-id">MV05</span>
+              <span class="module-checkbox-name">발음 듣고 뜻 맞추기</span>
+            </label>
+            <label class="module-checkbox-item" data-module="MV06" data-course="circular">
+              <input type="checkbox" onchange="toggleModuleCheckbox(this)">
+              <span class="module-checkbox-id">MV06</span>
+              <span class="module-checkbox-name">발음 듣고 철자 빈칸 채우기</span>
+            </label>
+            <label class="module-checkbox-item" data-module="MV07" data-course="circular">
+              <input type="checkbox" onchange="toggleModuleCheckbox(this)">
+              <span class="module-checkbox-id">MV07</span>
+              <span class="module-checkbox-name">철자 빈칸 채우기</span>
+            </label>
+            <label class="module-checkbox-item" data-module="MV08" data-course="circular">
+              <input type="checkbox" onchange="toggleModuleCheckbox(this)">
+              <span class="module-checkbox-id">MV08</span>
+              <span class="module-checkbox-name">단어 타이핑</span>
+            </label>
+            <label class="module-checkbox-item" data-module="MV09" data-course="circular">
+              <input type="checkbox" onchange="toggleModuleCheckbox(this)">
+              <span class="module-checkbox-id">MV09</span>
+              <span class="module-checkbox-name">예문 빈칸 채우기</span>
+            </label>
+            <label class="module-checkbox-item" data-module="MV10" data-course="circular">
+              <input type="checkbox" onchange="toggleModuleCheckbox(this)">
+              <span class="module-checkbox-id">MV10</span>
+              <span class="module-checkbox-name">단어 오답 복습</span>
+            </label>
+            <label class="module-checkbox-item" data-module="MV11" data-course="circular">
+              <input type="checkbox" onchange="toggleModuleCheckbox(this)">
+              <span class="module-checkbox-id">MV11</span>
+              <span class="module-checkbox-name">단어 빈칸 채워 읽기</span>
+            </label>
+            <label class="module-checkbox-item" data-module="MV12" data-course="circular">
+              <input type="checkbox" onchange="toggleModuleCheckbox(this)">
+              <span class="module-checkbox-id">MV12</span>
+              <span class="module-checkbox-name">문장 듣고 단어 채우기</span>
+            </label>
+            <label class="module-checkbox-item" data-module="MS01" data-course="circular">
+              <input type="checkbox" onchange="toggleModuleCheckbox(this)">
+              <span class="module-checkbox-id">MS01</span>
+              <span class="module-checkbox-name">지문 번갈아 읽기</span>
+            </label>
+            <label class="module-checkbox-item" data-module="MS02" data-course="circular">
+              <input type="checkbox" onchange="toggleModuleCheckbox(this)">
+              <span class="module-checkbox-id">MS02</span>
+              <span class="module-checkbox-name">문장 발음 평가</span>
+            </label>
+            <label class="module-checkbox-item" data-module="MS03" data-course="circular">
+              <input type="checkbox" onchange="toggleModuleCheckbox(this)">
+              <span class="module-checkbox-id">MS03</span>
+              <span class="module-checkbox-name">쉐도잉</span>
+            </label>
+            <label class="module-checkbox-item" data-module="MS04" data-course="circular">
+              <input type="checkbox" onchange="toggleModuleCheckbox(this)">
+              <span class="module-checkbox-id">MS04</span>
+              <span class="module-checkbox-name">AI 대화 평가 <span style="color:#D97706;font-size:11px;">· 마지막 회차 고정</span></span>
+            </label>
+            <label class="module-checkbox-item" data-module="MS05" data-course="circular">
+              <input type="checkbox" onchange="toggleModuleCheckbox(this)">
+              <span class="module-checkbox-id">MS05</span>
+              <span class="module-checkbox-name">TOEFL 인터뷰 <span style="color:#D97706;font-size:11px;">· 마지막 회차 고정</span></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 사용 모듈 선택 - Retention Course -->
+        <div class="form-section conditional-section" id="moduleSelectionRetention">
+          <div class="form-section-title">사용 학습 모듈 선택 <span class="required">*</span></div>
+          <div class="form-section-desc">첫번째 암기와 반복 암기에서 사용할 모듈을 각각 선택하세요.</div>
+          
+          <!-- 첫번째 암기 -->
+          <div class="retention-module-section">
+            <div class="retention-section-header">
+              <span class="retention-section-badge first">첫번째 암기</span>
+              <span class="required">*</span>
+              <span class="retention-section-desc">새로운 Unit을 처음 학습할 때 사용</span>
+            </div>
+            <div class="module-action-buttons">
+              <button type="button" class="module-action-btn" onclick="selectAllRetentionModules('first')">전체 선택</button>
+              <button type="button" class="module-action-btn" onclick="clearAllRetentionModules('first')">선택 해제</button>
+            </div>
+            <div class="module-checkbox-list">
+              <label class="module-checkbox-item" data-module="MV01" data-course="retention" data-type="first">
+                <input type="checkbox" onchange="toggleRetentionCheckbox(this)">
+                <span class="module-checkbox-id">MV01</span>
+                <span class="module-checkbox-name">아는 단어 체크</span>
+              </label>
+              <label class="module-checkbox-item" data-module="MV02" data-course="retention" data-type="first">
+                <input type="checkbox" onchange="toggleRetentionCheckbox(this)">
+                <span class="module-checkbox-id">MV02</span>
+                <span class="module-checkbox-name">플래시카드</span>
+              </label>
+              <label class="module-checkbox-item" data-module="MV03" data-course="retention" data-type="first">
+                <input type="checkbox" onchange="toggleRetentionCheckbox(this)">
+                <span class="module-checkbox-id">MV03</span>
+                <span class="module-checkbox-name">단어 뜻 맞추기</span>
+              </label>
+              <label class="module-checkbox-item" data-module="MV04" data-course="retention" data-type="first">
+                <input type="checkbox" onchange="toggleRetentionCheckbox(this)">
+                <span class="module-checkbox-id">MV04</span>
+                <span class="module-checkbox-name">뜻 보고 단어 맞추기</span>
+              </label>
+              <label class="module-checkbox-item" data-module="MV05" data-course="retention" data-type="first">
+                <input type="checkbox" onchange="toggleRetentionCheckbox(this)">
+                <span class="module-checkbox-id">MV05</span>
+                <span class="module-checkbox-name">발음 듣고 뜻 맞추기</span>
+              </label>
+              <label class="module-checkbox-item" data-module="MV06" data-course="retention" data-type="first">
+                <input type="checkbox" onchange="toggleRetentionCheckbox(this)">
+                <span class="module-checkbox-id">MV06</span>
+                <span class="module-checkbox-name">발음 듣고 철자 빈칸 채우기</span>
+              </label>
+              <label class="module-checkbox-item" data-module="MV07" data-course="retention" data-type="first">
+                <input type="checkbox" onchange="toggleRetentionCheckbox(this)">
+                <span class="module-checkbox-id">MV07</span>
+                <span class="module-checkbox-name">철자 빈칸 채우기</span>
+              </label>
+              <label class="module-checkbox-item" data-module="MV08" data-course="retention" data-type="first">
+                <input type="checkbox" onchange="toggleRetentionCheckbox(this)">
+                <span class="module-checkbox-id">MV08</span>
+                <span class="module-checkbox-name">단어 타이핑</span>
+              </label>
+              <label class="module-checkbox-item" data-module="MV09" data-course="retention" data-type="first">
+                <input type="checkbox" onchange="toggleRetentionCheckbox(this)">
+                <span class="module-checkbox-id">MV09</span>
+                <span class="module-checkbox-name">예문 빈칸 채우기</span>
+              </label>
+              <label class="module-checkbox-item" data-module="MV10" data-course="retention" data-type="first">
+                <input type="checkbox" onchange="toggleRetentionCheckbox(this)">
+                <span class="module-checkbox-id">MV10</span>
+                <span class="module-checkbox-name">단어 오답 복습</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 반복 암기 -->
+          <div class="retention-module-section">
+            <div class="retention-section-header">
+              <span class="retention-section-badge repeat">반복 암기</span>
+              <span class="required">*</span>
+              <span class="retention-section-desc">직전 1~3회차 수업에서 해당 <span id="retentionStructure1Label">구분1</span>이 숙제로 나간 경우</span>
+            </div>
+            <div class="module-action-buttons">
+              <button type="button" class="module-action-btn" onclick="selectAllRetentionModules('repeat')">전체 선택</button>
+              <button type="button" class="module-action-btn" onclick="clearAllRetentionModules('repeat')">선택 해제</button>
+            </div>
+            <div class="module-checkbox-list">
+              <label class="module-checkbox-item" data-module="MV01" data-course="retention" data-type="repeat">
+                <input type="checkbox" onchange="toggleRetentionCheckbox(this)">
+                <span class="module-checkbox-id">MV01</span>
+                <span class="module-checkbox-name">아는 단어 체크</span>
+              </label>
+              <label class="module-checkbox-item" data-module="MV02" data-course="retention" data-type="repeat">
+                <input type="checkbox" onchange="toggleRetentionCheckbox(this)">
+                <span class="module-checkbox-id">MV02</span>
+                <span class="module-checkbox-name">플래시카드</span>
+              </label>
+              <label class="module-checkbox-item" data-module="MV03" data-course="retention" data-type="repeat">
+                <input type="checkbox" onchange="toggleRetentionCheckbox(this)">
+                <span class="module-checkbox-id">MV03</span>
+                <span class="module-checkbox-name">단어 뜻 맞추기</span>
+              </label>
+              <label class="module-checkbox-item" data-module="MV04" data-course="retention" data-type="repeat">
+                <input type="checkbox" onchange="toggleRetentionCheckbox(this)">
+                <span class="module-checkbox-id">MV04</span>
+                <span class="module-checkbox-name">뜻 보고 단어 맞추기</span>
+              </label>
+              <label class="module-checkbox-item" data-module="MV05" data-course="retention" data-type="repeat">
+                <input type="checkbox" onchange="toggleRetentionCheckbox(this)">
+                <span class="module-checkbox-id">MV05</span>
+                <span class="module-checkbox-name">발음 듣고 뜻 맞추기</span>
+              </label>
+              <label class="module-checkbox-item" data-module="MV06" data-course="retention" data-type="repeat">
+                <input type="checkbox" onchange="toggleRetentionCheckbox(this)">
+                <span class="module-checkbox-id">MV06</span>
+                <span class="module-checkbox-name">발음 듣고 철자 빈칸 채우기</span>
+              </label>
+              <label class="module-checkbox-item" data-module="MV07" data-course="retention" data-type="repeat">
+                <input type="checkbox" onchange="toggleRetentionCheckbox(this)">
+                <span class="module-checkbox-id">MV07</span>
+                <span class="module-checkbox-name">철자 빈칸 채우기</span>
+              </label>
+              <label class="module-checkbox-item" data-module="MV08" data-course="retention" data-type="repeat">
+                <input type="checkbox" onchange="toggleRetentionCheckbox(this)">
+                <span class="module-checkbox-id">MV08</span>
+                <span class="module-checkbox-name">단어 타이핑</span>
+              </label>
+              <label class="module-checkbox-item" data-module="MV09" data-course="retention" data-type="repeat">
+                <input type="checkbox" onchange="toggleRetentionCheckbox(this)">
+                <span class="module-checkbox-id">MV09</span>
+                <span class="module-checkbox-name">예문 빈칸 채우기</span>
+              </label>
+              <label class="module-checkbox-item" data-module="MV10" data-course="retention" data-type="repeat">
+                <input type="checkbox" onchange="toggleRetentionCheckbox(this)">
+                <span class="module-checkbox-id">MV10</span>
+                <span class="module-checkbox-name">단어 오답 복습</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 수업 회차별 모듈 배정 - Circular Course만 -->
+        <div class="form-section conditional-section" id="scheduleSection">
+          <div class="form-section-title">수업 회차별 모듈 배정 <span class="required">*</span></div>
+          <div class="form-section-desc">수업 횟수별로 모듈을 어떻게 나눌지 미리 설정합니다. 각 회차에 배정할 모듈 수를 입력하세요.<br><span class="desc-note">* 위에서 선택한 모듈 순서대로 자동 배정됩니다. 0을 입력하면 해당 회차는 숙제가 없습니다.</span></div>
+          
+          <div class="schedule-tabs">
+            <button class="schedule-tab active" onclick="switchScheduleTab(2)">2회 수업</button>
+            <button class="schedule-tab" onclick="switchScheduleTab(3)">3회 수업</button>
+            <button class="schedule-tab" onclick="switchScheduleTab(4)">4회 수업</button>
+            <button class="schedule-tab" onclick="switchScheduleTab(5)">5회 수업</button>
+            <button class="schedule-tab" onclick="switchScheduleTab(6)">6회 수업</button>
+          </div>
+
+          <!-- 선택된 모듈 요약 -->
+          <div class="selected-modules-summary" id="selectedModulesSummary">
+            <span class="summary-label">선택된 모듈:</span>
+            <span class="summary-value" id="selectedModulesText">모듈을 먼저 선택하세요</span>
+          </div>
+
+          <!-- 2회 수업 -->
+          <div class="schedule-content active" id="schedule2">
+            <div class="allocation-status" id="status2">
+              <span class="allocation-status-text">모듈을 먼저 선택하세요</span>
+            </div>
+            <div class="session-allocation-list" data-sessions="2">
+              <div class="session-allocation-row">
+                <span class="session-num">1회차</span>
+                <div class="session-input-group">
+                  <input type="number" class="session-count-input" value="0" min="0" data-session="1" oninput="handleSessionInput(this, 2)" onchange="updateSessionAllocation(2)">
+                  <span class="session-input-suffix">개 모듈</span>
+                </div>
+                <div class="session-modules-preview" data-session="1">-</div>
+              </div>
+              <div class="session-allocation-row">
+                <span class="session-num">2회차</span>
+                <div class="session-input-group">
+                  <input type="number" class="session-count-input" value="0" min="0" data-session="2" oninput="handleSessionInput(this, 2)" onchange="updateSessionAllocation(2)">
+                  <span class="session-input-suffix">개 모듈</span>
+                </div>
+                <div class="session-modules-preview" data-session="2">-</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3회 수업 -->
+          <div class="schedule-content" id="schedule3">
+            <div class="allocation-status" id="status3">
+              <span class="allocation-status-text">모듈을 먼저 선택하세요</span>
+            </div>
+            <div class="session-allocation-list" data-sessions="3">
+              <div class="session-allocation-row">
+                <span class="session-num">1회차</span>
+                <div class="session-input-group">
+                  <input type="number" class="session-count-input" value="0" min="0" data-session="1" oninput="handleSessionInput(this, 3)" onchange="updateSessionAllocation(3)">
+                  <span class="session-input-suffix">개 모듈</span>
+                </div>
+                <div class="session-modules-preview" data-session="1">-</div>
+              </div>
+              <div class="session-allocation-row">
+                <span class="session-num">2회차</span>
+                <div class="session-input-group">
+                  <input type="number" class="session-count-input" value="0" min="0" data-session="2" oninput="handleSessionInput(this, 3)" onchange="updateSessionAllocation(3)">
+                  <span class="session-input-suffix">개 모듈</span>
+                </div>
+                <div class="session-modules-preview" data-session="2">-</div>
+              </div>
+              <div class="session-allocation-row">
+                <span class="session-num">3회차</span>
+                <div class="session-input-group">
+                  <input type="number" class="session-count-input" value="0" min="0" data-session="3" oninput="handleSessionInput(this, 3)" onchange="updateSessionAllocation(3)">
+                  <span class="session-input-suffix">개 모듈</span>
+                </div>
+                <div class="session-modules-preview" data-session="3">-</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4회 수업 -->
+          <div class="schedule-content" id="schedule4">
+            <div class="allocation-status" id="status4">
+              <span class="allocation-status-text">모듈을 먼저 선택하세요</span>
+            </div>
+            <div class="session-allocation-list" data-sessions="4">
+              <div class="session-allocation-row">
+                <span class="session-num">1회차</span>
+                <div class="session-input-group">
+                  <input type="number" class="session-count-input" value="0" min="0" data-session="1" oninput="handleSessionInput(this, 4)" onchange="updateSessionAllocation(4)">
+                  <span class="session-input-suffix">개 모듈</span>
+                </div>
+                <div class="session-modules-preview" data-session="1">-</div>
+              </div>
+              <div class="session-allocation-row">
+                <span class="session-num">2회차</span>
+                <div class="session-input-group">
+                  <input type="number" class="session-count-input" value="0" min="0" data-session="2" oninput="handleSessionInput(this, 4)" onchange="updateSessionAllocation(4)">
+                  <span class="session-input-suffix">개 모듈</span>
+                </div>
+                <div class="session-modules-preview" data-session="2">-</div>
+              </div>
+              <div class="session-allocation-row">
+                <span class="session-num">3회차</span>
+                <div class="session-input-group">
+                  <input type="number" class="session-count-input" value="0" min="0" data-session="3" oninput="handleSessionInput(this, 4)" onchange="updateSessionAllocation(4)">
+                  <span class="session-input-suffix">개 모듈</span>
+                </div>
+                <div class="session-modules-preview" data-session="3">-</div>
+              </div>
+              <div class="session-allocation-row">
+                <span class="session-num">4회차</span>
+                <div class="session-input-group">
+                  <input type="number" class="session-count-input" value="0" min="0" data-session="4" oninput="handleSessionInput(this, 4)" onchange="updateSessionAllocation(4)">
+                  <span class="session-input-suffix">개 모듈</span>
+                </div>
+                <div class="session-modules-preview" data-session="4">-</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5회 수업 -->
+          <div class="schedule-content" id="schedule5">
+            <div class="allocation-status" id="status5">
+              <span class="allocation-status-text">모듈을 먼저 선택하세요</span>
+            </div>
+            <div class="session-allocation-list" data-sessions="5">
+              <div class="session-allocation-row">
+                <span class="session-num">1회차</span>
+                <div class="session-input-group">
+                  <input type="number" class="session-count-input" value="0" min="0" data-session="1" oninput="handleSessionInput(this, 5)" onchange="updateSessionAllocation(5)">
+                  <span class="session-input-suffix">개 모듈</span>
+                </div>
+                <div class="session-modules-preview" data-session="1">-</div>
+              </div>
+              <div class="session-allocation-row">
+                <span class="session-num">2회차</span>
+                <div class="session-input-group">
+                  <input type="number" class="session-count-input" value="0" min="0" data-session="2" oninput="handleSessionInput(this, 5)" onchange="updateSessionAllocation(5)">
+                  <span class="session-input-suffix">개 모듈</span>
+                </div>
+                <div class="session-modules-preview" data-session="2">-</div>
+              </div>
+              <div class="session-allocation-row">
+                <span class="session-num">3회차</span>
+                <div class="session-input-group">
+                  <input type="number" class="session-count-input" value="0" min="0" data-session="3" oninput="handleSessionInput(this, 5)" onchange="updateSessionAllocation(5)">
+                  <span class="session-input-suffix">개 모듈</span>
+                </div>
+                <div class="session-modules-preview" data-session="3">-</div>
+              </div>
+              <div class="session-allocation-row">
+                <span class="session-num">4회차</span>
+                <div class="session-input-group">
+                  <input type="number" class="session-count-input" value="0" min="0" data-session="4" oninput="handleSessionInput(this, 5)" onchange="updateSessionAllocation(5)">
+                  <span class="session-input-suffix">개 모듈</span>
+                </div>
+                <div class="session-modules-preview" data-session="4">-</div>
+              </div>
+              <div class="session-allocation-row">
+                <span class="session-num">5회차</span>
+                <div class="session-input-group">
+                  <input type="number" class="session-count-input" value="0" min="0" data-session="5" oninput="handleSessionInput(this, 5)" onchange="updateSessionAllocation(5)">
+                  <span class="session-input-suffix">개 모듈</span>
+                </div>
+                <div class="session-modules-preview" data-session="5">-</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6회 수업 -->
+          <div class="schedule-content" id="schedule6">
+            <div class="allocation-status" id="status6">
+              <span class="allocation-status-text">모듈을 먼저 선택하세요</span>
+            </div>
+            <div class="session-allocation-list" data-sessions="6">
+              <div class="session-allocation-row">
+                <span class="session-num">1회차</span>
+                <div class="session-input-group">
+                  <input type="number" class="session-count-input" value="0" min="0" data-session="1" oninput="handleSessionInput(this, 6)" onchange="updateSessionAllocation(6)">
+                  <span class="session-input-suffix">개 모듈</span>
+                </div>
+                <div class="session-modules-preview" data-session="1">-</div>
+              </div>
+              <div class="session-allocation-row">
+                <span class="session-num">2회차</span>
+                <div class="session-input-group">
+                  <input type="number" class="session-count-input" value="0" min="0" data-session="2" oninput="handleSessionInput(this, 6)" onchange="updateSessionAllocation(6)">
+                  <span class="session-input-suffix">개 모듈</span>
+                </div>
+                <div class="session-modules-preview" data-session="2">-</div>
+              </div>
+              <div class="session-allocation-row">
+                <span class="session-num">3회차</span>
+                <div class="session-input-group">
+                  <input type="number" class="session-count-input" value="0" min="0" data-session="3" oninput="handleSessionInput(this, 6)" onchange="updateSessionAllocation(6)">
+                  <span class="session-input-suffix">개 모듈</span>
+                </div>
+                <div class="session-modules-preview" data-session="3">-</div>
+              </div>
+              <div class="session-allocation-row">
+                <span class="session-num">4회차</span>
+                <div class="session-input-group">
+                  <input type="number" class="session-count-input" value="0" min="0" data-session="4" oninput="handleSessionInput(this, 6)" onchange="updateSessionAllocation(6)">
+                  <span class="session-input-suffix">개 모듈</span>
+                </div>
+                <div class="session-modules-preview" data-session="4">-</div>
+              </div>
+              <div class="session-allocation-row">
+                <span class="session-num">5회차</span>
+                <div class="session-input-group">
+                  <input type="number" class="session-count-input" value="0" min="0" data-session="5" oninput="handleSessionInput(this, 6)" onchange="updateSessionAllocation(6)">
+                  <span class="session-input-suffix">개 모듈</span>
+                </div>
+                <div class="session-modules-preview" data-session="5">-</div>
+              </div>
+              <div class="session-allocation-row">
+                <span class="session-num">6회차</span>
+                <div class="session-input-group">
+                  <input type="number" class="session-count-input" value="0" min="0" data-session="6" oninput="handleSessionInput(this, 6)" onchange="updateSessionAllocation(6)">
+                  <span class="session-input-suffix">개 모듈</span>
+                </div>
+                <div class="session-modules-preview" data-session="6">-</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 추가 설명 -->
+        <div class="form-section">
+          <div class="form-section-title">추가 설명 (선택)</div>
+          <div class="form-section-desc">교재에 대한 추가 메모나 참고사항을 입력하세요.</div>
+          <textarea class="form-textarea" id="additionalNote" placeholder="예: 초등 고학년~중등 초급 대상, 논픽션 위주 구성"></textarea>
+        </div>
+      </div>
+
+      <div class="side-peek-footer">
+        <div class="side-peek-footer-left">
+          <button class="modal-btn modal-btn-delete" id="deleteBtn" onclick="openDeleteConfirm()" style="display: none;">삭제</button>
+        </div>
+        <div class="side-peek-footer-right">
+          <button class="modal-btn modal-btn-cancel" onclick="closeSidePeek()">취소</button>
+          <button class="modal-btn modal-btn-confirm" id="confirmBtn" onclick="confirmSave()" disabled>등록</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirm Modal -->
+  <div class="confirm-overlay" id="deleteConfirmOverlay" onclick="closeDeleteConfirm(event)">
+    <div class="confirm-modal" onclick="event.stopPropagation()">
+      <div class="confirm-body">
+        <div class="confirm-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18"></path>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <line x1="10" y1="11" x2="10" y2="17"></line>
+            <line x1="14" y1="11" x2="14" y2="17"></line>
+          </svg>
+        </div>
+        <div class="confirm-title">교재를 삭제하시겠습니까?</div>
+        <div class="confirm-message">이 교재를 삭제하면 등록된 모든 콘텐츠가 함께 삭제됩니다.<br>이 작업은 되돌릴 수 없습니다.</div>
+      </div>
+      <div class="confirm-footer">
+        <button class="modal-btn modal-btn-cancel" onclick="closeDeleteConfirm()">취소</button>
+        <button class="modal-btn modal-btn-delete" onclick="confirmDelete()">삭제</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Not Allowed Modal (사용중 상태) -->
+  <div class="confirm-overlay" id="deleteNotAllowedOverlay" onclick="closeDeleteNotAllowed(event)">
+    <div class="confirm-modal" onclick="event.stopPropagation()">
+      <div class="confirm-body">
+        <div class="confirm-icon" style="color: #EF4444;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <div class="confirm-title">삭제할 수 없습니다</div>
+        <div class="confirm-message">이 교재는 현재 커리큘럼에서 사용 중입니다.<br>커리큘럼 배정을 먼저 해제한 후 삭제해 주세요.</div>
+      </div>
+      <div class="confirm-footer">
+        <button class="modal-btn modal-btn-confirm" onclick="closeDeleteNotAllowed()">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+    <span class="toast-message" id="toastMessage">완료되었습니다.</span>
+  </div>
+
+  <script>
+    const menuData = {
+      'curriculum': {
+        title: '커리큘럼 관리',
+        items: [
+          { page: 'quarter-settings', text: '분기 설정' },
+          { page: 'textbook-register', text: '교재 등록' },
+          { page: 'curriculum-assign', text: '커리큘럼 배정' }
+        ]
+      },
+      'contents': {
+        title: '콘텐츠 관리',
+        items: [
+          { page: 'circular-course', text: 'Circular Course' },
+          { page: 'retention-course', text: 'Retention Course' }
+        ]
+      },
+      'prompt': {
+        title: 'Prompt 관리',
+        items: [
+          { page: 'content-prompt', text: '콘텐츠 생성 Prompt' },
+          { page: 'module-prompt', text: '학습 모듈 Prompt' }
+        ]
+      },
+      'usage': {
+        title: '이용 현황',
+        items: [
+          { page: 'teacher-status', text: '선생님 현황' },
+          { page: 'student-status', text: '학생 현황' }
+        ]
+      },
+      'settings': {
+        title: '환경설정',
+        items: [
+          { page: 'module-settings', text: '학습 모듈 설정' },
+          { page: 'media-manage', text: '미디어 관리' },
+          { page: 'popup-settings', text: '팝업창 설정' },
+          { page: 'permission-manage', text: '권한 관리' },
+          { page: 'notification-manage', text: '알림 관리' },
+          { page: 'code-manage', text: '코드 관리' }
+        ]
+      }
+    };
+
+    let currentActivePage = 'textbook-register';
+    let isOverFloating = false;
+    let currentMode = 'add';
+    let currentStatus = '';
+    let selectedModules = [];
+    let selectedModulesFirst = [];  // Retention - 첫번째 암기
+    let selectedModulesRepeat = []; // Retention - 반복 암기
+
+    const gnb = document.getElementById('gnb');
+    const floatingSubmenu = document.getElementById('floatingSubmenu');
+    const menuGroups = document.querySelectorAll('.menu-group');
+
+    gnb.addEventListener('click', (e) => {
+      if (e.target.closest('.submenu-item') || e.target.closest('.menu-group-header')) return;
+      gnb.classList.toggle('collapsed');
+      hideFloatingSubmenu();
+    });
+
+    menuGroups.forEach(group => {
+      const header = group.querySelector('.menu-group-header');
+      const menuKey = group.dataset.menu;
+
+      header.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!gnb.classList.contains('collapsed')) {
+          group.classList.toggle('open');
+        }
+      });
+
+      header.addEventListener('mouseenter', () => {
+        if (gnb.classList.contains('collapsed')) {
+          showFloatingSubmenu(menuKey, header);
+        }
+      });
+
+      header.addEventListener('mouseleave', () => {
+        if (gnb.classList.contains('collapsed')) {
+          setTimeout(() => {
+            if (!isOverFloating) hideFloatingSubmenu();
+          }, 50);
+        }
+      });
+    });
+
+    floatingSubmenu.addEventListener('mouseenter', () => { isOverFloating = true; });
+    floatingSubmenu.addEventListener('mouseleave', () => { isOverFloating = false; hideFloatingSubmenu(); });
+
+    function showFloatingSubmenu(menuKey, headerElement) {
+      const data = menuData[menuKey];
+      if (!data) return;
+      const rect = headerElement.getBoundingClientRect();
+      const gnbWidth = gnb.classList.contains('collapsed') ? 56 : 224;
+      floatingSubmenu.style.left = `${gnbWidth + 4}px`;
+      floatingSubmenu.style.top = `${rect.top}px`;
+      let html = `<div class="floating-submenu-title">${data.title}</div>`;
+      data.items.forEach(item => {
+        const isActive = item.page === currentActivePage ? 'active' : '';
+        html += `<a class="floating-item ${isActive}" href="#" data-page="${item.page}"><span class="floating-item-text">${item.text}</span></a>`;
+      });
+      floatingSubmenu.innerHTML = html;
+      floatingSubmenu.classList.add('visible');
+    }
+
+    function hideFloatingSubmenu() {
+      floatingSubmenu.classList.remove('visible');
+    }
+
+    function openSidePeek(mode, rowElement) {
+      currentMode = mode;
+      const overlay = document.getElementById('sidePeekOverlay');
+      const title = document.getElementById('sidePeekTitle');
+      const confirmBtn = document.getElementById('confirmBtn');
+      const deleteBtn = document.getElementById('deleteBtn');
+
+      if (mode === 'add') {
+        title.textContent = '교재 등록';
+        confirmBtn.textContent = '등록';
+        deleteBtn.style.display = 'none';
+        resetForm();
+        confirmBtn.disabled = true; // 신규 등록 시 초기 비활성화
+      } else {
+        title.textContent = '교재 수정';
+        confirmBtn.textContent = '수정 및 적용';
+        deleteBtn.style.display = 'block';
+        confirmBtn.disabled = false; // 수정 시 활성화
+        if (rowElement) {
+          const statusCell = rowElement.querySelector('.status-badge');
+          currentStatus = statusCell.classList.contains('status-active') ? 'active' : 'inactive';
+          // 삭제 버튼은 항상 활성화, 클릭 시 상태 체크
+        }
+      }
+      overlay.classList.add('show');
+    }
+
+    function closeSidePeek(event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById('sidePeekOverlay').classList.remove('show');
+    }
+
+    function resetForm() {
+      document.querySelectorAll('input[name="course"]').forEach(r => r.checked = false);
+      document.getElementById('textbookName').value = '';
+      document.getElementById('publisherSelect').value = '';
+      document.getElementById('publisherExtra').classList.remove('show');
+      document.getElementById('structure1').value = '';
+      document.getElementById('structure2').value = '';
+      document.getElementById('structureCount').value = '';
+      document.querySelectorAll('input[name="contentType"]').forEach(r => r.checked = false);
+      document.getElementById('additionalNote').value = '';
+      
+      // 조건부 섹션 숨기기
+      document.getElementById('contentSettingSection').classList.remove('show');
+      document.getElementById('moduleSelectionCircular').classList.remove('show');
+      document.getElementById('moduleSelectionRetention').classList.remove('show');
+      document.getElementById('scheduleSection').classList.remove('show');
+      
+      // 모듈 선택 초기화
+      resetModuleSelection();
+      updateStructureLabels();
+    }
+
+    function onCourseChange() {
+      const circular = document.getElementById('courseCircular').checked;
+      const retention = document.getElementById('courseRetention').checked;
+      
+      // 콘텐츠 설정 (Circular만)
+      const contentSection = document.getElementById('contentSettingSection');
+      contentSection.classList.toggle('show', circular);
+      
+      // 모듈 선택 섹션 토글
+      const moduleCircular = document.getElementById('moduleSelectionCircular');
+      const moduleRetention = document.getElementById('moduleSelectionRetention');
+      moduleCircular.classList.toggle('show', circular);
+      moduleRetention.classList.toggle('show', retention);
+      
+      // 수업 회차별 모듈 배정 (Circular만)
+      const scheduleSection = document.getElementById('scheduleSection');
+      scheduleSection.classList.toggle('show', circular);
+      
+      // 모듈 선택 초기화
+      resetModuleSelection();
+    }
+
+    function onPublisherChange() {
+      const select = document.getElementById('publisherSelect');
+      const extra = document.getElementById('publisherExtra');
+      extra.classList.toggle('show', select.value === 'external');
+    }
+
+    function onStructureChange() {
+      updateStructureLabels();
+    }
+
+    function updateStructureLabels() {
+      const value = document.getElementById('structure1').value || '구분1';
+      document.getElementById('structure1Label').textContent = value;
+      document.getElementById('structure1LabelDesc').textContent = value;
+      document.getElementById('retentionStructure1Label').textContent = value;
+    }
+
+    // 모듈 분배 순서 (ML01이 맨 앞 → 1회차, MS04가 맨 뒤 → 마지막 회차)
+    const MODULE_ORDER = ['ML01', 'MV01', 'MV02', 'MV03', 'MV04', 'MV05', 'MV06', 'MV07', 'MV08', 'MV09', 'MV10', 'MV11', 'MV12', 'MS01', 'MS02', 'MS03', 'MS04', 'MS05'];
+    
+    // AI 모듈 (마지막 회차 고정)
+    const AI_MODULES = ['MS04', 'MS05'];
+
+    function toggleModule(element) {
+      const moduleId = element.dataset.module;
+      const course = element.dataset.course;
+      const type = element.dataset.type; // 'first' or 'repeat' for Retention
+      
+      let targetArray;
+      if (course === 'retention') {
+        targetArray = type === 'first' ? selectedModulesFirst : selectedModulesRepeat;
+      } else {
+        targetArray = selectedModules;
+      }
+      
+      if (element.classList.contains('selected')) {
+        // 선택 해제
+        element.classList.remove('selected');
+        const idx = targetArray.indexOf(moduleId);
+        if (idx > -1) targetArray.splice(idx, 1);
+        const badge = element.querySelector('.order-badge');
+        if (badge) badge.remove();
+      } else {
+        // 선택 추가
+        element.classList.add('selected');
+        targetArray.push(moduleId);
+        // 고정 순서대로 정렬
+        targetArray.sort((a, b) => MODULE_ORDER.indexOf(a) - MODULE_ORDER.indexOf(b));
+      }
+      
+      // 순서 배지 업데이트 (고정 순서 기준)
+      updateModuleOrder(course, type);
+      
+      // Circular Course일 때 선택 모듈 요약 및 회차 배정 업데이트
+      if (course === 'circular') {
+        updateSelectedModulesSummary();
+        autoDistributeAllTabs(); // 모듈 변경 시 자동 재분배
+      }
+      
+      // 폼 유효성 검사
+      validateForm();
+    }
+
+    function updateModuleOrder(course, type) {
+      let targetArray;
+      let selector;
+      
+      if (course === 'retention') {
+        targetArray = type === 'first' ? selectedModulesFirst : selectedModulesRepeat;
+        selector = `.module-chip[data-course="retention"][data-type="${type}"]`;
+      } else {
+        targetArray = selectedModules;
+        selector = '.module-chip[data-course="circular"]';
+      }
+      
+      // 모든 칩에 대해 순서 배지 업데이트
+      document.querySelectorAll(selector).forEach(chip => {
+        const moduleId = chip.dataset.module;
+        const orderIndex = targetArray.indexOf(moduleId);
+        let badge = chip.querySelector('.order-badge');
+        
+        if (orderIndex > -1) {
+          // 선택된 모듈: 배지 표시
+          if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'order-badge';
+            chip.appendChild(badge);
+          }
+          badge.textContent = orderIndex + 1;
+        } else {
+          // 선택 안 된 모듈: 배지 제거
+          if (badge) badge.remove();
+        }
+      });
+    }
+
+    function resetModuleSelection() {
+      selectedModules = [];
+      selectedModulesFirst = [];
+      selectedModulesRepeat = [];
+      
+      // Circular Course 체크박스 초기화
+      document.querySelectorAll('.module-checkbox-item[data-course="circular"] input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+      });
+      
+      // Retention Course 체크박스 초기화
+      document.querySelectorAll('.module-checkbox-item[data-course="retention"] input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+      });
+      
+      // 선택 모듈 요약 초기화
+      updateSelectedModulesSummary();
+      
+      // 회차 배정 자동 재분배 (0개 모듈이므로 모두 0으로)
+      autoDistributeAllTabs();
+    }
+
+    function switchScheduleTab(num) {
+      document.querySelectorAll('.schedule-tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.schedule-content').forEach(content => content.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById(`schedule${num}`).classList.add('active');
+    }
+
+    // 선택된 모듈 요약 업데이트
+    function updateSelectedModulesSummary() {
+      const summaryText = document.getElementById('selectedModulesText');
+      if (selectedModules.length === 0) {
+        summaryText.textContent = '모듈을 먼저 선택하세요';
+        summaryText.classList.add('empty');
+      } else {
+        summaryText.textContent = selectedModules.join(', ') + ` (총 ${selectedModules.length}개)`;
+        summaryText.classList.remove('empty');
+      }
+    }
+
+    // 모든 탭의 회차 배정 업데이트
+    function updateAllSessionAllocations() {
+      [2, 3, 4, 5, 6].forEach(num => {
+        updateSessionAllocation(num);
+      });
+    }
+
+    // Retention 모듈 고정 순서
+    const RETENTION_MODULE_ORDER = ['MV01', 'MV02', 'MV03', 'MV04', 'MV05', 'MV06', 'MV07', 'MV08', 'MV09', 'MV10'];
+
+    // 체크박스 토글 (Circular Course용)
+    function toggleModuleCheckbox(checkbox) {
+      const item = checkbox.closest('.module-checkbox-item');
+      const moduleId = item.dataset.module;
+      const course = item.dataset.course;
+      
+      if (checkbox.checked) {
+        if (!selectedModules.includes(moduleId)) {
+          selectedModules.push(moduleId);
+          selectedModules.sort((a, b) => MODULE_ORDER.indexOf(a) - MODULE_ORDER.indexOf(b));
+        }
+      } else {
+        const idx = selectedModules.indexOf(moduleId);
+        if (idx > -1) selectedModules.splice(idx, 1);
+      }
+      
+      updateSelectedModulesSummary();
+      autoDistributeAllTabs();
+      validateForm();
+    }
+
+    // 체크박스 토글 (Retention Course용)
+    function toggleRetentionCheckbox(checkbox) {
+      const item = checkbox.closest('.module-checkbox-item');
+      const moduleId = item.dataset.module;
+      const type = item.dataset.type;
+      
+      const targetArray = type === 'first' ? selectedModulesFirst : selectedModulesRepeat;
+      
+      if (checkbox.checked) {
+        if (!targetArray.includes(moduleId)) {
+          targetArray.push(moduleId);
+          targetArray.sort((a, b) => RETENTION_MODULE_ORDER.indexOf(a) - RETENTION_MODULE_ORDER.indexOf(b));
+        }
+      } else {
+        const idx = targetArray.indexOf(moduleId);
+        if (idx > -1) targetArray.splice(idx, 1);
+      }
+      
+      validateForm();
+    }
+
+    // Retention 전체 선택
+    function selectAllRetentionModules(type) {
+      const targetArray = type === 'first' ? selectedModulesFirst : selectedModulesRepeat;
+      targetArray.length = 0;
+      targetArray.push(...RETENTION_MODULE_ORDER);
+      
+      document.querySelectorAll(`.module-checkbox-item[data-course="retention"][data-type="${type}"] input[type="checkbox"]`).forEach(cb => {
+        cb.checked = true;
+      });
+      
+      validateForm();
+    }
+
+    // Retention 선택 해제
+    function clearAllRetentionModules(type) {
+      const targetArray = type === 'first' ? selectedModulesFirst : selectedModulesRepeat;
+      targetArray.length = 0;
+      
+      document.querySelectorAll(`.module-checkbox-item[data-course="retention"][data-type="${type}"] input[type="checkbox"]`).forEach(cb => {
+        cb.checked = false;
+      });
+      
+      validateForm();
+    }
+
+    // 전체 선택 (Circular)
+    function selectAllModules(courseType) {
+      if (courseType === 'circular') {
+        selectedModules = [...MODULE_ORDER];
+        document.querySelectorAll('.module-checkbox-item[data-course="circular"] input[type="checkbox"]').forEach(cb => {
+          cb.checked = true;
+        });
+        updateSelectedModulesSummary();
+        autoDistributeAllTabs();
+      }
+      validateForm();
+    }
+
+    // 선택 해제
+    function clearAllModules(courseType) {
+      if (courseType === 'circular') {
+        selectedModules = [];
+        document.querySelectorAll('.module-checkbox-item[data-course="circular"] input[type="checkbox"]').forEach(cb => {
+          cb.checked = false;
+        });
+        updateSelectedModulesSummary();
+        autoDistributeAllTabs();
+      }
+      validateForm();
+    }
+
+    // 입력 제한 핸들러
+    function handleSessionInput(input, sessionCount) {
+      const maxModules = selectedModules.length;
+      const container = document.getElementById(`schedule${sessionCount}`);
+      const inputs = container.querySelectorAll('.session-count-input');
+      const currentSession = parseInt(input.dataset.session);
+      
+      // AI 모듈 개수 계산
+      const aiModuleCount = selectedModules.filter(m => AI_MODULES.includes(m)).length;
+      
+      // 현재 입력을 제외한 다른 회차 합계 계산
+      let otherSum = 0;
+      inputs.forEach(inp => {
+        if (inp !== input) {
+          otherSum += parseInt(inp.value) || 0;
+        }
+      });
+      
+      // 현재 입력 가능한 최대값
+      const maxAllowed = Math.max(0, maxModules - otherSum);
+      let value = parseInt(input.value) || 0;
+      
+      // 음수 방지
+      if (value < 0) value = 0;
+      
+      // 최소값 제한
+      let minRequired = 0;
+      if (selectedModules.length >= 2) {
+        if (currentSession === 1) {
+          minRequired = 1; // 1회차는 최소 1개
+        } else if (currentSession === sessionCount) {
+          // 마지막 회차는 AI 모듈 개수 이상, 최소 1개
+          minRequired = Math.max(1, aiModuleCount);
+        }
+      }
+      
+      if (value < minRequired) {
+        value = minRequired;
+        input.value = value;
+      }
+      
+      // 최대값 초과 방지
+      if (value > maxAllowed) {
+        value = maxAllowed;
+        input.value = value;
+      }
+      
+      updateSessionAllocation(sessionCount);
+    }
+
+    // 자동 분배 (모든 탭)
+    function autoDistributeAllTabs() {
+      [2, 3, 4, 5, 6].forEach(num => {
+        autoDistributeModules(num);
+      });
+    }
+
+    // 자동 분배 (특정 탭) - AI 모듈은 마지막 회차 고정
+    function autoDistributeModules(sessionCount) {
+      const container = document.getElementById(`schedule${sessionCount}`);
+      const inputs = container.querySelectorAll('.session-count-input');
+      const totalModules = selectedModules.length;
+      
+      if (totalModules === 0) {
+        inputs.forEach(input => input.value = 0);
+        updateSessionAllocation(sessionCount);
+        return;
+      }
+      
+      // 초기화: 모두 0으로
+      let distribution = new Array(sessionCount).fill(0);
+      
+      // AI 모듈 (마지막 회차 고정) 개수 계산
+      const aiModuleCount = selectedModules.filter(m => AI_MODULES.includes(m)).length;
+      // ML01 (1회차 고정) 여부
+      const hasML01 = selectedModules.includes('ML01');
+      
+      // 1. 예약: ML01 → 1회차, AI 모듈 → 마지막 회차
+      let reservedFirst = hasML01 ? 1 : 0;
+      let reservedLast = aiModuleCount;
+      
+      // 최소 보장: 첫/마지막 회차는 항상 1 이상
+      if (reservedFirst === 0) reservedFirst = 1;
+      if (sessionCount > 1 && reservedLast === 0 && totalModules > 1) reservedLast = 1;
+      
+      distribution[0] = reservedFirst;
+      if (sessionCount > 1) {
+        distribution[sessionCount - 1] = reservedLast;
+      }
+      
+      // 2. 남은 모듈 분배
+      let reserved = reservedFirst + (sessionCount > 1 ? reservedLast : 0);
+      const remaining = totalModules - reserved;
+      
+      if (remaining > 0) {
+        if (totalModules >= sessionCount) {
+          // Case 1: 모듈 수 >= 회차 수 → 균등 분배
+          const base = Math.floor(remaining / sessionCount);
+          const remainder = remaining % sessionCount;
+          
+          for (let i = 0; i < sessionCount; i++) {
+            distribution[i] += base + (i < remainder ? 1 : 0);
+          }
+        } else {
+          // Case 2: 모듈 수 < 회차 수 → 핑퐁 방식 분산
+          // 배치 가능한 슬롯 찾기 (첫/마지막 제외)
+          let availableSlots = [];
+          for (let i = 1; i < sessionCount - 1; i++) {
+            availableSlots.push(i);
+          }
+          
+          // 균등 간격으로 선택
+          if (availableSlots.length > 0 && remaining > 0) {
+            const step = availableSlots.length / remaining;
+            for (let i = 0; i < remaining; i++) {
+              const slotIndex = Math.floor(i * step);
+              distribution[availableSlots[slotIndex]] = 1;
+            }
+          }
+        }
+      }
+      
+      // 3. 최종 안전장치
+      // 마지막 회차에 AI 모듈 개수 이상 보장
+      if (sessionCount > 1 && aiModuleCount > 0 && distribution[sessionCount - 1] < aiModuleCount) {
+        const needed = aiModuleCount - distribution[sessionCount - 1];
+        for (let i = sessionCount - 2; i >= 1 && needed > 0; i--) {
+          const available = distribution[i] - 0; // 중간 회차는 0까지 가능
+          if (available > 0) {
+            const take = Math.min(available, needed);
+            distribution[i] -= take;
+            distribution[sessionCount - 1] += take;
+          }
+        }
+      }
+      
+      // 마지막 회차가 0이면 안됨 (최소 1)
+      if (sessionCount > 1 && distribution[sessionCount - 1] === 0 && totalModules >= 2) {
+        for (let i = sessionCount - 2; i >= 1; i--) {
+          if (distribution[i] > 0) {
+            distribution[i]--;
+            distribution[sessionCount - 1]++;
+            break;
+          }
+        }
+        if (distribution[sessionCount - 1] === 0 && distribution[0] > 1) {
+          distribution[0]--;
+          distribution[sessionCount - 1]++;
+        }
+      }
+      
+      inputs.forEach((input, idx) => {
+        input.value = distribution[idx];
+      });
+      
+      updateSessionAllocation(sessionCount);
+    }
+
+    // 특정 탭의 회차 배정 업데이트
+    function updateSessionAllocation(sessionCount) {
+      const container = document.getElementById(`schedule${sessionCount}`);
+      const inputs = container.querySelectorAll('.session-count-input');
+      const previews = container.querySelectorAll('.session-modules-preview');
+      const statusEl = document.getElementById(`status${sessionCount}`);
+      
+      let totalAllocated = 0;
+      let currentIndex = 0;
+      
+      inputs.forEach((input, idx) => {
+        const count = parseInt(input.value) || 0;
+        totalAllocated += count;
+        
+        const preview = previews[idx];
+        preview.classList.remove('empty', 'overflow');
+        
+        if (count === 0) {
+          preview.textContent = '(없음)';
+          preview.classList.add('empty');
+        } else if (selectedModules.length === 0) {
+          preview.textContent = '-';
+          preview.classList.add('empty');
+        } else {
+          const assignedModules = selectedModules.slice(currentIndex, currentIndex + count);
+          if (assignedModules.length > 0 && assignedModules.length === count) {
+            preview.textContent = assignedModules.join(', ');
+          } else if (assignedModules.length > 0) {
+            preview.textContent = assignedModules.join(', ') + ' (부족)';
+            preview.classList.add('overflow');
+          } else {
+            preview.textContent = '(모듈 부족)';
+            preview.classList.add('overflow');
+          }
+          currentIndex += count;
+        }
+      });
+      
+      // 상태 표시
+      statusEl.classList.remove('valid', 'over', 'under');
+      const statusText = statusEl.querySelector('.allocation-status-text');
+      
+      const firstSessionCount = parseInt(inputs[0].value) || 0;
+      const lastSessionCount = parseInt(inputs[inputs.length - 1].value) || 0;
+      
+      // AI 모듈 개수 계산
+      const aiModuleCount = selectedModules.filter(m => AI_MODULES.includes(m)).length;
+      
+      // 제약 조건 체크
+      let constraintError = null;
+      if (selectedModules.length >= 2) {
+        if (firstSessionCount < 1) {
+          constraintError = '1회차는 최소 1개 모듈 필요';
+        } else if (lastSessionCount < 1) {
+          constraintError = '마지막 회차는 최소 1개 모듈 필요';
+        } else if (aiModuleCount > 0 && lastSessionCount < aiModuleCount) {
+          constraintError = `AI 모듈 ${aiModuleCount}개 선택 시 마지막 회차는 최소 ${aiModuleCount}개 필요`;
+        }
+      }
+      
+      if (selectedModules.length === 0) {
+        statusText.textContent = '모듈을 먼저 선택하세요 (최소 2개)';
+      } else if (selectedModules.length < 2) {
+        statusEl.classList.add('under');
+        statusText.textContent = '⚠ 최소 2개 이상 모듈을 선택하세요';
+      } else if (constraintError) {
+        statusEl.classList.add('under');
+        statusText.textContent = `⚠ ${constraintError}`;
+      } else if (totalAllocated === selectedModules.length) {
+        statusEl.classList.add('valid');
+        statusText.textContent = `✓ ${totalAllocated}개 모듈 배정 완료`;
+      } else if (totalAllocated > selectedModules.length) {
+        statusEl.classList.add('over');
+        statusText.textContent = `⚠ ${totalAllocated - selectedModules.length}개 초과 (선택: ${selectedModules.length}개)`;
+      } else {
+        statusEl.classList.add('under');
+        statusText.textContent = `⚠ ${selectedModules.length - totalAllocated}개 미배정 (선택: ${selectedModules.length}개)`;
+      }
+      
+      // 폼 유효성 검사
+      validateForm();
+    }
+
+    function resetFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('courseFilter').value = '';
+      document.getElementById('statusFilter').value = '';
+    }
+
+    function validateForm() {
+      const confirmBtn = document.getElementById('confirmBtn');
+      
+      // 기본 필수 필드 체크
+      const courseSelected = document.querySelector('input[name="course"]:checked');
+      const textbookName = document.getElementById('textbookName').value.trim();
+      const publisherSelect = document.getElementById('publisherSelect').value;
+      const structure1 = document.getElementById('structure1').value.trim();
+      const structureCount = document.getElementById('structureCount').value;
+      
+      // 외부교재 선택 시 출판사명도 필수
+      let publisherValid = false;
+      if (publisherSelect === 'dyb') {
+        publisherValid = true;
+      } else if (publisherSelect === 'external') {
+        const publisherName = document.getElementById('publisherName').value.trim();
+        publisherValid = publisherName.length > 0;
+      }
+      
+      // 기본 필수값 체크
+      let isValid = courseSelected && 
+                    textbookName.length > 0 && 
+                    publisherValid && 
+                    structure1.length > 0 && 
+                    structureCount > 0;
+      
+      if (!isValid) {
+        confirmBtn.disabled = true;
+        return;
+      }
+      
+      // Course별 추가 필수값 체크
+      const isCircular = document.getElementById('courseCircular').checked;
+      const isRetention = document.getElementById('courseRetention').checked;
+      
+      if (isCircular) {
+        // Circular: 콘텐츠 설정 필수
+        const contentTypeSelected = document.querySelector('input[name="contentType"]:checked');
+        if (!contentTypeSelected) {
+          confirmBtn.disabled = true;
+          return;
+        }
+        
+        // Circular: 모듈 최소 2개 이상 선택 필수
+        if (selectedModules.length < 2) {
+          confirmBtn.disabled = true;
+          return;
+        }
+        
+        // Circular: 수업 회차별 모듈 배정 검증
+        const activeSchedule = document.querySelector('.schedule-content.active');
+        if (activeSchedule) {
+          const statusEl = activeSchedule.querySelector('.allocation-status');
+          if (!statusEl.classList.contains('valid')) {
+            confirmBtn.disabled = true;
+            return;
+          }
+          
+          // 첫 회차와 마지막 회차 >= 1 체크 (무조건)
+          const inputs = activeSchedule.querySelectorAll('.session-count-input');
+          const firstSessionCount = parseInt(inputs[0].value) || 0;
+          const lastSessionCount = parseInt(inputs[inputs.length - 1].value) || 0;
+          
+          // AI 모듈 개수 계산
+          const aiModuleCount = selectedModules.filter(m => AI_MODULES.includes(m)).length;
+          
+          if (firstSessionCount < 1 || lastSessionCount < 1) {
+            confirmBtn.disabled = true;
+            return;
+          }
+          
+          // AI 모듈 개수만큼 마지막 회차에 배정되어야 함
+          if (aiModuleCount > 0 && lastSessionCount < aiModuleCount) {
+            confirmBtn.disabled = true;
+            return;
+          }
+        }
+      }
+      
+      if (isRetention) {
+        // Retention: 첫번째 암기 모듈 1개 이상 선택 필수
+        if (selectedModulesFirst.length === 0) {
+          confirmBtn.disabled = true;
+          return;
+        }
+        
+        // Retention: 반복 암기 모듈 1개 이상 선택 필수
+        if (selectedModulesRepeat.length === 0) {
+          confirmBtn.disabled = true;
+          return;
+        }
+      }
+      
+      confirmBtn.disabled = false;
+    }
+
+    function confirmSave() {
+      const message = currentMode === 'add' ? '교재가 등록되었습니다.' : '교재 정보가 수정되었습니다.';
+      closeSidePeek();
+      showToast(message);
+    }
+
+    // 토스트 표시
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toastMessage');
+      toastMessage.textContent = message;
+      toast.classList.add('show');
+      
+      setTimeout(function() {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    function openDeleteConfirm() {
+      // 현재 상태 확인
+      if (currentStatus === 'active') {
+        // 사용중 상태 - 삭제 불가 팝업
+        document.getElementById('deleteNotAllowedOverlay').classList.add('show');
+      } else {
+        // 미사용 상태 - 삭제 확인 팝업
+        document.getElementById('deleteConfirmOverlay').classList.add('show');
+      }
+    }
+
+    function closeDeleteConfirm(event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById('deleteConfirmOverlay').classList.remove('show');
+    }
+
+    function closeDeleteNotAllowed(event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById('deleteNotAllowedOverlay').classList.remove('show');
+    }
+
+    function confirmDelete() {
+      closeDeleteConfirm();
+      closeSidePeek();
+      showToast('교재가 삭제되었습니다.');
+    }
+  </script>
+</body>
+</html>

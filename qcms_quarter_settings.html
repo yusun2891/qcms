@@ -1,0 +1,2323 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QCMS - 분기 설정</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-blue: #4C55EB;
+      --primary-blue-hover: #3D45D9;
+      --font-1: #191F28;
+      --font-2: #4E5968;
+      --font-3: #8B95A1;
+      --bg-f9: #F9FAFB;
+      --bg-f6: #F6F7F9;
+      --bg-f3: #F3F4F6;
+      --line-e: #E5E8EB;
+      --line-d: #D1D6DB;
+      --white: #FFFFFF;
+      --success: #22C55E;
+      --warning: #F59E0B;
+      --error: #EF4444;
+      
+      --gnb-width-expanded: 224px;
+      --gnb-width-collapsed: 56px;
+      --transition-fast: 0.15s ease;
+      --transition-normal: 0.25s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-f6);
+      color: var(--font-1);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* GNB */
+    .gnb {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--gnb-width-expanded);
+      height: 100vh;
+      background: var(--white);
+      border-right: 1px solid var(--line-e);
+      display: flex;
+      flex-direction: column;
+      transition: width var(--transition-normal);
+      z-index: 100;
+    }
+
+    .gnb.collapsed {
+      width: var(--gnb-width-collapsed);
+    }
+
+    .gnb-header {
+      height: 56px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+
+    .gnb-header:hover {
+      background: var(--bg-f9);
+    }
+
+    .gnb-logo {
+      display: flex;
+      align-items: center;
+      opacity: 1;
+      transition: opacity var(--transition-fast);
+    }
+
+    .gnb.collapsed .gnb-logo {
+      opacity: 0;
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .gnb-logo-text {
+      font-size: 18px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .gnb-logo-text span:first-child {
+      color: var(--primary-blue);
+    }
+
+    .gnb-logo-text span:last-child {
+      color: var(--font-1);
+    }
+
+    .gnb-hamburger {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      opacity: 0;
+      position: absolute;
+      pointer-events: none;
+      transition: opacity var(--transition-fast);
+    }
+
+    .gnb.collapsed .gnb-hamburger {
+      opacity: 1;
+      position: relative;
+      pointer-events: auto;
+    }
+
+    .gnb-hamburger span {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background: var(--font-1);
+      border-radius: 1px;
+    }
+
+    .gnb-nav {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 8px 0;
+    }
+
+    .gnb-nav::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .gnb-nav::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .gnb-nav::-webkit-scrollbar-thumb {
+      background: var(--line-d);
+      border-radius: 2px;
+    }
+
+    .menu-group {
+      margin-bottom: 4px;
+      position: relative;
+    }
+
+    .menu-group-header {
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+      position: relative;
+    }
+
+    .menu-group-header:hover {
+      background: var(--bg-f9);
+    }
+
+    .menu-group-header.active {
+      background: var(--bg-f3);
+    }
+
+    .menu-icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-icon svg {
+      width: 20px;
+      height: 20px;
+      color: var(--font-2);
+      transition: color var(--transition-fast);
+    }
+
+    .menu-group-header:hover .menu-icon svg,
+    .menu-group-header.active .menu-icon svg {
+      color: var(--primary-blue);
+    }
+
+    .menu-group-title {
+      margin-left: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--font-1);
+      white-space: nowrap;
+      flex: 1;
+      opacity: 1;
+      transition: opacity var(--transition-fast);
+    }
+
+    .gnb.collapsed .menu-group-title {
+      opacity: 0;
+    }
+
+    .menu-arrow {
+      width: 16px;
+      height: 16px;
+      transition: transform var(--transition-fast), opacity var(--transition-fast);
+    }
+
+    .menu-arrow svg {
+      width: 16px;
+      height: 16px;
+      color: var(--font-3);
+    }
+
+    .gnb.collapsed .menu-arrow {
+      opacity: 0;
+    }
+
+    .menu-group.open .menu-arrow {
+      transform: rotate(180deg);
+    }
+
+    .submenu {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height var(--transition-normal);
+    }
+
+    .menu-group.open .submenu {
+      max-height: 500px;
+    }
+
+    .gnb.collapsed .submenu {
+      max-height: 0 !important;
+    }
+
+    .submenu-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px 8px 52px;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+      text-decoration: none;
+    }
+
+    .submenu-item:hover {
+      background: var(--bg-f9);
+    }
+
+    .submenu-item.active {
+      background: var(--bg-f3);
+    }
+
+    .submenu-item-text {
+      font-size: 13px;
+      color: var(--font-2);
+      white-space: nowrap;
+    }
+
+    .submenu-item.active .submenu-item-text {
+      color: var(--primary-blue);
+      font-weight: 500;
+    }
+
+    /* Floating Submenu */
+    .floating-submenu {
+      position: fixed;
+      background: var(--white);
+      border: 1px solid var(--line-e);
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      padding: 8px 0;
+      min-width: 180px;
+      z-index: 150;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(-8px);
+      transition: all var(--transition-fast);
+    }
+
+    .floating-submenu.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+
+    .floating-submenu-title {
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--font-3);
+      border-bottom: 1px solid var(--line-e);
+      margin-bottom: 4px;
+    }
+
+    .floating-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+      text-decoration: none;
+    }
+
+    .floating-item:hover {
+      background: var(--bg-f9);
+    }
+
+    .floating-item.active {
+      background: var(--bg-f3);
+    }
+
+    .floating-item-text {
+      font-size: 13px;
+      color: var(--font-2);
+    }
+
+    .floating-item.active .floating-item-text {
+      color: var(--primary-blue);
+      font-weight: 500;
+    }
+
+    /* Main Content - Full Height Layout */
+    .main-wrapper {
+      margin-left: var(--gnb-width-expanded);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: margin-left var(--transition-normal);
+    }
+
+    .gnb.collapsed ~ .main-wrapper {
+      margin-left: var(--gnb-width-collapsed);
+    }
+
+    /* Fixed Header Area */
+    .fixed-header {
+      flex-shrink: 0;
+      background: var(--bg-f6);
+      padding: 16px 24px 0 24px;
+    }
+
+    /* Page Header */
+    .page-header {
+      margin-bottom: 12px;
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--font-1);
+    }
+
+    .page-description {
+      font-size: 13px;
+      color: var(--font-3);
+    }
+
+    /* Content Card */
+    .content-card {
+      background: var(--white);
+      border-radius: 12px;
+      border: 1px solid var(--line-e);
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      margin: 0 24px 24px 24px;
+    }
+
+    /* Filter + Action 통합 영역 */
+    .toolbar {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line-e);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .filter-section {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .filter-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--font-3);
+    }
+
+    /* 더 컴팩트한 Select */
+    .filter-select {
+      min-width: 140px;
+      height: 32px;
+      padding: 0 28px 0 10px;
+      border: 1px solid var(--line-d);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--font-1);
+      background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238B95A1' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 8px center;
+      appearance: none;
+      cursor: pointer;
+      transition: border-color var(--transition-fast);
+    }
+
+    .filter-select:hover {
+      border-color: var(--font-3);
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--primary-blue);
+    }
+
+    /* Multi Select */
+    .multi-select-wrapper {
+      position: relative;
+      min-width: 140px;
+    }
+
+    .multi-select-trigger {
+      height: 32px;
+      padding: 0 28px 0 10px;
+      border: 1px solid var(--line-d);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--font-1);
+      background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238B95A1' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 8px center;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      transition: border-color var(--transition-fast);
+    }
+
+    .multi-select-trigger:hover {
+      border-color: var(--font-3);
+    }
+
+    .multi-select-trigger.active {
+      border-color: var(--primary-blue);
+    }
+
+    .multi-select-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      min-width: 100%;
+      max-height: 240px;
+      overflow-y: auto;
+      background: var(--white);
+      border: 1px solid var(--line-d);
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      z-index: 50;
+      display: none;
+    }
+
+    .multi-select-dropdown.show {
+      display: block;
+    }
+
+    .multi-select-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+
+    .multi-select-option:hover {
+      background: var(--bg-f9);
+    }
+
+    .multi-select-option input {
+      width: 14px;
+      height: 14px;
+      accent-color: var(--primary-blue);
+    }
+
+    .multi-select-option label {
+      font-size: 13px;
+      color: var(--font-1);
+      cursor: pointer;
+    }
+
+    .filter-btn {
+      height: 32px;
+      padding: 0 14px;
+      background: var(--bg-f3);
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--font-2);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .filter-btn:hover {
+      background: var(--line-e);
+    }
+
+    .filter-reset-btn {
+      height: 32px;
+      padding: 0 12px;
+      background: var(--white);
+      border: 1px solid var(--line-d);
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--font-2);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all var(--transition-fast);
+    }
+
+    .filter-reset-btn:hover {
+      background: var(--bg-f9);
+      border-color: var(--font-3);
+    }
+
+    .filter-reset-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Action Area */
+    .action-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .selected-count {
+      font-size: 12px;
+      color: var(--font-3);
+    }
+
+    .selected-count strong {
+      color: var(--primary-blue);
+      font-weight: 600;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn {
+      height: 32px;
+      padding: 0 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-primary {
+      background: var(--primary-blue);
+      border: none;
+      color: var(--white);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-blue-hover);
+    }
+
+    .btn-secondary {
+      background: var(--white);
+      border: 1px solid var(--line-d);
+      color: var(--font-1);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-f9);
+      border-color: var(--font-3);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn:disabled:hover {
+      background: var(--white);
+      border-color: var(--line-d);
+    }
+
+    .btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Table Container */
+    .table-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* 고정 테이블 헤더 */
+    .table-header {
+      flex-shrink: 0;
+      background: var(--bg-f9);
+      border-bottom: 1px solid var(--line-e);
+    }
+
+    .table-header table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table-header th {
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--font-2);
+      white-space: nowrap;
+    }
+
+    /* 스크롤 테이블 바디 */
+    .table-body {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .table-body table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table-body td {
+      padding: 10px 16px;
+      font-size: 13px;
+      color: var(--font-1);
+      border-bottom: 1px solid var(--line-e);
+    }
+
+    .table-body tr:hover td {
+      background: var(--bg-f9);
+    }
+
+    .table-body tr {
+      cursor: pointer;
+    }
+
+    .table-body tr.selected td {
+      background: #EEF0FF;
+    }
+
+    .table-body tr.selected:hover td {
+      background: #E5E8FF;
+    }
+
+    .table-body tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* 컬럼 너비 고정 */
+    .col-checkbox { width: 48px; text-align: center; }
+    .col-quarter { width: 120px; }
+    .col-brand { width: 100px; }
+    .col-campus { width: 120px; }
+    .col-period { width: 200px; }
+    .col-modified { width: 140px; }
+    .col-created { width: 140px; }
+
+    .checkbox-cell {
+      text-align: center;
+    }
+
+    .checkbox-cell input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary-blue);
+      cursor: pointer;
+    }
+
+    .period-empty {
+      color: var(--font-3);
+      font-style: italic;
+    }
+
+    .period-set {
+      color: var(--primary-blue);
+      font-weight: 500;
+    }
+
+    /* Pagination */
+    .pagination-wrapper {
+      flex-shrink: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      border-top: 1px solid var(--line-e);
+      background: var(--white);
+    }
+
+    .pagination-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pagination-info span {
+      font-size: 12px;
+      color: var(--font-2);
+    }
+
+    .page-size-select {
+      height: 28px;
+      padding: 0 24px 0 8px;
+      border: 1px solid var(--line-d);
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--font-1);
+      background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B95A1' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 6px center;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .pagination-pages {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .page-btn {
+      min-width: 28px;
+      height: 28px;
+      padding: 0 6px;
+      border: 1px solid var(--line-d);
+      border-radius: 4px;
+      background: var(--white);
+      font-size: 12px;
+      color: var(--font-2);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .page-btn:hover {
+      background: var(--bg-f9);
+      border-color: var(--font-3);
+    }
+
+    .page-btn.active {
+      background: var(--primary-blue);
+      border-color: var(--primary-blue);
+      color: var(--white);
+    }
+
+    .page-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .page-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--transition-fast);
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: var(--white);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      transform: translateY(-20px);
+      transition: transform var(--transition-normal);
+    }
+
+    .modal-overlay.show .modal {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line-e);
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--font-1);
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--font-2);
+      margin-bottom: 6px;
+    }
+
+    .form-select {
+      width: 100%;
+      height: 36px;
+      padding: 0 32px 0 12px;
+      border: 1px solid var(--line-d);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--font-1);
+      background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238B95A1' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 10px center;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .form-select:focus {
+      outline: none;
+      border-color: var(--primary-blue);
+    }
+
+    .form-select option:disabled {
+      color: var(--font-3);
+      background: var(--bg-f9);
+    }
+
+    .form-input {
+      width: 100%;
+      height: 36px;
+      padding: 0 12px;
+      border: 1px solid var(--line-d);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--font-1);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary-blue);
+    }
+
+    .selected-summary {
+      background: var(--bg-f9);
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--font-2);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .selected-summary strong {
+      color: var(--primary-blue);
+    }
+
+    .date-picker-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .date-picker-group .form-input {
+      flex: 1;
+    }
+
+    .date-separator {
+      color: var(--font-3);
+      font-size: 13px;
+    }
+
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--line-e);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .modal-btn {
+      height: 36px;
+      padding: 0 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .modal-btn-cancel {
+      background: var(--white);
+      border: 1px solid var(--line-d);
+      color: var(--font-2);
+    }
+
+    .modal-btn-cancel:hover {
+      background: var(--bg-f9);
+    }
+
+    .modal-btn-confirm {
+      background: var(--primary-blue);
+      border: none;
+      color: var(--white);
+    }
+
+    .modal-btn-confirm:hover {
+      background: var(--primary-blue-hover);
+    }
+
+    /* Alert Modal */
+    .alert-modal {
+      max-width: 340px;
+    }
+
+    .alert-modal .modal-body {
+      text-align: center;
+      padding: 28px 20px;
+    }
+
+    .alert-icon {
+      width: 44px;
+      height: 44px;
+      margin: 0 auto 14px;
+      background: #FEF3C7;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .alert-icon svg {
+      width: 22px;
+      height: 22px;
+      color: var(--warning);
+    }
+
+    .alert-message {
+      font-size: 14px;
+      color: var(--font-1);
+      line-height: 1.5;
+    }
+
+    .alert-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--font-1);
+      margin-bottom: 8px;
+    }
+
+    .modal-btn-reset {
+      background: var(--white);
+      border: 1px solid var(--warning);
+      color: var(--warning);
+    }
+
+    .modal-btn-reset:hover {
+      background: #FEF3C7;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1F2937;
+      color: var(--white);
+      padding: 12px 20px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      z-index: 200;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast-icon {
+      width: 18px;
+      height: 18px;
+      color: var(--success);
+    }
+
+    .toast-message {
+      font-size: 14px;
+    }
+
+    /* 메타 정보 컬럼 스타일 */
+    .col-modified, .col-created {
+      font-size: 12px;
+      color: var(--font-3);
+    }
+
+    .alert-modal .modal-footer {
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <!-- GNB -->
+  <nav class="gnb" id="gnb">
+    <div class="gnb-header" id="gnbHeader">
+      <div class="gnb-logo">
+        <div class="gnb-logo-text">
+          <span>Q</span><span>CMS</span>
+        </div>
+      </div>
+      <div class="gnb-hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+
+    <div class="gnb-nav">
+      <!-- 커리큘럼 관리 -->
+      <div class="menu-group open" data-menu="curriculum">
+        <div class="menu-group-header active">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+          </div>
+          <span class="menu-group-title">커리큘럼 관리</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item active" href="#" data-page="quarter-settings">
+            <span class="submenu-item-text">분기 설정</span>
+          </a>
+          <a class="submenu-item" href="#" data-page="textbook-register">
+            <span class="submenu-item-text">교재 등록</span>
+          </a>
+          <a class="submenu-item" href="#" data-page="curriculum-assign">
+            <span class="submenu-item-text">커리큘럼 배정</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- 콘텐츠 관리 -->
+      <div class="menu-group" data-menu="contents">
+        <div class="menu-group-header">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+              <polyline points="2 17 12 22 22 17"></polyline>
+              <polyline points="2 12 12 17 22 12"></polyline>
+            </svg>
+          </div>
+          <span class="menu-group-title">콘텐츠 관리</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item" href="#" data-page="circular-course">
+            <span class="submenu-item-text">Circular Course</span>
+          </a>
+          <a class="submenu-item" href="#" data-page="retention-course">
+            <span class="submenu-item-text">Retention Course</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Prompt 관리 -->
+      <div class="menu-group" data-menu="prompt">
+        <div class="menu-group-header">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="4 17 10 11 4 5"></polyline>
+              <line x1="12" y1="19" x2="20" y2="19"></line>
+            </svg>
+          </div>
+          <span class="menu-group-title">Prompt 관리</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item" href="#" data-page="content-prompt">
+            <span class="submenu-item-text">콘텐츠 생성 Prompt</span>
+          </a>
+          <a class="submenu-item" href="#" data-page="module-prompt">
+            <span class="submenu-item-text">학습 모듈 Prompt</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- 이용 현황 -->
+      <div class="menu-group" data-menu="usage">
+        <div class="menu-group-header">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+          </div>
+          <span class="menu-group-title">이용 현황</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item" href="#" data-page="teacher-status">
+            <span class="submenu-item-text">선생님 현황</span>
+          </a>
+          <a class="submenu-item" href="#" data-page="student-status">
+            <span class="submenu-item-text">학생 현황</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- 환경설정 -->
+      <div class="menu-group" data-menu="settings">
+        <div class="menu-group-header">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </div>
+          <span class="menu-group-title">환경설정</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item" href="#" data-page="module-settings">
+            <span class="submenu-item-text">학습 모듈 설정</span>
+          </a>
+          <a class="submenu-item" href="#" data-page="media-manage">
+            <span class="submenu-item-text">미디어 관리</span>
+          </a>
+          <a class="submenu-item" href="#" data-page="popup-settings">
+            <span class="submenu-item-text">팝업창 설정</span>
+          </a>
+          <a class="submenu-item" href="#" data-page="permission-manage">
+            <span class="submenu-item-text">권한 관리</span>
+          </a>
+          <a class="submenu-item" href="#" data-page="notification-manage">
+            <span class="submenu-item-text">알림 관리</span>
+          </a>
+          <a class="submenu-item" href="#" data-page="code-manage">
+            <span class="submenu-item-text">코드 관리</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Floating Submenu -->
+  <div class="floating-submenu" id="floatingSubmenu"></div>
+
+  <!-- Main Content -->
+  <main class="main-wrapper">
+    <!-- Fixed Header -->
+    <div class="fixed-header">
+      <div class="page-header">
+        <h1 class="page-title">분기 설정</h1>
+        <p class="page-description">학기/분기별 운영 기간 및 캠퍼스 설정을 관리합니다.</p>
+      </div>
+    </div>
+
+    <!-- Content Card -->
+    <div class="content-card">
+      <!-- Toolbar: Filter + Actions -->
+      <div class="toolbar">
+        <div class="filter-section">
+          <div class="filter-group">
+            <span class="filter-label">연도</span>
+            <div class="multi-select-wrapper" id="yearFilter">
+              <div class="multi-select-trigger" onclick="toggleDropdown('yearDropdown')">
+                <span>전체</span>
+              </div>
+              <div class="multi-select-dropdown" id="yearDropdown">
+                <div class="multi-select-option">
+                  <input type="checkbox" id="year-all" checked onchange="applyFilter()">
+                  <label for="year-all">전체</label>
+                </div>
+                <div class="multi-select-option">
+                  <input type="checkbox" id="year-2024" onchange="applyFilter()">
+                  <label for="year-2024">2024</label>
+                </div>
+                <div class="multi-select-option">
+                  <input type="checkbox" id="year-2025" onchange="applyFilter()">
+                  <label for="year-2025">2025</label>
+                </div>
+                <div class="multi-select-option">
+                  <input type="checkbox" id="year-2026" onchange="applyFilter()">
+                  <label for="year-2026">2026</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <span class="filter-label">분기</span>
+            <div class="multi-select-wrapper" id="quarterFilter">
+              <div class="multi-select-trigger" onclick="toggleDropdown('quarterDropdown')">
+                <span>전체</span>
+              </div>
+              <div class="multi-select-dropdown" id="quarterDropdown">
+                <div class="multi-select-option">
+                  <input type="checkbox" id="quarter-all" checked onchange="applyFilter()">
+                  <label for="quarter-all">전체</label>
+                </div>
+                <div class="multi-select-option">
+                  <input type="checkbox" id="quarter-1" onchange="applyFilter()">
+                  <label for="quarter-1">1분기</label>
+                </div>
+                <div class="multi-select-option">
+                  <input type="checkbox" id="quarter-2" onchange="applyFilter()">
+                  <label for="quarter-2">2분기</label>
+                </div>
+                <div class="multi-select-option">
+                  <input type="checkbox" id="quarter-3" onchange="applyFilter()">
+                  <label for="quarter-3">3분기</label>
+                </div>
+                <div class="multi-select-option">
+                  <input type="checkbox" id="quarter-4" onchange="applyFilter()">
+                  <label for="quarter-4">4분기</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <span class="filter-label">브랜드</span>
+            <div class="multi-select-wrapper" id="brandFilter">
+              <div class="multi-select-trigger" onclick="toggleDropdown('brandDropdown')">
+                <span>전체</span>
+              </div>
+              <div class="multi-select-dropdown" id="brandDropdown">
+                <div class="multi-select-option">
+                  <input type="checkbox" id="brand-all" checked onchange="onBrandChange()">
+                  <label for="brand-all">전체</label>
+                </div>
+                <div class="multi-select-option">
+                  <input type="checkbox" id="brand-choisun" onchange="onBrandChange()">
+                  <label for="brand-choisun">최선어학원</label>
+                </div>
+                <div class="multi-select-option">
+                  <input type="checkbox" id="brand-creo" onchange="onBrandChange()">
+                  <label for="brand-creo">CREO</label>
+                </div>
+                <div class="multi-select-option">
+                  <input type="checkbox" id="brand-mate-choisun" onchange="onBrandChange()">
+                  <label for="brand-mate-choisun">MATE 최선</label>
+                </div>
+                <div class="multi-select-option">
+                  <input type="checkbox" id="brand-mate-creo" onchange="onBrandChange()">
+                  <label for="brand-mate-creo">MATE CREO</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <span class="filter-label">캠퍼스</span>
+            <div class="multi-select-wrapper" id="campusFilter">
+              <div class="multi-select-trigger" onclick="toggleDropdown('campusDropdown')">
+                <span>전체</span>
+              </div>
+              <div class="multi-select-dropdown" id="campusDropdown">
+                <!-- 동적으로 생성됨 -->
+              </div>
+            </div>
+          </div>
+
+          <button class="filter-reset-btn" onclick="resetFilters()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+              <path d="M3 3v5h5"></path>
+            </svg>
+            초기화
+          </button>
+        </div>
+
+        <div class="action-area">
+          <span class="selected-count" id="selectedCount">선택 <strong>0</strong>개</span>
+          <div class="action-buttons">
+            <button class="btn btn-secondary" id="setPeriodBtn" disabled onclick="openPeriodModal()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              기간 설정
+            </button>
+            <button class="btn btn-primary" onclick="openAddQuarterModal()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              분기 추가
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table Container -->
+      <div class="table-container">
+        <!-- Fixed Table Header -->
+        <div class="table-header">
+          <table>
+            <thead>
+              <tr>
+                <th class="col-checkbox checkbox-cell">
+                  <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                </th>
+                <th class="col-quarter">분기</th>
+                <th class="col-brand">브랜드</th>
+                <th class="col-campus">캠퍼스</th>
+                <th class="col-period">기간</th>
+                <th class="col-modified">최근 수정</th>
+                <th class="col-created">등록 정보</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+
+        <!-- Scrollable Table Body -->
+        <div class="table-body">
+          <table>
+            <tbody id="tableBody">
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 1분기</td>
+                <td class="col-brand">최선어학원</td>
+                <td class="col-campus">대치본원</td>
+                <td class="col-period"><span class="period-set">2026-01-11 ~ 2026-09-22</span></td>
+                <td class="col-modified">홍길동, 2026-01-15</td>
+                <td class="col-created">김철수, 2026-01-10</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 1분기</td>
+                <td class="col-brand">최선어학원</td>
+                <td class="col-campus">강동하남</td>
+                <td class="col-period"><span class="period-set">2026-01-11 ~ 2026-09-22</span></td>
+                <td class="col-modified">홍길동, 2026-01-15</td>
+                <td class="col-created">김철수, 2026-01-10</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 1분기</td>
+                <td class="col-brand">최선어학원</td>
+                <td class="col-campus">1동탄</td>
+                <td class="col-period"><span class="period-set">2026-01-11 ~ 2026-09-22</span></td>
+                <td class="col-modified">홍길동, 2026-01-15</td>
+                <td class="col-created">김철수, 2026-01-10</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 1분기</td>
+                <td class="col-brand">최선어학원</td>
+                <td class="col-campus">2동탄</td>
+                <td class="col-period"><span class="period-set">2026-01-11 ~ 2026-09-22</span></td>
+                <td class="col-modified">홍길동, 2026-01-15</td>
+                <td class="col-created">김철수, 2026-01-10</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 1분기</td>
+                <td class="col-brand">최선어학원</td>
+                <td class="col-campus">분당</td>
+                <td class="col-period"><span class="period-set">2026-01-11 ~ 2026-09-22</span></td>
+                <td class="col-modified">홍길동, 2026-01-15</td>
+                <td class="col-created">김철수, 2026-01-10</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 1분기</td>
+                <td class="col-brand">최선어학원</td>
+                <td class="col-campus">송파</td>
+                <td class="col-period"><span class="period-set">2026-01-11 ~ 2026-09-22</span></td>
+                <td class="col-modified">홍길동, 2026-01-15</td>
+                <td class="col-created">김철수, 2026-01-10</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 1분기</td>
+                <td class="col-brand">최선어학원</td>
+                <td class="col-campus">수원</td>
+                <td class="col-period"><span class="period-set">2026-01-11 ~ 2026-09-22</span></td>
+                <td class="col-modified">홍길동, 2026-01-15</td>
+                <td class="col-created">김철수, 2026-01-10</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 1분기</td>
+                <td class="col-brand">최선어학원</td>
+                <td class="col-campus">수지</td>
+                <td class="col-period"><span class="period-set">2026-01-11 ~ 2026-09-22</span></td>
+                <td class="col-modified">홍길동, 2026-01-15</td>
+                <td class="col-created">김철수, 2026-01-10</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 1분기</td>
+                <td class="col-brand">최선어학원</td>
+                <td class="col-campus">영통</td>
+                <td class="col-period"><span class="period-set">2026-01-11 ~ 2026-09-22</span></td>
+                <td class="col-modified">홍길동, 2026-01-15</td>
+                <td class="col-created">김철수, 2026-01-10</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 1분기</td>
+                <td class="col-brand">최선어학원</td>
+                <td class="col-campus">일산</td>
+                <td class="col-period"><span class="period-set">2026-01-11 ~ 2026-09-22</span></td>
+                <td class="col-modified">홍길동, 2026-01-15</td>
+                <td class="col-created">김철수, 2026-01-10</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 1분기</td>
+                <td class="col-brand">최선어학원</td>
+                <td class="col-campus">죽전</td>
+                <td class="col-period"><span class="period-set">2026-01-11 ~ 2026-09-22</span></td>
+                <td class="col-modified">홍길동, 2026-01-15</td>
+                <td class="col-created">김철수, 2026-01-10</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 1분기</td>
+                <td class="col-brand">최선어학원</td>
+                <td class="col-campus">중계</td>
+                <td class="col-period"><span class="period-set">2026-01-11 ~ 2026-09-22</span></td>
+                <td class="col-modified">홍길동, 2026-01-15</td>
+                <td class="col-created">김철수, 2026-01-10</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 1분기</td>
+                <td class="col-brand">최선어학원</td>
+                <td class="col-campus">평촌</td>
+                <td class="col-period"><span class="period-set">2026-01-11 ~ 2026-09-22</span></td>
+                <td class="col-modified">홍길동, 2026-01-15</td>
+                <td class="col-created">김철수, 2026-01-10</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 1분기</td>
+                <td class="col-brand">CREO</td>
+                <td class="col-campus">CREO 대치</td>
+                <td class="col-period"><span class="period-set">2026-01-11 ~ 2026-09-23</span></td>
+                <td class="col-modified">홍길동, 2026-01-15</td>
+                <td class="col-created">김철수, 2026-01-10</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 1분기</td>
+                <td class="col-brand">CREO</td>
+                <td class="col-campus">CREO 송파</td>
+                <td class="col-period"><span class="period-set">2026-01-11 ~ 2026-09-24</span></td>
+                <td class="col-modified">홍길동, 2026-01-15</td>
+                <td class="col-created">김철수, 2026-01-10</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 1분기</td>
+                <td class="col-brand">CREO</td>
+                <td class="col-campus">CREO 하남</td>
+                <td class="col-period"><span class="period-set">2026-01-11 ~ 2026-09-22</span></td>
+                <td class="col-modified">홍길동, 2026-01-15</td>
+                <td class="col-created">김철수, 2026-01-10</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 1분기</td>
+                <td class="col-brand">MATE 최선</td>
+                <td class="col-campus">경기광주</td>
+                <td class="col-period"><span class="period-set">2026-01-11 ~ 2026-09-25</span></td>
+                <td class="col-modified">홍길동, 2026-01-15</td>
+                <td class="col-created">김철수, 2026-01-10</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 1분기</td>
+                <td class="col-brand">MATE 최선</td>
+                <td class="col-campus">광명</td>
+                <td class="col-period"><span class="period-set">2026-01-11 ~ 2026-09-25</span></td>
+                <td class="col-modified">홍길동, 2026-01-15</td>
+                <td class="col-created">김철수, 2026-01-10</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 1분기</td>
+                <td class="col-brand">MATE 최선</td>
+                <td class="col-campus">광주</td>
+                <td class="col-period"><span class="period-set">2026-01-11 ~ 2026-09-25</span></td>
+                <td class="col-modified">홍길동, 2026-01-15</td>
+                <td class="col-created">김철수, 2026-01-10</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 1분기</td>
+                <td class="col-brand">MATE 최선</td>
+                <td class="col-campus">구리남양주</td>
+                <td class="col-period"><span class="period-set">2026-01-11 ~ 2026-09-25</span></td>
+                <td class="col-modified">홍길동, 2026-01-15</td>
+                <td class="col-created">김철수, 2026-01-10</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 1분기</td>
+                <td class="col-brand">MATE 최선</td>
+                <td class="col-campus">김포한강</td>
+                <td class="col-period"><span class="period-set">2026-01-11 ~ 2026-09-25</span></td>
+                <td class="col-modified">홍길동, 2026-01-15</td>
+                <td class="col-created">김철수, 2026-01-10</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 2분기</td>
+                <td class="col-brand">최선어학원</td>
+                <td class="col-campus">대치본원</td>
+                <td class="col-period"><span class="period-empty">미설정</span></td>
+                <td class="col-modified">-</td>
+                <td class="col-created">-</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 2분기</td>
+                <td class="col-brand">최선어학원</td>
+                <td class="col-campus">강동하남</td>
+                <td class="col-period"><span class="period-empty">미설정</span></td>
+                <td class="col-modified">-</td>
+                <td class="col-created">-</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 2분기</td>
+                <td class="col-brand">CREO</td>
+                <td class="col-campus">CREO 대치</td>
+                <td class="col-period"><span class="period-empty">미설정</span></td>
+                <td class="col-modified">-</td>
+                <td class="col-created">-</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 2분기</td>
+                <td class="col-brand">CREO</td>
+                <td class="col-campus">CREO 송파</td>
+                <td class="col-period"><span class="period-empty">미설정</span></td>
+                <td class="col-modified">-</td>
+                <td class="col-created">-</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 2분기</td>
+                <td class="col-brand">CREO</td>
+                <td class="col-campus">CREO 하남</td>
+                <td class="col-period"><span class="period-empty">미설정</span></td>
+                <td class="col-modified">-</td>
+                <td class="col-created">-</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 2분기</td>
+                <td class="col-brand">MATE 최선</td>
+                <td class="col-campus">동래</td>
+                <td class="col-period"><span class="period-empty">미설정</span></td>
+                <td class="col-modified">-</td>
+                <td class="col-created">-</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 2분기</td>
+                <td class="col-brand">MATE 최선</td>
+                <td class="col-campus">동작</td>
+                <td class="col-period"><span class="period-empty">미설정</span></td>
+                <td class="col-modified">-</td>
+                <td class="col-created">-</td>
+              </tr>
+              <tr>
+                <td class="col-checkbox checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td class="col-quarter">2026년 2분기</td>
+                <td class="col-brand">MATE 최선</td>
+                <td class="col-campus">둔산</td>
+                <td class="col-period"><span class="period-empty">미설정</span></td>
+                <td class="col-modified">-</td>
+                <td class="col-created">-</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-wrapper">
+        <div class="pagination-info">
+          <span>총 <strong>156</strong>개</span>
+          <select class="page-size-select" onchange="changePageSize(this.value)">
+            <option value="30" selected>30개</option>
+            <option value="50">50개</option>
+            <option value="80">80개</option>
+            <option value="100">100개</option>
+            <option value="200">200개</option>
+          </select>
+        </div>
+        <div class="pagination-pages">
+          <button class="page-btn" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <button class="page-btn">4</button>
+          <button class="page-btn">5</button>
+          <button class="page-btn">6</button>
+          <button class="page-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 분기 추가 Modal -->
+  <div class="modal-overlay" id="addQuarterModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">분기 추가</h3>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">년도</label>
+          <select class="form-select" id="yearSelect" onchange="onYearChange()">
+            <option value="">년도 선택</option>
+            <option value="2026">2026년</option>
+            <option value="2027">2027년</option>
+            <option value="2028">2028년</option>
+            <option value="2029">2029년</option>
+            <option value="2030">2030년</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">분기</label>
+          <select class="form-select" id="quarterSelect">
+            <option value="">분기 선택</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn-cancel" onclick="closeModal('addQuarterModal')">취소</button>
+        <button class="modal-btn modal-btn-confirm" onclick="confirmAddQuarter()">분기 추가</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 기간 설정 Modal -->
+  <div class="modal-overlay" id="periodModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">기간 설정</h3>
+      </div>
+      <div class="modal-body">
+        <div class="selected-summary" id="periodSummary">
+          <!-- 동적으로 생성됨 -->
+        </div>
+        <div class="form-group">
+          <label class="form-label">기간</label>
+          <div class="date-picker-group">
+            <input type="date" class="form-input" id="startDate" value="2026-01-11">
+            <span class="date-separator">~</span>
+            <input type="date" class="form-input" id="endDate" value="2026-09-22">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn-cancel" onclick="closeModal('periodModal')">취소</button>
+        <button class="modal-btn modal-btn-reset" onclick="confirmReset()">초기화</button>
+        <button class="modal-btn modal-btn-confirm" onclick="confirmPeriod()">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alert Modal - 기간 덮어쓰기 -->
+  <div class="modal-overlay" id="alertModal">
+    <div class="modal alert-modal">
+      <div class="modal-body">
+        <div class="alert-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </div>
+        <p class="alert-message">이미 설정된 기간이 있습니다.<br>기존 기간을 새로운 기간으로 변경하시겠습니까?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn-cancel" onclick="closeModal('alertModal')">취소</button>
+        <button class="modal-btn modal-btn-confirm" onclick="confirmOverwrite()">변경</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alert Modal - 기간 초기화 -->
+  <div class="modal-overlay" id="resetAlertModal">
+    <div class="modal alert-modal">
+      <div class="modal-body">
+        <div class="alert-icon warning">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </div>
+        <h4 class="alert-title">기간을 초기화하시겠습니까?</h4>
+        <p class="alert-message">선택한 캠퍼스의 기간이 미설정 상태가 됩니다.<br>미설정 상태에서는 커리큘럼이 배정되어 있어도 과제가 나가지 않습니다.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn-cancel" onclick="closeModal('resetAlertModal')">취소</button>
+        <button class="modal-btn modal-btn-confirm" onclick="applyReset()">초기화</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+    <span class="toast-message" id="toastMessage">완료되었습니다.</span>
+  </div>
+
+  <script>
+    // 브랜드-캠퍼스 매핑 데이터 (수정됨: CREO 접두어 추가, 최선어학원 중복 제거)
+    const brandCampusMap = {
+      'choisun': ['대치본원', '강동하남', '1동탄', '2동탄', '분당', '송파', '수원', '수지', '영통', '일산', '죽전', '중계', '평촌'],
+      'creo': ['CREO 대치', 'CREO 송파', 'CREO 하남'],
+      'mate-choisun': ['경기광주', '광명', '광주', '구리남양주', '김포한강', '동래', '동작', '둔산', '마포', '부천', '세종', '송도', '운정', '은평', '인천남동', '전주', '창원', '천안', '청라', '평택국제', '포항남구', '포항북구'],
+      'mate-creo': ['경기광주', '광명', '광주', '구리남양주', '김포한강', '동래', '동작', '둔산', '마포', '부천', '세종', '송도', '운정', '은평', '인천남동', '전주', '창원', '천안', '청라', '평택국제', '포항남구', '포항북구']
+    };
+
+    // Menu data for floating submenu
+    const menuData = {
+      'curriculum': {
+        title: '커리큘럼 관리',
+        items: [
+          { page: 'quarter-settings', text: '분기 설정' },
+          { page: 'textbook-register', text: '교재 등록' },
+          { page: 'curriculum-assign', text: '커리큘럼 배정' }
+        ]
+      },
+      'contents': {
+        title: '콘텐츠 관리',
+        items: [
+          { page: 'circular-course', text: 'Circular Course' },
+          { page: 'retention-course', text: 'Retention Course' }
+        ]
+      },
+      'prompt': {
+        title: 'Prompt 관리',
+        items: [
+          { page: 'content-prompt', text: '콘텐츠 생성 Prompt' },
+          { page: 'module-prompt', text: '학습 모듈 Prompt' }
+        ]
+      },
+      'usage': {
+        title: '이용 현황',
+        items: [
+          { page: 'teacher-status', text: '선생님 현황' },
+          { page: 'student-status', text: '학생 현황' }
+        ]
+      },
+      'settings': {
+        title: '환경설정',
+        items: [
+          { page: 'module-settings', text: '학습 모듈 설정' },
+          { page: 'media-manage', text: '미디어 관리' },
+          { page: 'popup-settings', text: '팝업창 설정' },
+          { page: 'permission-manage', text: '권한 관리' },
+          { page: 'notification-manage', text: '알림 관리' },
+          { page: 'code-manage', text: '코드 관리' }
+        ]
+      }
+    };
+
+    let currentActivePage = 'quarter-settings';
+    let isOverFloating = false;
+
+    // 캠퍼스 드롭다운 업데이트
+    function updateCampusDropdown() {
+      const campusDropdown = document.getElementById('campusDropdown');
+      const selectedBrands = [];
+      
+      if (document.getElementById('brand-all').checked) {
+        selectedBrands.push(...Object.keys(brandCampusMap));
+      } else {
+        if (document.getElementById('brand-choisun').checked) selectedBrands.push('choisun');
+        if (document.getElementById('brand-creo').checked) selectedBrands.push('creo');
+        if (document.getElementById('brand-mate-choisun').checked) selectedBrands.push('mate-choisun');
+        if (document.getElementById('brand-mate-creo').checked) selectedBrands.push('mate-creo');
+      }
+      
+      const campuses = new Set();
+      selectedBrands.forEach(brand => {
+        brandCampusMap[brand]?.forEach(campus => campuses.add(campus));
+      });
+      
+      let html = `
+        <div class="multi-select-option">
+          <input type="checkbox" id="campus-all" checked onchange="applyFilter()">
+          <label for="campus-all">전체</label>
+        </div>
+      `;
+      
+      Array.from(campuses).sort().forEach((campus, idx) => {
+        html += `
+          <div class="multi-select-option">
+            <input type="checkbox" id="campus-${idx}" onchange="applyFilter()">
+            <label for="campus-${idx}">${campus}</label>
+          </div>
+        `;
+      });
+      
+      campusDropdown.innerHTML = html;
+      document.querySelector('#campusFilter .multi-select-trigger span').textContent = '전체';
+    }
+
+    function onBrandChange() {
+      updateCampusDropdown();
+      applyFilter();
+    }
+
+    updateCampusDropdown();
+
+    // GNB Toggle
+    const gnb = document.getElementById('gnb');
+    const floatingSubmenu = document.getElementById('floatingSubmenu');
+    const menuGroups = document.querySelectorAll('.menu-group');
+    const allSubmenuItems = document.querySelectorAll('.submenu-item');
+
+    gnb.addEventListener('click', (e) => {
+      if (e.target.closest('.submenu-item') || e.target.closest('.menu-group-header')) {
+        return;
+      }
+      gnb.classList.toggle('collapsed');
+      hideFloatingSubmenu();
+    });
+
+    // Menu Toggle
+    menuGroups.forEach(group => {
+      const header = group.querySelector('.menu-group-header');
+      const menuKey = group.dataset.menu;
+
+      header.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!gnb.classList.contains('collapsed')) {
+          group.classList.toggle('open');
+        }
+      });
+
+      // 접힌 상태에서 hover 시 floating submenu 표시
+      header.addEventListener('mouseenter', (e) => {
+        if (gnb.classList.contains('collapsed')) {
+          showFloatingSubmenu(menuKey, header);
+        }
+      });
+
+      header.addEventListener('mouseleave', () => {
+        if (gnb.classList.contains('collapsed')) {
+          setTimeout(() => {
+            if (!isOverFloating) {
+              hideFloatingSubmenu();
+            }
+          }, 50);
+        }
+      });
+    });
+
+    // Floating submenu hover 처리
+    floatingSubmenu.addEventListener('mouseenter', () => {
+      isOverFloating = true;
+    });
+
+    floatingSubmenu.addEventListener('mouseleave', () => {
+      isOverFloating = false;
+      hideFloatingSubmenu();
+    });
+
+    function showFloatingSubmenu(menuKey, headerElement) {
+      const data = menuData[menuKey];
+      if (!data) return;
+
+      const rect = headerElement.getBoundingClientRect();
+      const gnbWidth = gnb.classList.contains('collapsed') ? 56 : 224;
+
+      floatingSubmenu.style.left = `${gnbWidth + 4}px`;
+      floatingSubmenu.style.top = `${rect.top}px`;
+
+      let html = `<div class="floating-submenu-title">${data.title}</div>`;
+      data.items.forEach(item => {
+        const isActive = item.page === currentActivePage ? 'active' : '';
+        html += `
+          <a class="floating-item ${isActive}" href="#" data-page="${item.page}">
+            <span class="floating-item-text">${item.text}</span>
+          </a>
+        `;
+      });
+      floatingSubmenu.innerHTML = html;
+
+      floatingSubmenu.querySelectorAll('.floating-item').forEach(item => {
+        item.addEventListener('click', handlePageChange);
+      });
+
+      floatingSubmenu.classList.add('visible');
+    }
+
+    function hideFloatingSubmenu() {
+      floatingSubmenu.classList.remove('visible');
+    }
+
+    function handlePageChange(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const page = e.currentTarget.dataset.page;
+      if (!page) return;
+
+      currentActivePage = page;
+
+      allSubmenuItems.forEach(i => i.classList.remove('active'));
+      document.querySelectorAll('.menu-group-header').forEach(h => h.classList.remove('active'));
+
+      allSubmenuItems.forEach(i => {
+        if (i.dataset.page === page) {
+          i.classList.add('active');
+          const menuGroup = i.closest('.menu-group');
+          if (menuGroup) {
+            menuGroup.querySelector('.menu-group-header').classList.add('active');
+          }
+        }
+      });
+
+      hideFloatingSubmenu();
+    }
+
+    allSubmenuItems.forEach(item => {
+      item.addEventListener('click', handlePageChange);
+    });
+
+    // Multi-select Dropdown
+    function toggleDropdown(id) {
+      const dropdown = document.getElementById(id);
+      const isVisible = dropdown.classList.contains('show');
+      
+      document.querySelectorAll('.multi-select-dropdown').forEach(d => {
+        d.classList.remove('show');
+        d.previousElementSibling.classList.remove('active');
+      });
+      
+      if (!isVisible) {
+        dropdown.classList.add('show');
+        dropdown.previousElementSibling.classList.add('active');
+      }
+    }
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.multi-select-wrapper')) {
+        document.querySelectorAll('.multi-select-dropdown').forEach(d => {
+          d.classList.remove('show');
+          d.previousElementSibling.classList.remove('active');
+        });
+      }
+    });
+
+    // Select All Checkbox
+    function toggleSelectAll() {
+      const selectAll = document.getElementById('selectAll');
+      const checkboxes = document.querySelectorAll('.row-checkbox');
+      checkboxes.forEach(cb => cb.checked = selectAll.checked);
+      updateSelectedCount();
+    }
+
+    // Update Selected Count
+    function updateSelectedCount() {
+      const checked = document.querySelectorAll('.row-checkbox:checked').length;
+      document.getElementById('selectedCount').innerHTML = `선택 <strong>${checked}</strong>개`;
+      document.getElementById('setPeriodBtn').disabled = checked === 0;
+      
+      const total = document.querySelectorAll('.row-checkbox').length;
+      document.getElementById('selectAll').checked = checked === total && total > 0;
+
+      // 선택된 행 스타일 적용
+      document.querySelectorAll('#tableBody tr').forEach(row => {
+        const checkbox = row.querySelector('.row-checkbox');
+        if (checkbox.checked) {
+          row.classList.add('selected');
+        } else {
+          row.classList.remove('selected');
+        }
+      });
+    }
+
+    // 이미 생성된 년도+분기 조합 (테이블에서 추출)
+    function getExistingQuarters() {
+      const existing = new Set();
+      document.querySelectorAll('#tableBody tr').forEach(row => {
+        const quarterText = row.querySelector('.col-quarter').textContent.trim();
+        // "2026년 1분기" 형식에서 파싱
+        const match = quarterText.match(/(\d{4})년\s*(\d)분기/);
+        if (match) {
+          existing.add(`${match[1]}-${match[2]}`);
+        }
+      });
+      return existing;
+    }
+
+    // 년도 선택 시 분기 옵션 업데이트
+    function onYearChange() {
+      const yearSelect = document.getElementById('yearSelect');
+      const quarterSelect = document.getElementById('quarterSelect');
+      const selectedYear = yearSelect.value;
+      const existingQuarters = getExistingQuarters();
+
+      // 분기 옵션 초기화
+      quarterSelect.innerHTML = '<option value="">분기 선택</option>';
+      
+      if (!selectedYear) return;
+
+      // 1~4분기 옵션 추가 (이미 존재하면 비활성화)
+      for (let q = 1; q <= 4; q++) {
+        const option = document.createElement('option');
+        option.value = q;
+        option.textContent = `${q}분기`;
+        
+        if (existingQuarters.has(`${selectedYear}-${q}`)) {
+          option.disabled = true;
+          option.textContent = `${q}분기 (생성됨)`;
+        }
+        
+        quarterSelect.appendChild(option);
+      }
+    }
+
+    // Modal Functions
+    function openAddQuarterModal() {
+      // 모달 열 때 초기화
+      document.getElementById('yearSelect').value = '';
+      document.getElementById('quarterSelect').innerHTML = '<option value="">분기 선택</option>';
+      document.getElementById('addQuarterModal').classList.add('show');
+    }
+
+    // 기간 설정 모달 열기 - 분기별로 그룹화하여 요약 표시
+    function openPeriodModal() {
+      const checkedRows = document.querySelectorAll('.row-checkbox:checked');
+      const quarterGroups = {};
+      
+      checkedRows.forEach(cb => {
+        const row = cb.closest('tr');
+        const quarterText = row.querySelector('.col-quarter').textContent.trim();
+        
+        if (!quarterGroups[quarterText]) {
+          quarterGroups[quarterText] = 0;
+        }
+        quarterGroups[quarterText]++;
+      });
+      
+      // 요약 메시지 생성
+      const summaryParts = [];
+      for (const [quarter, count] of Object.entries(quarterGroups)) {
+        summaryParts.push(`<strong>${quarter}</strong>의 <strong>${count}</strong>개의 캠퍼스`);
+      }
+      
+      const summaryText = summaryParts.join(', ') + '를 선택하셨습니다.';
+      document.getElementById('periodSummary').innerHTML = summaryText;
+      document.getElementById('periodModal').classList.add('show');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('show');
+    }
+
+    function confirmAddQuarter() {
+      const year = document.getElementById('yearSelect').value;
+      const quarterSelect = document.getElementById('quarterSelect');
+      const quarter = quarterSelect.value;
+      
+      // 년도, 분기 선택 여부 확인
+      if (!year || !quarter) {
+        return;
+      }
+
+      // 선택한 분기가 비활성화된 옵션인지 확인
+      const selectedOption = quarterSelect.options[quarterSelect.selectedIndex];
+      if (selectedOption.disabled) {
+        return;
+      }
+      
+      // 실제 구현 시 데이터 추가 로직
+      console.log(`${year}년 ${quarter}분기 추가`);
+      closeModal('addQuarterModal');
+      showToast(`${year}년 ${quarter}분기가 추가되었습니다.`);
+    }
+
+    function confirmPeriod() {
+      const checkedRows = document.querySelectorAll('.row-checkbox:checked');
+      let hasExistingPeriod = false;
+      
+      checkedRows.forEach(cb => {
+        const row = cb.closest('tr');
+        const periodCell = row.querySelector('.col-period span');
+        if (periodCell.classList.contains('period-set')) {
+          hasExistingPeriod = true;
+        }
+      });
+      
+      if (hasExistingPeriod) {
+        closeModal('periodModal');
+        document.getElementById('alertModal').classList.add('show');
+      } else {
+        applyPeriod();
+      }
+    }
+
+    function confirmOverwrite() {
+      closeModal('alertModal');
+      applyPeriod();
+    }
+
+    function applyPeriod() {
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+      
+      const checkedRows = document.querySelectorAll('.row-checkbox:checked');
+      const count = checkedRows.length;
+      checkedRows.forEach(cb => {
+        const row = cb.closest('tr');
+        const periodCell = row.querySelector('.col-period');
+        periodCell.innerHTML = `<span class="period-set">${startDate} ~ ${endDate}</span>`;
+        
+        // 최근 수정 정보 업데이트
+        const modifiedCell = row.querySelector('.col-modified');
+        modifiedCell.textContent = '홍길동, 2026-01-19';
+        
+        cb.checked = false;
+      });
+      
+      updateSelectedCount();
+      closeModal('periodModal');
+      showToast(`${count}개 캠퍼스의 기간이 설정되었습니다.`);
+    }
+
+    // 기간 초기화 확인
+    function confirmReset() {
+      closeModal('periodModal');
+      document.getElementById('resetAlertModal').classList.add('show');
+    }
+
+    // 기간 초기화 적용
+    function applyReset() {
+      const checkedRows = document.querySelectorAll('.row-checkbox:checked');
+      const count = checkedRows.length;
+      
+      checkedRows.forEach(cb => {
+        const row = cb.closest('tr');
+        const periodCell = row.querySelector('.col-period');
+        periodCell.innerHTML = `<span class="period-empty">미설정</span>`;
+        
+        // 최근 수정 정보 초기화
+        const modifiedCell = row.querySelector('.col-modified');
+        modifiedCell.textContent = '-';
+        
+        cb.checked = false;
+      });
+      
+      updateSelectedCount();
+      closeModal('resetAlertModal');
+      showToast(`${count}개 캠퍼스의 기간이 초기화되었습니다.`);
+    }
+
+    // 토스트 표시
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toastMessage');
+      toastMessage.textContent = message;
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    function applyFilter() {
+      console.log('필터 적용됨');
+    }
+
+    function resetFilters() {
+      // 연도 필터 초기화
+      document.getElementById('year-all').checked = true;
+      document.querySelectorAll('#yearDropdown input[type="checkbox"]:not(#year-all)').forEach(cb => {
+        cb.checked = false;
+      });
+      document.querySelector('#yearFilter .multi-select-trigger span').textContent = '전체';
+
+      // 분기 필터 초기화
+      document.getElementById('quarter-all').checked = true;
+      document.querySelectorAll('#quarterDropdown input[type="checkbox"]:not(#quarter-all)').forEach(cb => {
+        cb.checked = false;
+      });
+      document.querySelector('#quarterFilter .multi-select-trigger span').textContent = '전체';
+
+      // 브랜드 필터 초기화
+      document.getElementById('brand-all').checked = true;
+      document.querySelectorAll('#brandDropdown input[type="checkbox"]:not(#brand-all)').forEach(cb => {
+        cb.checked = false;
+      });
+      document.querySelector('#brandFilter .multi-select-trigger span').textContent = '전체';
+
+      // 캠퍼스 드롭다운 업데이트 (브랜드 전체 선택 상태로)
+      updateCampusDropdown();
+
+      console.log('필터 초기화됨');
+    }
+
+    function changePageSize(size) {
+      console.log(`페이지당 ${size}개씩 표시`);
+      // 실제 구현 시 테이블 데이터 갱신 로직
+    }
+
+    // 행 클릭 시 체크박스 토글
+    document.querySelectorAll('#tableBody tr').forEach(row => {
+      row.style.cursor = 'pointer';
+      row.addEventListener('click', (e) => {
+        // 체크박스 직접 클릭한 경우는 제외 (이미 처리됨)
+        if (e.target.type === 'checkbox') return;
+        
+        const checkbox = row.querySelector('.row-checkbox');
+        checkbox.checked = !checkbox.checked;
+        updateSelectedCount();
+      });
+    });
+  </script>
+</body>
+</html>
