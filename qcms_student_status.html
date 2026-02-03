@@ -1,0 +1,2023 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QCMS - 학생 현황</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-blue: #4C55EB;
+      --primary-blue-hover: #3D45D9;
+      --primary-blue-light: #EEF0FF;
+      --font-1: #191F28;
+      --font-2: #4E5968;
+      --font-3: #8B95A1;
+      --font-4: #B0B8C1;
+      --bg-f9: #F9FAFB;
+      --bg-f6: #F6F7F9;
+      --bg-f3: #F3F4F6;
+      --line-e: #E5E8EB;
+      --line-d: #D1D6DB;
+      --white: #FFFFFF;
+      --success: #22C55E;
+      --warning: #F59E0B;
+      --error: #EF4444;
+
+      --gnb-width-expanded: 224px;
+      --gnb-width-collapsed: 56px;
+      --transition-fast: 0.15s ease;
+      --transition-normal: 0.25s ease;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-f6);
+      color: var(--font-1);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ===== GNB ===== */
+    .gnb {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--gnb-width-expanded);
+      height: 100vh;
+      background: var(--white);
+      border-right: 1px solid var(--line-e);
+      display: flex;
+      flex-direction: column;
+      transition: width var(--transition-normal);
+      z-index: 100;
+    }
+
+    .gnb.collapsed { width: var(--gnb-width-collapsed); }
+
+    .gnb-header {
+      height: 56px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+
+    .gnb-header:hover { background: var(--bg-f9); }
+
+    .gnb-logo {
+      display: flex;
+      align-items: center;
+      opacity: 1;
+      transition: opacity var(--transition-fast);
+    }
+
+    .gnb.collapsed .gnb-logo {
+      opacity: 0;
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .gnb-logo-text { font-size: 18px; font-weight: 700; white-space: nowrap; }
+    .gnb-logo-text span:first-child { color: var(--primary-blue); }
+    .gnb-logo-text span:last-child { color: var(--font-1); }
+
+    .gnb-hamburger {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      opacity: 0;
+      position: absolute;
+      pointer-events: none;
+      transition: opacity var(--transition-fast);
+    }
+
+    .gnb.collapsed .gnb-hamburger {
+      opacity: 1;
+      position: relative;
+      pointer-events: auto;
+    }
+
+    .gnb-hamburger span {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background: var(--font-1);
+      border-radius: 1px;
+    }
+
+    .gnb-nav {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 8px 0;
+    }
+
+    .menu-group { margin-bottom: 4px; position: relative; }
+
+    .menu-group-header {
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+
+    .menu-group-header:hover { background: var(--bg-f9); }
+    .menu-group-header.active { background: var(--bg-f3); }
+
+    .menu-icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-icon svg {
+      width: 20px;
+      height: 20px;
+      color: var(--font-2);
+      transition: color var(--transition-fast);
+    }
+
+    .menu-group-header:hover .menu-icon svg,
+    .menu-group-header.active .menu-icon svg { color: var(--primary-blue); }
+
+    .menu-group-title {
+      margin-left: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--font-1);
+      white-space: nowrap;
+      flex: 1;
+      opacity: 1;
+      transition: opacity var(--transition-fast);
+    }
+
+    .gnb.collapsed .menu-group-title { opacity: 0; }
+
+    .menu-arrow {
+      width: 16px;
+      height: 16px;
+      transition: transform var(--transition-fast), opacity var(--transition-fast);
+    }
+
+    .menu-arrow svg { width: 16px; height: 16px; color: var(--font-3); }
+    .gnb.collapsed .menu-arrow { opacity: 0; }
+    .menu-group.open .menu-arrow { transform: rotate(180deg); }
+
+    .submenu {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height var(--transition-normal);
+    }
+
+    .menu-group.open .submenu { max-height: 500px; }
+    .gnb.collapsed .submenu { max-height: 0 !important; }
+
+    .submenu-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px 8px 52px;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+      text-decoration: none;
+    }
+
+    .submenu-item:hover { background: var(--bg-f9); }
+    .submenu-item.active { background: var(--bg-f3); }
+
+    .submenu-item-text { font-size: 13px; color: var(--font-2); white-space: nowrap; }
+
+    .submenu-item.active .submenu-item-text {
+      color: var(--primary-blue);
+      font-weight: 500;
+    }
+
+    /* Floating Submenu */
+    .floating-submenu {
+      position: fixed;
+      background: var(--white);
+      border: 1px solid var(--line-e);
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      padding: 8px 0;
+      min-width: 180px;
+      z-index: 150;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(-8px);
+      transition: all var(--transition-fast);
+    }
+
+    .floating-submenu.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+
+    .floating-submenu-title {
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--font-3);
+      border-bottom: 1px solid var(--line-e);
+      margin-bottom: 4px;
+    }
+
+    .floating-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+      text-decoration: none;
+    }
+
+    .floating-item:hover { background: var(--bg-f9); }
+    .floating-item.active { background: var(--bg-f3); }
+    .floating-item-text { font-size: 13px; color: var(--font-2); }
+    .floating-item.active .floating-item-text { color: var(--primary-blue); font-weight: 500; }
+
+    /* ===== Main Content ===== */
+    .main-wrapper {
+      margin-left: var(--gnb-width-expanded);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: margin-left var(--transition-normal);
+    }
+
+    .gnb.collapsed ~ .main-wrapper { margin-left: var(--gnb-width-collapsed); }
+
+    .fixed-header {
+      flex-shrink: 0;
+      background: var(--bg-f6);
+      padding: 16px 24px 0 24px;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .page-header-left {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .page-title { font-size: 20px; font-weight: 700; color: var(--font-1); }
+    .page-description { font-size: 13px; color: var(--font-3); }
+
+    /* ===== Content Card ===== */
+    .content-card {
+      flex: 1;
+      margin: 0 24px 24px 24px;
+      background: var(--white);
+      border-radius: 12px;
+      border: 1px solid var(--line-e);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ===== Toolbar ===== */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line-e);
+      flex-shrink: 0;
+    }
+
+    .toolbar-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .toolbar-right { display: flex; align-items: center; gap: 8px; }
+
+    .search-box { position: relative; width: 240px; }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--font-3);
+    }
+
+    .search-input {
+      width: 100%;
+      height: 36px;
+      padding: 0 12px 0 36px;
+      border: 1px solid var(--line-e);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--font-1);
+      transition: border-color var(--transition-fast);
+    }
+
+    .search-input::placeholder { color: var(--font-4); }
+    .search-input:focus { outline: none; border-color: var(--primary-blue); }
+
+    .filter-select {
+      height: 36px;
+      padding: 0 32px 0 12px;
+      border: 1px solid var(--line-e);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--font-1);
+      background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B95A1' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 10px center;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .filter-select:focus { outline: none; border-color: var(--primary-blue); }
+
+    /* ===== Buttons ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 36px;
+      padding: 0 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      border: none;
+      white-space: nowrap;
+    }
+
+    .btn svg { width: 16px; height: 16px; }
+
+    .btn-primary {
+      background: var(--primary-blue);
+      color: var(--white);
+    }
+
+    .btn-primary:hover { background: var(--primary-blue-hover); }
+
+    .btn-secondary {
+      background: var(--white);
+      color: var(--font-2);
+      border: 1px solid var(--line-d);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-f9);
+      border-color: var(--font-3);
+    }
+
+    .btn-outline-primary {
+      background: var(--white);
+      color: var(--primary-blue);
+      border: 1px solid var(--primary-blue);
+    }
+
+    .btn-outline-primary:hover {
+      background: var(--primary-blue-light);
+    }
+
+    /* ===== Table ===== */
+    .table-wrapper { flex: 1; overflow: auto; }
+
+    .data-table { width: 100%; border-collapse: collapse; min-width: 1560px; }
+
+    .data-table thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .data-table thead tr:first-child th {
+      background: var(--bg-f9);
+    }
+
+    .data-table thead tr:nth-child(2) th {
+      background: var(--bg-f3);
+    }
+
+    .data-table th {
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--font-3);
+      border-bottom: 1px solid var(--line-e);
+      white-space: nowrap;
+      position: relative;
+    }
+
+    .data-table th.group-header {
+      text-align: center;
+      color: var(--font-2);
+      font-size: 12px;
+      font-weight: 700;
+      border-left: 1px solid var(--line-e);
+      border-right: 1px solid var(--line-e);
+    }
+
+    .data-table th.sub-header {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--font-3);
+      border-left: 1px solid var(--line-e);
+    }
+
+    .data-table th.sub-header:last-of-type {
+      border-right: 1px solid var(--line-e);
+    }
+
+    .data-table td {
+      padding: 10px 12px;
+      font-size: 13px;
+      color: var(--font-2);
+      border-bottom: 1px solid var(--line-e);
+      vertical-align: middle;
+    }
+
+    .data-table tbody tr {
+      transition: background var(--transition-fast);
+      cursor: pointer;
+    }
+
+    .data-table tbody tr:hover { background: var(--bg-f9); }
+    .data-table tbody tr.selected { background: var(--primary-blue-light); }
+
+    .text-center { text-align: center; }
+
+    /* Sort Header */
+    .sortable-header {
+      cursor: pointer;
+      user-select: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .sortable-header:hover { color: var(--font-2); }
+
+    .sort-icon {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 1px;
+      opacity: 0.4;
+      transition: opacity var(--transition-fast);
+    }
+
+    .sortable-header:hover .sort-icon { opacity: 0.7; }
+
+    .sort-icon svg { width: 10px; height: 10px; }
+
+    .sort-icon.asc .sort-up { color: var(--primary-blue); opacity: 1; }
+    .sort-icon.desc .sort-down { color: var(--primary-blue); opacity: 1; }
+    .sort-icon.asc, .sort-icon.desc { opacity: 1; }
+
+    /* Column widths */
+    .col-student-id { width: 90px; }
+    .col-student-name { width: 90px; }
+    .col-brand { width: 90px; }
+    .col-campus { width: 100px; }
+    .col-grade { width: 60px; text-align: center; }
+    .col-level { width: 60px; text-align: center; }
+    .col-teacher { width: 90px; }
+    .col-hw-count { width: 76px; text-align: center; }
+    .col-hw-score { width: 76px; text-align: center; }
+    .col-hw-date { width: 100px; text-align: center; }
+    .col-qpoint { width: 100px; text-align: center; }
+    .col-payment { width: 80px; text-align: center; }
+
+    .td-center { text-align: center; }
+
+
+
+    /* Course column border */
+    .td-course-start { border-left: 1px solid var(--line-e); }
+    .td-course-end { border-right: 1px solid var(--line-e); }
+
+    /* Badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .badge-active {
+      background: #DCFCE7;
+      color: #166534;
+    }
+
+    .badge-inactive {
+      background: var(--bg-f3);
+      color: var(--font-3);
+    }
+
+    .badge-score-high { color: var(--success); font-weight: 600; }
+    .badge-score-mid { color: var(--font-2); font-weight: 500; }
+    .badge-score-low { color: var(--error); font-weight: 600; }
+
+    /* ===== Pagination ===== */
+    .pagination-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      border-top: 1px solid var(--line-e);
+      background: var(--white);
+      flex-shrink: 0;
+    }
+
+    .pagination-info { display: flex; align-items: center; gap: 10px; }
+    .pagination-info span { font-size: 12px; color: var(--font-2); }
+
+    .page-size-select {
+      height: 28px;
+      padding: 0 24px 0 8px;
+      border: 1px solid var(--line-d);
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--font-1);
+      background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B95A1' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 6px center;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .pagination-pages { display: flex; align-items: center; gap: 4px; }
+
+    .page-btn {
+      min-width: 28px;
+      height: 28px;
+      padding: 0 6px;
+      border: 1px solid var(--line-d);
+      border-radius: 4px;
+      background: var(--white);
+      font-size: 12px;
+      color: var(--font-2);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page-btn:hover { background: var(--bg-f9); border-color: var(--font-3); }
+
+    .page-btn.active {
+      background: var(--primary-blue);
+      border-color: var(--primary-blue);
+      color: var(--white);
+    }
+
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .page-btn:disabled:hover { background: var(--white); border-color: var(--line-d); }
+
+    .page-btn svg { width: 14px; height: 14px; }
+
+    /* ===== Side Peek ===== */
+    .side-peek-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 200;
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--transition-normal);
+    }
+
+    .side-peek-overlay.show { opacity: 1; visibility: visible; }
+
+    .side-peek {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 800px;
+      height: 100vh;
+      background: var(--white);
+      box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+      z-index: 201;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform var(--transition-normal);
+    }
+
+    .side-peek-overlay.show .side-peek { transform: translateX(0); }
+
+    .side-peek-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--line-e);
+      flex-shrink: 0;
+    }
+
+    .side-peek-title { font-size: 18px; font-weight: 600; color: var(--font-1); }
+
+    .side-peek-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      color: var(--font-3);
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all var(--transition-fast);
+    }
+
+    .side-peek-close:hover { background: var(--bg-f9); color: var(--font-1); }
+
+    /* Student Info */
+    .student-info {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--line-e);
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    .info-item { display: flex; align-items: center; gap: 6px; }
+    .info-label { font-size: 12px; color: var(--font-3); font-weight: 500; }
+    .info-value { font-size: 13px; color: var(--font-1); font-weight: 500; }
+
+    /* Side Peek Tabs */
+    .side-peek-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--line-e);
+      padding: 0 24px;
+      flex-shrink: 0;
+    }
+
+    .side-peek-tab {
+      padding: 14px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--font-3);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all var(--transition-fast);
+      margin-bottom: -1px;
+    }
+
+    .side-peek-tab:hover { color: var(--font-2); }
+
+    .side-peek-tab.active {
+      color: var(--primary-blue);
+      border-bottom-color: var(--primary-blue);
+    }
+
+    .side-peek-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+
+    /* Tab Content */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Detail Table */
+    .detail-table-wrapper { overflow-x: auto; }
+
+    .detail-table { width: 100%; border-collapse: collapse; min-width: 700px; }
+
+    .detail-table th,
+    .detail-table td {
+      padding: 10px 12px;
+      border: 1px solid var(--line-e);
+      font-size: 13px;
+      vertical-align: top;
+    }
+
+    .detail-table th {
+      background: var(--bg-f9);
+      font-weight: 600;
+      color: var(--font-3);
+      text-align: left;
+      font-size: 12px;
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+    }
+
+    .detail-table td { color: var(--font-2); }
+
+    /* Module Tags */
+    .module-tags { display: flex; flex-direction: column; gap: 4px; }
+
+    .module-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      background: var(--bg-f9);
+      border: 1px solid var(--line-e);
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--font-2);
+      white-space: nowrap;
+    }
+
+    .module-tag .score {
+      font-weight: 600;
+      margin-left: 2px;
+    }
+
+    .module-tag .score.high { color: var(--success); }
+    .module-tag .score.mid { color: var(--primary-blue); }
+    .module-tag .score.low { color: var(--error); }
+
+    .module-count {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--font-1);
+    }
+
+    .module-count span { color: var(--font-3); font-weight: 400; }
+
+    .avg-score {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .avg-score.high { color: var(--success); }
+    .avg-score.mid { color: var(--primary-blue); }
+    .avg-score.low { color: var(--error); }
+
+    /* Summary Cards in Side Peek */
+    .summary-cards {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .summary-card {
+      flex: 1;
+      padding: 16px;
+      border: 1px solid var(--line-e);
+      border-radius: 10px;
+      background: var(--bg-f9);
+    }
+
+    .summary-card-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--font-3);
+      margin-bottom: 10px;
+    }
+
+    .summary-card-stats { display: flex; gap: 20px; }
+
+    .summary-stat { display: flex; flex-direction: column; gap: 2px; }
+    .summary-stat-label { font-size: 11px; color: var(--font-4); }
+    .summary-stat-value { font-size: 16px; font-weight: 700; color: var(--font-1); }
+
+    /* No Data */
+    .no-data {
+      text-align: center;
+      padding: 40px 0;
+      color: var(--font-4);
+      font-size: 13px;
+    }
+
+    /* Detail Filter Bar */
+    .detail-filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .detail-filter-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--font-3);
+      white-space: nowrap;
+    }
+
+    .detail-filter-select {
+      height: 32px;
+      padding: 0 28px 0 10px;
+      border: 1px solid var(--line-e);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--font-1);
+      background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B95A1' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 8px center;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .detail-filter-select:focus { outline: none; border-color: var(--primary-blue); }
+
+    /* Textbook group separator */
+    .detail-table tr.group-first td { border-top: 2px solid var(--line-d); }
+    .detail-table tr.row-hidden { display: none; }
+
+    /* ===== Toast ===== */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--font-1);
+      color: var(--white);
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 400;
+      opacity: 0;
+      transition: all var(--transition-normal);
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+
+  </style>
+</head>
+<body>
+  <!-- GNB -->
+  <nav class="gnb" id="gnb">
+    <div class="gnb-header" id="gnbHeader">
+      <div class="gnb-logo">
+        <div class="gnb-logo-text"><span>Q</span><span>CMS</span></div>
+      </div>
+      <div class="gnb-hamburger">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <div class="gnb-nav">
+      <!-- 커리큘럼 관리 -->
+      <div class="menu-group" data-menu="curriculum">
+        <div class="menu-group-header">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+          </div>
+          <span class="menu-group-title">커리큘럼 관리</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item" href="#"><span class="submenu-item-text">분기 설정</span></a>
+          <a class="submenu-item" href="#"><span class="submenu-item-text">교재 등록</span></a>
+          <a class="submenu-item" href="#"><span class="submenu-item-text">커리큘럼 배정</span></a>
+        </div>
+      </div>
+
+      <!-- 콘텐츠 관리 -->
+      <div class="menu-group" data-menu="contents">
+        <div class="menu-group-header">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+          </div>
+          <span class="menu-group-title">콘텐츠 관리</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item" href="#"><span class="submenu-item-text">Circular Course</span></a>
+          <a class="submenu-item" href="#"><span class="submenu-item-text">Retention Course</span></a>
+        </div>
+      </div>
+
+      <!-- Prompt 관리 -->
+      <div class="menu-group" data-menu="prompt">
+        <div class="menu-group-header">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+          </div>
+          <span class="menu-group-title">Prompt 관리</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item" href="#"><span class="submenu-item-text">콘텐츠 생성 Prompt</span></a>
+          <a class="submenu-item" href="#"><span class="submenu-item-text">학습 모듈 Prompt</span></a>
+        </div>
+      </div>
+
+      <!-- 이용 현황 -->
+      <div class="menu-group open" data-menu="usage">
+        <div class="menu-group-header active">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+          </div>
+          <span class="menu-group-title">이용 현황</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item" href="#"><span class="submenu-item-text">선생님 현황</span></a>
+          <a class="submenu-item active" href="#"><span class="submenu-item-text">학생 현황</span></a>
+        </div>
+      </div>
+
+      <!-- 환경설정 -->
+      <div class="menu-group" data-menu="settings">
+        <div class="menu-group-header">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </div>
+          <span class="menu-group-title">환경설정</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item" href="#"><span class="submenu-item-text">학습 모듈 설정</span></a>
+          <a class="submenu-item" href="#"><span class="submenu-item-text">미디어 관리</span></a>
+          <a class="submenu-item" href="#"><span class="submenu-item-text">팝업창 설정</span></a>
+          <a class="submenu-item" href="#"><span class="submenu-item-text">권한 관리</span></a>
+          <a class="submenu-item" href="#"><span class="submenu-item-text">알림 관리</span></a>
+          <a class="submenu-item" href="#"><span class="submenu-item-text">코드 관리</span></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Floating Submenu -->
+  <div class="floating-submenu" id="floatingSubmenu"></div>
+
+  <!-- Main Content -->
+  <div class="main-wrapper">
+    <div class="fixed-header">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1 class="page-title">학생 현황</h1>
+          <span class="page-description">Quantum 서비스를 이용하는 학생의 학습 현황을 조회합니다.</span>
+        </div>
+        <div class="page-header-right">
+        </div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="search-box">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <input type="text" class="search-input" placeholder="학생명, 학생 ID로 검색">
+          </div>
+          <select class="filter-select" id="filterBrand" onchange="updateCampusFilter()">
+            <option value="">브랜드 전체</option>
+            <option value="choisun">최선어학원</option>
+            <option value="creo">CREO</option>
+            <option value="mate-choisun">MATE최선</option>
+            <option value="mate-creo">MATE CREO</option>
+          </select>
+          <select class="filter-select" id="filterCampus">
+            <option value="">캠퍼스 전체</option>
+            <option value="daechi">대치본원</option>
+            <option value="gangdong">강동하남</option>
+            <option value="ilsan">일산</option>
+            <option value="songpa">송파</option>
+          </select>
+          <select class="filter-select">
+            <option value="">학년 전체</option>
+            <option value="e3">초3</option>
+            <option value="e4">초4</option>
+            <option value="e5">초5</option>
+            <option value="e6">초6</option>
+            <option value="m1">중1</option>
+            <option value="m2">중2</option>
+            <option value="m3">중3</option>
+          </select>
+          <select class="filter-select">
+            <option value="">결제 여부 전체</option>
+            <option value="active">결제</option>
+            <option value="inactive">미결제</option>
+          </select>
+
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrapper">
+        <table class="data-table" id="studentTable">
+          <thead>
+            <tr>
+              <th rowspan="2" class="col-student-id">
+                <span class="sortable-header" onclick="toggleSort(this, 'student-id')">
+                  학생 ID
+                  <span class="sort-icon" data-col="student-id">
+                    <svg class="sort-up" viewBox="0 0 10 6"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                    <svg class="sort-down" viewBox="0 0 10 6"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                  </span>
+                </span>
+              </th>
+              <th rowspan="2" class="col-student-name">
+                <span class="sortable-header" onclick="toggleSort(this, 'student-name')">
+                  학생 이름
+                  <span class="sort-icon" data-col="student-name">
+                    <svg class="sort-up" viewBox="0 0 10 6"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                    <svg class="sort-down" viewBox="0 0 10 6"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                  </span>
+                </span>
+              </th>
+              <th rowspan="2" class="col-brand">
+                <span class="sortable-header" onclick="toggleSort(this, 'brand')">
+                  브랜드
+                  <span class="sort-icon" data-col="brand">
+                    <svg class="sort-up" viewBox="0 0 10 6"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                    <svg class="sort-down" viewBox="0 0 10 6"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                  </span>
+                </span>
+              </th>
+              <th rowspan="2" class="col-campus">
+                <span class="sortable-header" onclick="toggleSort(this, 'campus')">
+                  캠퍼스
+                  <span class="sort-icon" data-col="campus">
+                    <svg class="sort-up" viewBox="0 0 10 6"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                    <svg class="sort-down" viewBox="0 0 10 6"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                  </span>
+                </span>
+              </th>
+              <th rowspan="2" class="col-grade">
+                <span class="sortable-header" onclick="toggleSort(this, 'grade')">
+                  학년
+                  <span class="sort-icon" data-col="grade">
+                    <svg class="sort-up" viewBox="0 0 10 6"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                    <svg class="sort-down" viewBox="0 0 10 6"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                  </span>
+                </span>
+              </th>
+              <th rowspan="2" class="col-level">
+                <span class="sortable-header" onclick="toggleSort(this, 'level')">
+                  레벨
+                  <span class="sort-icon" data-col="level">
+                    <svg class="sort-up" viewBox="0 0 10 6"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                    <svg class="sort-down" viewBox="0 0 10 6"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                  </span>
+                </span>
+              </th>
+              <th rowspan="2" class="col-teacher">
+                <span class="sortable-header" onclick="toggleSort(this, 'teacher')">
+                  선생님
+                  <span class="sort-icon" data-col="teacher">
+                    <svg class="sort-up" viewBox="0 0 10 6"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                    <svg class="sort-down" viewBox="0 0 10 6"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                  </span>
+                </span>
+              </th>
+              <th colspan="3" class="group-header" style="background:var(--bg-f9);">Circular Course</th>
+              <th colspan="3" class="group-header" style="background:var(--bg-f9);">Retention Course</th>
+              <th rowspan="2" class="col-qpoint">
+                <span class="sortable-header" onclick="toggleSort(this, 'qpoint')">
+                  누적 Q포인트
+                  <span class="sort-icon" data-col="qpoint">
+                    <svg class="sort-up" viewBox="0 0 10 6"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                    <svg class="sort-down" viewBox="0 0 10 6"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                  </span>
+                </span>
+              </th>
+              <th rowspan="2" class="col-payment">
+                <span class="sortable-header" onclick="toggleSort(this, 'payment')">
+                  결제 여부
+                  <span class="sort-icon" data-col="payment">
+                    <svg class="sort-up" viewBox="0 0 10 6"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                    <svg class="sort-down" viewBox="0 0 10 6"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                  </span>
+                </span>
+              </th>
+            </tr>
+            <tr>
+              <!-- Circular Course sub-headers -->
+              <th class="col-hw-count sub-header">
+                <span class="sortable-header" onclick="toggleSort(this, 'cc-count')">
+                  완료 Unit
+                  <span class="sort-icon" data-col="cc-count">
+                    <svg class="sort-up" viewBox="0 0 10 6"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                    <svg class="sort-down" viewBox="0 0 10 6"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                  </span>
+                </span>
+              </th>
+              <th class="col-hw-score sub-header">
+                <span class="sortable-header" onclick="toggleSort(this, 'cc-score')">
+                  평균 점수
+                  <span class="sort-icon" data-col="cc-score">
+                    <svg class="sort-up" viewBox="0 0 10 6"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                    <svg class="sort-down" viewBox="0 0 10 6"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                  </span>
+                </span>
+              </th>
+              <th class="col-hw-date sub-header">
+                <span class="sortable-header" onclick="toggleSort(this, 'cc-date')">
+                  최근 학습일
+                  <span class="sort-icon" data-col="cc-date">
+                    <svg class="sort-up" viewBox="0 0 10 6"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                    <svg class="sort-down" viewBox="0 0 10 6"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                  </span>
+                </span>
+              </th>
+              <!-- Retention Course sub-headers -->
+              <th class="col-hw-count sub-header">
+                <span class="sortable-header" onclick="toggleSort(this, 'rc-count')">
+                  완료 Unit
+                  <span class="sort-icon" data-col="rc-count">
+                    <svg class="sort-up" viewBox="0 0 10 6"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                    <svg class="sort-down" viewBox="0 0 10 6"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                  </span>
+                </span>
+              </th>
+              <th class="col-hw-score sub-header">
+                <span class="sortable-header" onclick="toggleSort(this, 'rc-score')">
+                  평균 점수
+                  <span class="sort-icon" data-col="rc-score">
+                    <svg class="sort-up" viewBox="0 0 10 6"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                    <svg class="sort-down" viewBox="0 0 10 6"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                  </span>
+                </span>
+              </th>
+              <th class="col-hw-date sub-header">
+                <span class="sortable-header" onclick="toggleSort(this, 'rc-date')">
+                  최근 학습일
+                  <span class="sort-icon" data-col="rc-date">
+                    <svg class="sort-up" viewBox="0 0 10 6"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                    <svg class="sort-down" viewBox="0 0 10 6"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                  </span>
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="openStudentDetail('STU001', '김민준')">
+              <td>STU001</td>
+              <td>김민준</td>
+              <td>최선어학원</td>
+              <td>대치본원</td>
+              <td class="td-center">초5</td>
+              <td class="td-center">BL5</td>
+              <td>박지영</td>
+              <td class="td-center td-course-start">3</td>
+              <td class="td-center"><span class="badge-score-high">87.5</span></td>
+              <td class="td-center td-course-end">2026-01-28</td>
+              <td class="td-center td-course-start">3</td>
+              <td class="td-center"><span class="badge-score-high">82.0</span></td>
+              <td class="td-center td-course-end">2026-01-25</td>
+              <td class="td-center">1,240</td>
+              <td class="td-center"><span class="badge badge-active">결제</span></td>
+            </tr>
+            <tr onclick="openStudentDetail('STU002', '이서연')">
+              <td>STU002</td>
+              <td>이서연</td>
+              <td>최선어학원</td>
+              <td>강동하남</td>
+              <td class="td-center">초6</td>
+              <td class="td-center">BL7</td>
+              <td>김현수</td>
+              <td class="td-center td-course-start">4</td>
+              <td class="td-center"><span class="badge-score-high">92.3</span></td>
+              <td class="td-center td-course-end">2026-01-30</td>
+              <td class="td-center td-course-start">3</td>
+              <td class="td-center"><span class="badge-score-high">88.0</span></td>
+              <td class="td-center td-course-end">2026-01-29</td>
+              <td class="td-center">1,890</td>
+              <td class="td-center"><span class="badge badge-active">결제</span></td>
+            </tr>
+            <tr onclick="openStudentDetail('STU003', '박도윤')">
+              <td>STU003</td>
+              <td>박도윤</td>
+              <td>CREO</td>
+              <td>일산</td>
+              <td class="td-center">초4</td>
+              <td class="td-center">BL3</td>
+              <td>이은지</td>
+              <td class="td-center td-course-start">2</td>
+              <td class="td-center"><span class="badge-score-mid">72.0</span></td>
+              <td class="td-center td-course-end">2026-01-20</td>
+              <td class="td-center td-course-start">1</td>
+              <td class="td-center"><span class="badge-score-mid">68.5</span></td>
+              <td class="td-center td-course-end">2026-01-18</td>
+              <td class="td-center">520</td>
+              <td class="td-center"><span class="badge badge-active">결제</span></td>
+            </tr>
+            <tr onclick="openStudentDetail('STU004', '정하은')">
+              <td>STU004</td>
+              <td>정하은</td>
+              <td>MATE최선</td>
+              <td>대치본원</td>
+              <td class="td-center">중1</td>
+              <td class="td-center">BL8</td>
+              <td>박지영</td>
+              <td class="td-center td-course-start">3</td>
+              <td class="td-center"><span class="badge-score-high">85.2</span></td>
+              <td class="td-center td-course-end">2026-01-27</td>
+              <td class="td-center td-course-start">2</td>
+              <td class="td-center"><span class="badge-score-mid">74.0</span></td>
+              <td class="td-center td-course-end">2026-01-22</td>
+              <td class="td-center">980</td>
+              <td class="td-center"><span class="badge badge-active">결제</span></td>
+            </tr>
+            <tr onclick="openStudentDetail('STU005', '최시우')">
+              <td>STU005</td>
+              <td>최시우</td>
+              <td>MATE CREO</td>
+              <td>송파</td>
+              <td class="td-center">초3</td>
+              <td class="td-center">BL2</td>
+              <td>오세준</td>
+              <td class="td-center td-course-start">2</td>
+              <td class="td-center"><span class="badge-score-low">58.0</span></td>
+              <td class="td-center td-course-end">2026-01-10</td>
+              <td class="td-center td-course-start">0</td>
+              <td class="td-center"><span style="color:var(--font-4);">-</span></td>
+              <td class="td-center td-course-end"><span style="color:var(--font-4);">-</span></td>
+              <td class="td-center">120</td>
+              <td class="td-center"><span class="badge badge-inactive">미결제</span></td>
+            </tr>
+            <tr onclick="openStudentDetail('STU006', '강예린')">
+              <td>STU006</td>
+              <td>강예린</td>
+              <td>최선어학원</td>
+              <td>송파</td>
+              <td class="td-center">중2</td>
+              <td class="td-center">BL10</td>
+              <td>한미정</td>
+              <td class="td-center td-course-start">5</td>
+              <td class="td-center"><span class="badge-score-high">94.1</span></td>
+              <td class="td-center td-course-end">2026-02-01</td>
+              <td class="td-center td-course-start">4</td>
+              <td class="td-center"><span class="badge-score-high">91.5</span></td>
+              <td class="td-center td-course-end">2026-01-31</td>
+              <td class="td-center">2,340</td>
+              <td class="td-center"><span class="badge badge-active">결제</span></td>
+            </tr>
+            <tr onclick="openStudentDetail('STU007', '윤지호')">
+              <td>STU007</td>
+              <td>윤지호</td>
+              <td>CREO</td>
+              <td>강동하남</td>
+              <td class="td-center">초5</td>
+              <td class="td-center">BL6</td>
+              <td>이은지</td>
+              <td class="td-center td-course-start">3</td>
+              <td class="td-center"><span class="badge-score-mid">76.8</span></td>
+              <td class="td-center td-course-end">2026-01-24</td>
+              <td class="td-center td-course-start">2</td>
+              <td class="td-center"><span class="badge-score-mid">71.0</span></td>
+              <td class="td-center td-course-end">2026-01-23</td>
+              <td class="td-center">780</td>
+              <td class="td-center"><span class="badge badge-active">결제</span></td>
+            </tr>
+            <tr onclick="openStudentDetail('STU008', '임수아')">
+              <td>STU008</td>
+              <td>임수아</td>
+              <td>MATE최선</td>
+              <td>일산</td>
+              <td class="td-center">초4</td>
+              <td class="td-center">BL4</td>
+              <td>김현수</td>
+              <td class="td-center td-course-start">0</td>
+              <td class="td-center"><span style="color:var(--font-4);">-</span></td>
+              <td class="td-center td-course-end"><span style="color:var(--font-4);">-</span></td>
+              <td class="td-center td-course-start">0</td>
+              <td class="td-center"><span style="color:var(--font-4);">-</span></td>
+              <td class="td-center td-course-end"><span style="color:var(--font-4);">-</span></td>
+              <td class="td-center">0</td>
+              <td class="td-center"><span class="badge badge-inactive">미결제</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-wrapper">
+        <div class="pagination-info">
+          <span>총 156개</span>
+          <select class="page-size-select">
+            <option value="30">30개씩</option>
+            <option value="50">50개씩</option>
+            <option value="100">100개씩</option>
+          </select>
+        </div>
+        <div class="pagination-pages">
+          <button class="page-btn" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <button class="page-btn">4</button>
+          <button class="page-btn">5</button>
+          <button class="page-btn">6</button>
+          <button class="page-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Side Peek: Student Detail ===== -->
+  <div class="side-peek-overlay" id="studentDetailOverlay">
+    <div class="side-peek">
+      <div class="side-peek-header">
+        <h2 class="side-peek-title" id="sidePeekTitle">김민준 (STU001)</h2>
+        <button class="side-peek-close" onclick="closeStudentDetail()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Student Info Bar -->
+      <div class="student-info">
+        <div class="info-item">
+          <span class="info-label">브랜드</span>
+          <span class="info-value" id="infoBarBrand">최선어학원</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">캠퍼스</span>
+          <span class="info-value" id="infoBarCampus">대치본원</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">학년</span>
+          <span class="info-value" id="infoBarGrade">초5</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">레벨</span>
+          <span class="info-value" id="infoBarLevel">BL5</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">선생님</span>
+          <span class="info-value" id="infoBarTeacher">박지영</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">누적 Q포인트</span>
+          <span class="info-value" id="infoBarQpoint">1,240</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">결제</span>
+          <span class="badge badge-active" id="infoBarPayment">결제</span>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="side-peek-tabs">
+        <div class="side-peek-tab active" onclick="switchDetailTab('circular', this)">Circular Course</div>
+        <div class="side-peek-tab" onclick="switchDetailTab('retention', this)">Retention Course</div>
+      </div>
+
+      <div class="side-peek-body">
+        <!-- Circular Course Tab -->
+        <div class="tab-content active" id="circularTabContent">
+          <div class="detail-filter-bar">
+            <span class="detail-filter-label">교재</span>
+            <select class="detail-filter-select" id="circularTextbookFilter" onchange="filterTextbook('circular', this.value)">
+              <option value="CC Level 3" data-current="true">CC Level 3 (사용중)</option>
+              <option value="CC Level 5">CC Level 5</option>
+            </select>
+          </div>
+
+          <div class="summary-cards">
+            <div class="summary-card">
+              <div class="summary-card-title">학습 요약</div>
+              <div class="summary-card-stats">
+                <div class="summary-stat">
+                  <span class="summary-stat-label">완료 Unit</span>
+                  <span class="summary-stat-value" id="ccSummaryCount">3개</span>
+                </div>
+                <div class="summary-stat">
+                  <span class="summary-stat-label">평균 점수</span>
+                  <span class="summary-stat-value" id="ccSummaryScore">87.5점</span>
+                </div>
+                <div class="summary-stat">
+                  <span class="summary-stat-label">최근 학습일</span>
+                  <span class="summary-stat-value" id="ccSummaryDate">2026-01-28</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-table-wrapper">
+            <table class="detail-table" id="circularDetailTable">
+              <thead>
+                <tr>
+                  <th style="width:70px;">구분</th>
+                  <th style="width:140px;">지문 제목</th>
+                  <th style="width:56px; text-align:center;">학습 모듈</th>
+                  <th>학습 모듈 / 점수</th>
+                  <th style="width:56px; text-align:center;">평균</th>
+                  <th style="width:90px; text-align:center;">학습 날짜</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="group-first" data-textbook="CC Level 3">
+                  <td>Unit 1</td>
+                  <td>The Amazing Rain Forest</td>
+                  <td class="td-center"><span class="module-count">4<span>/5</span></span></td>
+                  <td>
+                    <div class="module-tags">
+                      <span class="module-tag">단어 뜻 맞추기 <span class="score high">80</span></span>
+                      <span class="module-tag">뜻 보고 단어 맞추기 <span class="score high">90</span></span>
+                      <span class="module-tag">지문 빈칸 채우기 <span class="score high">85</span></span>
+                      <span class="module-tag">문장 순서 맞추기 <span class="score mid">75</span></span>
+                    </div>
+                  </td>
+                  <td class="td-center"><span class="avg-score high">82.5</span></td>
+                  <td class="td-center">2026-01-28</td>
+                </tr>
+                <tr data-textbook="CC Level 3">
+                  <td>Unit 1</td>
+                  <td>Life in the Ocean</td>
+                  <td class="td-center"><span class="module-count">5<span>/5</span></span></td>
+                  <td>
+                    <div class="module-tags">
+                      <span class="module-tag">단어 뜻 맞추기 <span class="score high">95</span></span>
+                      <span class="module-tag">뜻 보고 단어 맞추기 <span class="score high">90</span></span>
+                      <span class="module-tag">지문 빈칸 채우기 <span class="score high">85</span></span>
+                      <span class="module-tag">문장 순서 맞추기 <span class="score high">80</span></span>
+                      <span class="module-tag">예문 빈칸 채우기 <span class="score high">90</span></span>
+                    </div>
+                  </td>
+                  <td class="td-center"><span class="avg-score high">88.0</span></td>
+                  <td class="td-center">2026-01-25</td>
+                </tr>
+                <tr data-textbook="CC Level 3">
+                  <td>Unit 2</td>
+                  <td>My Best Friend's Adventure</td>
+                  <td class="td-center"><span class="module-count">5<span>/5</span></span></td>
+                  <td>
+                    <div class="module-tags">
+                      <span class="module-tag">단어 뜻 맞추기 <span class="score high">100</span></span>
+                      <span class="module-tag">뜻 보고 단어 맞추기 <span class="score high">95</span></span>
+                      <span class="module-tag">지문 빈칸 채우기 <span class="score high">90</span></span>
+                      <span class="module-tag">문장 순서 맞추기 <span class="score high">85</span></span>
+                      <span class="module-tag">예문 빈칸 채우기 <span class="score high">90</span></span>
+                    </div>
+                  </td>
+                  <td class="td-center"><span class="avg-score high">92.0</span></td>
+                  <td class="td-center">2026-01-22</td>
+                </tr>
+                <tr class="group-first" data-textbook="CC Level 5">
+                  <td>Unit 1</td>
+                  <td>Healthy Eating Habits</td>
+                  <td class="td-center"><span class="module-count">3<span>/5</span></span></td>
+                  <td>
+                    <div class="module-tags">
+                      <span class="module-tag">단어 뜻 맞추기 <span class="score high">85</span></span>
+                      <span class="module-tag">뜻 보고 단어 맞추기 <span class="score mid">70</span></span>
+                      <span class="module-tag">지문 빈칸 채우기 <span class="score high">80</span></span>
+                    </div>
+                  </td>
+                  <td class="td-center"><span class="avg-score mid">78.3</span></td>
+                  <td class="td-center">2026-01-20</td>
+                </tr>
+                <tr data-textbook="CC Level 5">
+                  <td>Unit 1</td>
+                  <td>Technology in Daily Life</td>
+                  <td class="td-center"><span class="module-count">5<span>/5</span></span></td>
+                  <td>
+                    <div class="module-tags">
+                      <span class="module-tag">단어 뜻 맞추기 <span class="score high">90</span></span>
+                      <span class="module-tag">뜻 보고 단어 맞추기 <span class="score high">85</span></span>
+                      <span class="module-tag">지문 빈칸 채우기 <span class="score high">90</span></span>
+                      <span class="module-tag">문장 순서 맞추기 <span class="score high">95</span></span>
+                      <span class="module-tag">예문 빈칸 채우기 <span class="score high">85</span></span>
+                    </div>
+                  </td>
+                  <td class="td-center"><span class="avg-score high">89.0</span></td>
+                  <td class="td-center">2026-01-18</td>
+                </tr>
+                <tr data-textbook="CC Level 5">
+                  <td>Unit 2</td>
+                  <td>Space Exploration</td>
+                  <td class="td-center"><span class="module-count">4<span>/5</span></span></td>
+                  <td>
+                    <div class="module-tags">
+                      <span class="module-tag">단어 뜻 맞추기 <span class="score high">85</span></span>
+                      <span class="module-tag">뜻 보고 단어 맞추기 <span class="score high">80</span></span>
+                      <span class="module-tag">지문 빈칸 채우기 <span class="score high">90</span></span>
+                      <span class="module-tag">문장 순서 맞추기 <span class="score high">90</span></span>
+                    </div>
+                  </td>
+                  <td class="td-center"><span class="avg-score high">86.3</span></td>
+                  <td class="td-center">2026-01-15</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Retention Course Tab -->
+        <div class="tab-content" id="retentionTabContent">
+          <div class="detail-filter-bar">
+            <span class="detail-filter-label">교재</span>
+            <select class="detail-filter-select" id="retentionTextbookFilter" onchange="filterTextbook('retention', this.value)">
+              <option value="RC Level 2" data-current="true">RC Level 2 (사용중)</option>
+              <option value="RC Level 4">RC Level 4</option>
+            </select>
+          </div>
+
+          <div class="summary-cards">
+            <div class="summary-card">
+              <div class="summary-card-title">학습 요약</div>
+              <div class="summary-card-stats">
+                <div class="summary-stat">
+                  <span class="summary-stat-label">완료 Unit</span>
+                  <span class="summary-stat-value" id="rcSummaryCount">3개</span>
+                </div>
+                <div class="summary-stat">
+                  <span class="summary-stat-label">평균 점수</span>
+                  <span class="summary-stat-value" id="rcSummaryScore">82.0점</span>
+                </div>
+                <div class="summary-stat">
+                  <span class="summary-stat-label">최근 학습일</span>
+                  <span class="summary-stat-value" id="rcSummaryDate">2026-01-25</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-table-wrapper">
+            <table class="detail-table" id="retentionDetailTable">
+              <thead>
+                <tr>
+                  <th style="width:70px;">구분</th>
+                  <th style="width:140px;">지문 제목</th>
+                  <th style="width:56px; text-align:center;">학습 모듈</th>
+                  <th>학습 모듈 / 점수</th>
+                  <th style="width:56px; text-align:center;">평균</th>
+                  <th style="width:90px; text-align:center;">학습 날짜</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="group-first" data-textbook="RC Level 2">
+                  <td>Week 1</td>
+                  <td>Review: Animals Around Us</td>
+                  <td class="td-center"><span class="module-count">3<span>/4</span></span></td>
+                  <td>
+                    <div class="module-tags">
+                      <span class="module-tag">단어 복습 <span class="score high">85</span></span>
+                      <span class="module-tag">문장 복습 <span class="score mid">75</span></span>
+                      <span class="module-tag">Comprehension <span class="score high">80</span></span>
+                    </div>
+                  </td>
+                  <td class="td-center"><span class="avg-score high">80.0</span></td>
+                  <td class="td-center">2026-01-25</td>
+                </tr>
+                <tr data-textbook="RC Level 2">
+                  <td>Week 1</td>
+                  <td>Review: Food and Cooking</td>
+                  <td class="td-center"><span class="module-count">4<span>/4</span></span></td>
+                  <td>
+                    <div class="module-tags">
+                      <span class="module-tag">단어 복습 <span class="score high">90</span></span>
+                      <span class="module-tag">문장 복습 <span class="score high">85</span></span>
+                      <span class="module-tag">Comprehension <span class="score high">95</span></span>
+                      <span class="module-tag">받아쓰기 <span class="score high">80</span></span>
+                    </div>
+                  </td>
+                  <td class="td-center"><span class="avg-score high">87.5</span></td>
+                  <td class="td-center">2026-01-23</td>
+                </tr>
+                <tr data-textbook="RC Level 2">
+                  <td>Week 2</td>
+                  <td>Review: My School</td>
+                  <td class="td-center"><span class="module-count">4<span>/4</span></span></td>
+                  <td>
+                    <div class="module-tags">
+                      <span class="module-tag">단어 복습 <span class="score high">80</span></span>
+                      <span class="module-tag">문장 복습 <span class="score mid">70</span></span>
+                      <span class="module-tag">Comprehension <span class="score high">85</span></span>
+                      <span class="module-tag">받아쓰기 <span class="score mid">75</span></span>
+                    </div>
+                  </td>
+                  <td class="td-center"><span class="avg-score mid">77.5</span></td>
+                  <td class="td-center">2026-01-20</td>
+                </tr>
+                <tr class="group-first" data-textbook="RC Level 4">
+                  <td>Week 1</td>
+                  <td>Review: Sports and Games</td>
+                  <td class="td-center"><span class="module-count">2<span>/4</span></span></td>
+                  <td>
+                    <div class="module-tags">
+                      <span class="module-tag">단어 복습 <span class="score mid">75</span></span>
+                      <span class="module-tag">문장 복습 <span class="score mid">70</span></span>
+                    </div>
+                  </td>
+                  <td class="td-center"><span class="avg-score mid">72.5</span></td>
+                  <td class="td-center">2026-01-18</td>
+                </tr>
+                <tr data-textbook="RC Level 4">
+                  <td>Week 1</td>
+                  <td>Review: Weather and Seasons</td>
+                  <td class="td-center"><span class="module-count">4<span>/4</span></span></td>
+                  <td>
+                    <div class="module-tags">
+                      <span class="module-tag">단어 복습 <span class="score high">90</span></span>
+                      <span class="module-tag">문장 복습 <span class="score high">85</span></span>
+                      <span class="module-tag">Comprehension <span class="score high">90</span></span>
+                      <span class="module-tag">받아쓰기 <span class="score high">85</span></span>
+                    </div>
+                  </td>
+                  <td class="td-center"><span class="avg-score high">87.5</span></td>
+                  <td class="td-center">2026-01-15</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ===== GNB Toggle =====
+    const gnb = document.getElementById('gnb');
+    const floatingSubmenu = document.getElementById('floatingSubmenu');
+    const menuGroups = document.querySelectorAll('.menu-group');
+
+    let currentActivePage = 'student-usage';
+    let isOverFloating = false;
+
+    const menuData = {
+      'curriculum': { title: '커리큘럼 관리', items: [
+        { page: 'quarter-setting', text: '분기 설정' },
+        { page: 'textbook-register', text: '교재 등록' },
+        { page: 'curriculum-assign', text: '커리큘럼 배정' }
+      ]},
+      'contents': { title: '콘텐츠 관리', items: [
+        { page: 'circular-course', text: 'Circular Course' },
+        { page: 'retention-course', text: 'Retention Course' }
+      ]},
+      'prompt': { title: 'Prompt 관리', items: [
+        { page: 'content-prompt', text: '콘텐츠 생성 Prompt' },
+        { page: 'module-prompt', text: '학습 모듈 Prompt' }
+      ]},
+      'usage': { title: '이용 현황', items: [
+        { page: 'teacher-usage', text: '선생님 현황' },
+        { page: 'student-usage', text: '학생 현황' }
+      ]},
+      'settings': { title: '환경설정', items: [
+        { page: 'module-settings', text: '학습 모듈 설정' },
+        { page: 'media-management', text: '미디어 관리' },
+        { page: 'popup-settings', text: '팝업창 설정' },
+        { page: 'permission-management', text: '권한 관리' },
+        { page: 'notification-management', text: '알림 관리' },
+        { page: 'code-management', text: '코드 관리' }
+      ]}
+    };
+
+    // GNB 빈 영역 클릭
+    gnb.addEventListener('click', (e) => {
+      if (e.target.closest('.submenu-item') || e.target.closest('.menu-group-header')) return;
+      gnb.classList.toggle('collapsed');
+      hideFloatingSubmenu();
+    });
+
+    // 메뉴 그룹 헤더 이벤트
+    menuGroups.forEach(group => {
+      const header = group.querySelector('.menu-group-header');
+      const menuKey = group.dataset.menu;
+
+      header.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!gnb.classList.contains('collapsed')) {
+          group.classList.toggle('open');
+        }
+      });
+
+      header.addEventListener('mouseenter', () => {
+        if (gnb.classList.contains('collapsed')) {
+          showFloatingSubmenu(menuKey, header);
+        }
+      });
+
+      header.addEventListener('mouseleave', () => {
+        if (gnb.classList.contains('collapsed')) {
+          setTimeout(() => { if (!isOverFloating) hideFloatingSubmenu(); }, 50);
+        }
+      });
+    });
+
+    floatingSubmenu.addEventListener('mouseenter', () => { isOverFloating = true; });
+    floatingSubmenu.addEventListener('mouseleave', () => { isOverFloating = false; hideFloatingSubmenu(); });
+
+    function showFloatingSubmenu(menuKey, headerElement) {
+      const data = menuData[menuKey];
+      if (!data) return;
+      const rect = headerElement.getBoundingClientRect();
+      const gnbWidth = gnb.classList.contains('collapsed') ? 56 : 224;
+      floatingSubmenu.style.left = `${gnbWidth + 4}px`;
+      floatingSubmenu.style.top = `${rect.top}px`;
+      let html = `<div class="floating-submenu-title">${data.title}</div>`;
+      data.items.forEach(item => {
+        const isActive = item.page === currentActivePage ? 'active' : '';
+        html += `<a class="floating-item ${isActive}" href="#" data-page="${item.page}"><span class="floating-item-text">${item.text}</span></a>`;
+      });
+      floatingSubmenu.innerHTML = html;
+      floatingSubmenu.classList.add('visible');
+    }
+
+    function hideFloatingSubmenu() {
+      floatingSubmenu.classList.remove('visible');
+    }
+
+    // ===== Sort =====
+    let currentSort = { col: null, dir: null };
+
+    function toggleSort(headerEl, colName) {
+      // Reset all sort icons
+      document.querySelectorAll('.sort-icon').forEach(icon => {
+        icon.classList.remove('asc', 'desc');
+      });
+
+      if (currentSort.col === colName) {
+        if (currentSort.dir === 'asc') {
+          currentSort.dir = 'desc';
+        } else if (currentSort.dir === 'desc') {
+          currentSort = { col: null, dir: null };
+          return;
+        }
+      } else {
+        currentSort = { col: colName, dir: 'asc' };
+      }
+
+      const icon = headerEl.querySelector('.sort-icon');
+      if (currentSort.dir) {
+        icon.classList.add(currentSort.dir);
+      }
+
+      showToast(`${getColumnLabel(colName)} ${currentSort.dir === 'asc' ? '오름차순' : '내림차순'} 정렬`);
+    }
+
+    function getColumnLabel(col) {
+      const labels = {
+        'student-id': '학생 ID',
+        'student-name': '학생 이름',
+        'brand': '브랜드',
+        'campus': '캠퍼스',
+        'grade': '학년',
+        'level': '레벨',
+        'teacher': '선생님',
+        'cc-count': 'CC 완료 Unit',
+        'cc-score': 'CC 평균 점수',
+        'cc-date': 'CC 최근 학습일',
+        'rc-count': 'RC 완료 Unit',
+        'rc-score': 'RC 평균 점수',
+        'rc-date': 'RC 최근 학습일',
+        'qpoint': '누적 Q포인트',
+        'payment': '결제 여부'
+      };
+      return labels[col] || col;
+    }
+
+    // ===== Side Peek =====
+    function openStudentDetail(studentId, studentName) {
+      // Update side peek header
+      document.getElementById('sidePeekTitle').textContent = `${studentName} (${studentId})`;
+
+      // Highlight selected row
+      document.querySelectorAll('.data-table tbody tr').forEach(row => row.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+
+      // Update info bar from clicked row
+      const row = event.currentTarget;
+      const cells = row.querySelectorAll('td');
+      document.getElementById('infoBarBrand').textContent = cells[2].textContent;
+      document.getElementById('infoBarCampus').textContent = cells[3].textContent;
+      document.getElementById('infoBarGrade').textContent = cells[4].textContent;
+      document.getElementById('infoBarLevel').textContent = cells[5].textContent;
+      document.getElementById('infoBarTeacher').textContent = cells[6].textContent;
+      document.getElementById('infoBarQpoint').textContent = cells[13].textContent;
+
+      const paymentBadge = document.getElementById('infoBarPayment');
+      const isActive = cells[14].querySelector('.badge-active');
+      paymentBadge.textContent = isActive ? '결제' : '미결제';
+      paymentBadge.className = isActive ? 'badge badge-active' : 'badge badge-inactive';
+
+      // Reset to first tab
+      document.querySelectorAll('.side-peek-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector('.side-peek-tab').classList.add('active');
+      document.getElementById('circularTabContent').classList.add('active');
+      document.getElementById('retentionTabContent').classList.remove('active');
+
+      // Set textbook filters to current textbook (default)
+      setDefaultTextbookFilter('circularTextbookFilter', 'circular');
+      setDefaultTextbookFilter('retentionTextbookFilter', 'retention');
+
+      // Show
+      document.getElementById('studentDetailOverlay').classList.add('show');
+    }
+
+    function setDefaultTextbookFilter(selectId, courseType) {
+      const select = document.getElementById(selectId);
+      const currentOption = select.querySelector('option[data-current="true"]');
+      if (currentOption) {
+        select.value = currentOption.value;
+      } else {
+        select.value = '';
+      }
+      filterTextbook(courseType, select.value);
+    }
+
+    function closeStudentDetail() {
+      document.getElementById('studentDetailOverlay').classList.remove('show');
+      document.querySelectorAll('.data-table tbody tr').forEach(row => row.classList.remove('selected'));
+    }
+
+    // Tab switching
+    function switchDetailTab(tabType, tabElement) {
+      document.querySelectorAll('.side-peek-tab').forEach(tab => tab.classList.remove('active'));
+      tabElement.classList.add('active');
+
+      document.getElementById('circularTabContent').classList.remove('active');
+      document.getElementById('retentionTabContent').classList.remove('active');
+
+      if (tabType === 'circular') {
+        document.getElementById('circularTabContent').classList.add('active');
+      } else {
+        document.getElementById('retentionTabContent').classList.add('active');
+      }
+    }
+
+    // Overlay click to close
+    document.getElementById('studentDetailOverlay').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeStudentDetail();
+    });
+
+    // ===== Campus Filter (브랜드 연동) =====
+    function updateCampusFilter() {
+      const brand = document.getElementById('filterBrand').value;
+      const campusSelect = document.getElementById('filterCampus');
+
+      const campusData = {
+        '': [
+          { value: '', text: '캠퍼스 전체' },
+          { value: 'daechi', text: '대치본원' },
+          { value: 'gangdong', text: '강동하남' },
+          { value: 'ilsan', text: '일산' },
+          { value: 'songpa', text: '송파' }
+        ],
+        'choisun': [
+          { value: '', text: '캠퍼스 전체' },
+          { value: 'daechi', text: '대치본원' },
+          { value: 'gangdong', text: '강동하남' },
+          { value: 'ilsan', text: '일산' },
+          { value: 'songpa', text: '송파' }
+        ],
+        'creo': [
+          { value: '', text: '캠퍼스 전체' },
+          { value: 'daechi', text: '대치본원' },
+          { value: 'gangdong', text: '강동하남' },
+          { value: 'ilsan', text: '일산' }
+        ],
+        'mate-choisun': [
+          { value: '', text: '캠퍼스 전체' },
+          { value: 'daechi', text: '대치본원' },
+          { value: 'ilsan', text: '일산' }
+        ],
+        'mate-creo': [
+          { value: '', text: '캠퍼스 전체' },
+          { value: 'gangdong', text: '강동하남' },
+          { value: 'songpa', text: '송파' }
+        ]
+      };
+
+      const options = campusData[brand] || campusData[''];
+      campusSelect.innerHTML = '';
+      options.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt.value;
+        option.textContent = opt.text;
+        campusSelect.appendChild(option);
+      });
+    }
+
+    // ===== Textbook Filter =====
+    function filterTextbook(courseType, textbookName) {
+      const tableId = courseType === 'circular' ? 'circularDetailTable' : 'retentionDetailTable';
+      const table = document.getElementById(tableId);
+      const rows = table.querySelectorAll('tbody tr');
+
+      // Show/hide rows
+      rows.forEach(row => {
+        if (!textbookName) {
+          row.classList.remove('row-hidden');
+        } else {
+          const rowTextbook = row.getAttribute('data-textbook');
+          if (rowTextbook === textbookName) {
+            row.classList.remove('row-hidden');
+          } else {
+            row.classList.add('row-hidden');
+          }
+        }
+      });
+
+      // Recalculate summary
+      updateSummary(courseType, tableId);
+    }
+
+    function updateSummary(courseType, tableId) {
+      const table = document.getElementById(tableId);
+      const visibleRows = table.querySelectorAll('tbody tr:not(.row-hidden)');
+      const prefix = courseType === 'circular' ? 'cc' : 'rc';
+
+      if (visibleRows.length === 0) {
+        document.getElementById(prefix + 'SummaryCount').textContent = '0개';
+        document.getElementById(prefix + 'SummaryScore').textContent = '-';
+        document.getElementById(prefix + 'SummaryDate').textContent = '-';
+        return;
+      }
+
+      let totalScore = 0;
+      let scoreCount = 0;
+      let latestDate = '';
+
+      visibleRows.forEach(row => {
+        const avgCell = row.querySelector('.avg-score');
+        if (avgCell) {
+          totalScore += parseFloat(avgCell.textContent);
+          scoreCount++;
+        }
+        const cells = row.querySelectorAll('td');
+        const dateCell = cells[cells.length - 1];
+        const dateText = dateCell.textContent.trim();
+        if (dateText && dateText !== '-' && dateText > latestDate) {
+          latestDate = dateText;
+        }
+      });
+
+      const avgScore = scoreCount > 0 ? (totalScore / scoreCount).toFixed(1) : '-';
+
+      document.getElementById(prefix + 'SummaryCount').textContent = visibleRows.length + '개';
+      document.getElementById(prefix + 'SummaryScore').textContent = avgScore !== '-' ? avgScore + '점' : '-';
+      document.getElementById(prefix + 'SummaryDate').textContent = latestDate || '-';
+    }
+
+    // ===== Toast =====
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    }
+  </script>
+</body>
+</html>
