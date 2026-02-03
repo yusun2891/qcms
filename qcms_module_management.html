@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QCMS - 학습 모듈 설정</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-blue: #4C55EB;
+      --primary-blue-hover: #3D45D9;
+      --primary-blue-light: #EEF0FF;
+      --font-1: #191F28;
+      --font-2: #4E5968;
+      --font-3: #8B95A1;
+      --font-4: #B0B8C1;
+      --bg-f9: #F9FAFB;
+      --bg-f6: #F6F7F9;
+      --bg-f3: #F3F4F6;
+      --line-e: #E5E8EB;
+      --line-d: #D1D6DB;
+      --white: #FFFFFF;
+      --success: #22C55E;
+      --warning: #F59E0B;
+      --error: #EF4444;
+      
+      --gnb-width-expanded: 224px;
+      --gnb-width-collapsed: 56px;
+      --transition-fast: 0.15s ease;
+      --transition-normal: 0.25s ease;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-f6);
+      color: var(--font-1);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* GNB */
+    .gnb {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--gnb-width-expanded);
+      height: 100vh;
+      background: var(--white);
+      border-right: 1px solid var(--line-e);
+      display: flex;
+      flex-direction: column;
+      transition: width var(--transition-normal);
+      z-index: 100;
+    }
+
+    .gnb.collapsed { width: var(--gnb-width-collapsed); }
+
+    .gnb-header {
+      height: 56px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+
+    .gnb-header:hover { background: var(--bg-f9); }
+
+    .gnb-logo {
+      display: flex;
+      align-items: center;
+      opacity: 1;
+      transition: opacity var(--transition-fast);
+    }
+
+    .gnb.collapsed .gnb-logo {
+      opacity: 0;
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .gnb-logo-text { font-size: 18px; font-weight: 700; white-space: nowrap; }
+    .gnb-logo-text span:first-child { color: var(--primary-blue); }
+    .gnb-logo-text span:last-child { color: var(--font-1); }
+
+    .gnb-hamburger {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      opacity: 0;
+      position: absolute;
+      pointer-events: none;
+      transition: opacity var(--transition-fast);
+    }
+
+    .gnb.collapsed .gnb-hamburger {
+      opacity: 1;
+      position: relative;
+      pointer-events: auto;
+    }
+
+    .gnb-hamburger span {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background: var(--font-1);
+      border-radius: 1px;
+    }
+
+    .gnb-nav {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 8px 0;
+    }
+
+    .menu-group { margin-bottom: 4px; position: relative; }
+
+    .menu-group-header {
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+
+    .menu-group-header:hover { background: var(--bg-f9); }
+    .menu-group-header.active { background: var(--bg-f3); }
+
+    .menu-icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-icon svg {
+      width: 20px;
+      height: 20px;
+      color: var(--font-2);
+      transition: color var(--transition-fast);
+    }
+
+    .menu-group-header:hover .menu-icon svg,
+    .menu-group-header.active .menu-icon svg { color: var(--primary-blue); }
+
+    .menu-group-title {
+      margin-left: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--font-1);
+      white-space: nowrap;
+      flex: 1;
+      opacity: 1;
+      transition: opacity var(--transition-fast);
+    }
+
+    .gnb.collapsed .menu-group-title { opacity: 0; }
+
+    .menu-arrow {
+      width: 16px;
+      height: 16px;
+      transition: transform var(--transition-fast), opacity var(--transition-fast);
+    }
+
+    .menu-arrow svg { width: 16px; height: 16px; color: var(--font-3); }
+    .gnb.collapsed .menu-arrow { opacity: 0; }
+    .menu-group.open .menu-arrow { transform: rotate(180deg); }
+
+    .submenu {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height var(--transition-normal);
+    }
+
+    .menu-group.open .submenu { max-height: 500px; }
+    .gnb.collapsed .submenu { max-height: 0 !important; }
+
+    .submenu-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px 8px 52px;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+      text-decoration: none;
+    }
+
+    .submenu-item:hover { background: var(--bg-f9); }
+    .submenu-item.active { background: var(--bg-f3); }
+
+    .submenu-item-text { font-size: 13px; color: var(--font-2); white-space: nowrap; }
+
+    .submenu-item.active .submenu-item-text {
+      color: var(--primary-blue);
+      font-weight: 500;
+    }
+
+    /* Floating Submenu */
+    .floating-submenu {
+      position: fixed;
+      background: var(--white);
+      border: 1px solid var(--line-e);
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      padding: 8px 0;
+      min-width: 180px;
+      z-index: 150;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(-8px);
+      transition: all var(--transition-fast);
+    }
+
+    .floating-submenu.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+
+    .floating-submenu-title {
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--font-3);
+      border-bottom: 1px solid var(--line-e);
+      margin-bottom: 4px;
+    }
+
+    .floating-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+      text-decoration: none;
+    }
+
+    .floating-item:hover { background: var(--bg-f9); }
+    .floating-item.active { background: var(--bg-f3); }
+    .floating-item-text { font-size: 13px; color: var(--font-2); }
+    .floating-item.active .floating-item-text { color: var(--primary-blue); font-weight: 500; }
+
+    /* Main Content */
+    .main-wrapper {
+      margin-left: var(--gnb-width-expanded);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: margin-left var(--transition-normal);
+    }
+
+    .gnb.collapsed ~ .main-wrapper { margin-left: var(--gnb-width-collapsed); }
+
+    .fixed-header {
+      flex-shrink: 0;
+      background: var(--bg-f6);
+      padding: 16px 24px 0 24px;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .page-header-left {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .page-title { font-size: 20px; font-weight: 700; color: var(--font-1); }
+    .page-description { font-size: 13px; color: var(--font-3); }
+
+    /* Content Card */
+    .content-card {
+      flex: 1;
+      margin: 0 24px 24px 24px;
+      background: var(--white);
+      border-radius: 12px;
+      border: 1px solid var(--line-e);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line-e);
+    }
+
+    .toolbar-left { display: flex; align-items: center; gap: 12px; }
+    .toolbar-right { display: flex; align-items: center; gap: 8px; }
+
+    .search-box { position: relative; width: 280px; }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--font-3);
+    }
+
+    .search-input {
+      width: 100%;
+      height: 36px;
+      padding: 0 12px 0 36px;
+      border: 1px solid var(--line-e);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--font-1);
+      transition: border-color var(--transition-fast);
+    }
+
+    .search-input::placeholder { color: var(--font-4); }
+    .search-input:focus { outline: none; border-color: var(--primary-blue); }
+
+    .filter-select {
+      height: 36px;
+      padding: 0 32px 0 12px;
+      border: 1px solid var(--line-e);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--font-1);
+      background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B95A1' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 10px center;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .filter-select:focus { outline: none; border-color: var(--primary-blue); }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 36px;
+      padding: 0 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      border: none;
+      white-space: nowrap;
+    }
+
+    .btn svg { width: 16px; height: 16px; }
+
+    .btn-primary {
+      background: var(--primary-blue);
+      color: var(--white);
+    }
+
+    .btn-primary:hover { background: var(--primary-blue-hover); }
+
+    .btn-primary:disabled {
+      background: var(--line-d);
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: var(--white);
+      color: var(--font-2);
+      border: 1px solid var(--line-d);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-f9);
+      border-color: var(--font-3);
+    }
+
+    /* Table */
+    .table-wrapper { flex: 1; overflow: auto; }
+
+    .data-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+
+    .data-table thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--bg-f9);
+    }
+
+    .data-table th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--font-3);
+      border-bottom: 1px solid var(--line-e);
+      white-space: nowrap;
+    }
+
+    .data-table td {
+      padding: 10px 16px;
+      font-size: 13px;
+      color: var(--font-2);
+      border-bottom: 1px solid var(--line-e);
+      vertical-align: middle;
+    }
+
+    .data-table tbody tr { 
+      transition: background var(--transition-fast);
+      cursor: pointer;
+    }
+    .data-table tbody tr:hover { background: var(--bg-f9); }
+
+    /* Column widths */
+    .col-no { width: 60px; text-align: center; }
+    .col-module-id { width: 100px; }
+    .col-module-name { width: auto; min-width: 200px; }
+    .col-area { width: 120px; }
+    .col-course { width: 120px; }
+    .col-type { width: 100px; }
+    .col-order { width: 90px; text-align: center; }
+    .col-fixed { width: 120px; }
+    .col-base-point { width: 100px; text-align: center; }
+    .col-earn-point { width: 100px; text-align: center; }
+    .col-time-limit { width: 120px; }
+    .col-message { width: 100px; text-align: center; }
+    .col-updated { width: 140px; }
+
+    .text-center { text-align: center; }
+
+    /* Badge */
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .badge-vocabulary { background: #F3E8FF; color: #7C3AED; }
+    .badge-listening { background: #FEF3C7; color: #D97706; }
+    .badge-speaking { background: #DBEAFE; color: #2563EB; }
+    .badge-reading { background: #D1FAE5; color: #059669; }
+    .badge-grammar { background: #FCE7F3; color: #DB2777; }
+
+    .badge-circular { background: #DBEAFE; color: #2563EB; }
+    .badge-retention { background: #FECACA; color: #DC2626; }
+    .badge-all { background: var(--bg-f3); color: var(--font-2); }
+
+    .badge-ai { background: var(--primary-blue-light); color: var(--primary-blue); }
+    .badge-normal { background: var(--bg-f3); color: var(--font-2); }
+
+    .status-complete { color: var(--success); font-weight: 500; }
+    .status-incomplete { color: var(--font-4); }
+
+    /* Pagination */
+    .pagination-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-top: 1px solid var(--line-e);
+      background: var(--white);
+      flex-shrink: 0;
+    }
+
+    .pagination-info { display: flex; align-items: center; gap: 12px; }
+    .pagination-info span { font-size: 13px; color: var(--font-2); }
+    .pagination-info strong { font-weight: 600; color: var(--font-1); }
+
+    .page-size-select {
+      height: 32px;
+      padding: 0 28px 0 12px;
+      border: 1px solid var(--line-d);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--font-1);
+      background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B95A1' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 10px center;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .pagination-pages { display: flex; align-items: center; gap: 6px; }
+
+    .page-btn {
+      min-width: 32px;
+      height: 32px;
+      padding: 0 8px;
+      border: 1px solid var(--line-d);
+      border-radius: 6px;
+      background: var(--white);
+      font-size: 13px;
+      color: var(--font-2);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page-btn:hover { background: var(--bg-f9); border-color: var(--font-3); }
+
+    .page-btn.active {
+      background: var(--primary-blue);
+      border-color: var(--primary-blue);
+      color: var(--white);
+    }
+
+    .page-btn svg { width: 16px; height: 16px; }
+
+    /* Side Peek */
+    .side-peek-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 200;
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--transition-normal);
+    }
+
+    .side-peek-overlay.show { opacity: 1; visibility: visible; }
+
+    .side-peek {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 700px;
+      height: 100vh;
+      background: var(--white);
+      box-shadow: -4px 0 16px rgba(0, 0, 0, 0.12);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform var(--transition-normal);
+    }
+
+    .side-peek-overlay.show .side-peek { transform: translateX(0); }
+
+    .side-peek-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--line-e);
+      flex-shrink: 0;
+    }
+
+    .side-peek-title { font-size: 18px; font-weight: 600; color: var(--font-1); }
+
+    .side-peek-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      color: var(--font-3);
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all var(--transition-fast);
+    }
+
+    .side-peek-close:hover { background: var(--bg-f9); color: var(--font-1); }
+
+    .side-peek-body { flex: 1; overflow-y: auto; padding: 24px; }
+
+    .side-peek-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 16px 24px;
+      border-top: 1px solid var(--line-e);
+      flex-shrink: 0;
+    }
+
+    /* Form */
+    .form-section { margin-bottom: 32px; }
+    .form-section:last-child { margin-bottom: 0; }
+
+    .form-section-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--font-1);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line-e);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .form-grid-full { grid-column: 1 / -1; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group:last-child { margin-bottom: 0; }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--font-2);
+      margin-bottom: 8px;
+    }
+
+    .form-label-required::after {
+      content: '*';
+      color: var(--error);
+      margin-left: 4px;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 0 12px;
+      border: 1px solid var(--line-d);
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--font-1);
+      transition: border-color var(--transition-fast);
+    }
+
+    .form-input,
+    .form-select { height: 40px; }
+
+    .form-textarea {
+      padding: 12px;
+      min-height: 80px;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--primary-blue);
+    }
+
+    .form-select {
+      background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B95A1' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 12px center;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .form-input:disabled,
+    .form-select:disabled {
+      background: var(--bg-f9);
+      color: var(--font-4);
+      cursor: not-allowed;
+    }
+
+    .form-hint { 
+      font-size: 12px; 
+      color: var(--font-3); 
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+
+    .form-radio-group {
+      display: flex;
+      gap: 16px;
+    }
+
+    .form-radio {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .form-radio input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .form-radio-label {
+      font-size: 14px;
+      color: var(--font-2);
+      cursor: pointer;
+    }
+
+    /* Messages Section */
+    .messages-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .message-field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .message-field-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--font-2);
+    }
+
+    .message-status {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .message-status.filled {
+      background: #D1FAE5;
+      color: #059669;
+    }
+
+    .message-status.empty {
+      background: var(--bg-f3);
+      color: var(--font-3);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--font-1);
+      color: var(--white);
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 400;
+      opacity: 0;
+      transition: all var(--transition-normal);
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+  <!-- GNB -->
+  <nav class="gnb" id="gnb">
+    <div class="gnb-header" id="gnbHeader">
+      <div class="gnb-logo">
+        <div class="gnb-logo-text"><span>Q</span><span>CMS</span></div>
+      </div>
+      <div class="gnb-hamburger">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+    
+    <div class="gnb-nav">
+      <!-- 커리큘럼 관리 -->
+      <div class="menu-group" data-menu="curriculum">
+        <div class="menu-group-header">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+          </div>
+          <span class="menu-group-title">커리큘럼 관리</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item" href="#"><span class="submenu-item-text">교재 등록</span></a>
+          <a class="submenu-item" href="#"><span class="submenu-item-text">커리큘럼 배정</span></a>
+          <a class="submenu-item" href="#"><span class="submenu-item-text">커리큘럼 배분</span></a>
+        </div>
+      </div>
+
+      <!-- 콘텐츠 관리 -->
+      <div class="menu-group" data-menu="contents">
+        <div class="menu-group-header">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+          </div>
+          <span class="menu-group-title">콘텐츠 관리</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item" href="#"><span class="submenu-item-text">Circular Course</span></a>
+          <a class="submenu-item" href="#"><span class="submenu-item-text">Retention Course</span></a>
+        </div>
+      </div>
+
+      <!-- Prompt 관리 -->
+      <div class="menu-group" data-menu="prompt">
+        <div class="menu-group-header">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+          </div>
+          <span class="menu-group-title">Prompt 관리</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item" href="#"><span class="submenu-item-text">콘텐츠 생성 Prompt</span></a>
+          <a class="submenu-item" href="#"><span class="submenu-item-text">학습 모듈 Prompt</span></a>
+        </div>
+      </div>
+
+      <!-- 이용 현황 -->
+      <div class="menu-group" data-menu="usage">
+        <div class="menu-group-header">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+          </div>
+          <span class="menu-group-title">이용 현황</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item" href="#"><span class="submenu-item-text">API 사용량</span></a>
+        </div>
+      </div>
+
+      <!-- 환경설정 -->
+      <div class="menu-group open" data-menu="settings">
+        <div class="menu-group-header active">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </div>
+          <span class="menu-group-title">환경설정</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item active" href="#"><span class="submenu-item-text">학습 모듈 설정</span></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Floating Submenu -->
+  <div class="floating-submenu" id="floatingSubmenu"></div>
+
+  <!-- Main Content -->
+  <div class="main-wrapper">
+    <div class="fixed-header">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1 class="page-title">학습 모듈 설정</h1>
+          <span class="page-description">학습 모듈의 설정을 관리합니다.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="search-box">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <input type="text" class="search-input" placeholder="학습 모듈 명으로 검색">
+          </div>
+          <select class="filter-select">
+            <option value="">학습 영역 전체</option>
+            <option value="vocabulary">Vocabulary</option>
+            <option value="listening">Listening</option>
+            <option value="speaking">Speaking</option>
+            <option value="reading">Reading</option>
+            <option value="grammar">Grammar</option>
+          </select>
+          <select class="filter-select">
+            <option value="">적용 코스 전체</option>
+            <option value="circular">Circular Course</option>
+            <option value="retention">Retention Course</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="col-no">No.</th>
+              <th class="col-module-id">학습모듈 ID</th>
+              <th class="col-module-name">학습모듈 명</th>
+              <th class="col-area">학습 영역</th>
+              <th class="col-course">적용 코스</th>
+              <th class="col-type">모듈 타입</th>
+              <th class="col-order">학습 순서</th>
+              <th class="col-fixed">회차 고정</th>
+              <th class="col-base-point">기본 포인트</th>
+              <th class="col-earn-point">획득 포인트</th>
+              <th class="col-time-limit">문제 당 제한 시간</th>
+              <th class="col-message">화면 메세지</th>
+              <th class="col-updated">최근 수정</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="openModuleEdit('MV01')">
+              <td class="text-center">1</td>
+              <td>MV01</td>
+              <td>아는 단어 체크</td>
+              <td><span class="badge badge-vocabulary">Vocabulary</span></td>
+              <td><span class="badge badge-circular">Circular Course</span></td>
+              <td><span class="badge badge-normal">일반 모듈</span></td>
+              <td class="text-center">1</td>
+              <td>1회차 고정</td>
+              <td class="text-center">10</td>
+              <td class="text-center">-</td>
+              <td>-</td>
+              <td class="text-center"><span class="status-complete">완료</span></td>
+              <td>홍길동, 2026-01-15</td>
+            </tr>
+            <tr onclick="openModuleEdit('MV02')">
+              <td class="text-center">2</td>
+              <td>MV02</td>
+              <td>플래시카드</td>
+              <td><span class="badge badge-vocabulary">Vocabulary</span></td>
+              <td><span class="badge badge-circular">Circular Course</span></td>
+              <td><span class="badge badge-normal">일반 모듈</span></td>
+              <td class="text-center">2</td>
+              <td>-</td>
+              <td class="text-center">5</td>
+              <td class="text-center">10</td>
+              <td>30초</td>
+              <td class="text-center"><span class="status-complete">완료</span></td>
+              <td>홍길동, 2026-01-15</td>
+            </tr>
+            <tr onclick="openModuleEdit('MV03')">
+              <td class="text-center">3</td>
+              <td>MV03</td>
+              <td>단어 뜻 맞추기</td>
+              <td><span class="badge badge-vocabulary">Vocabulary</span></td>
+              <td><span class="badge badge-circular">Circular Course</span></td>
+              <td><span class="badge badge-normal">일반 모듈</span></td>
+              <td class="text-center">3</td>
+              <td>-</td>
+              <td class="text-center">5</td>
+              <td class="text-center">10</td>
+              <td>30초</td>
+              <td class="text-center"><span class="status-incomplete">미완료</span></td>
+              <td>홍길동, 2026-01-15</td>
+            </tr>
+            <tr onclick="openModuleEdit('MV04')">
+              <td class="text-center">4</td>
+              <td>MV04</td>
+              <td>뜻 보고 단어 맞추기</td>
+              <td><span class="badge badge-vocabulary">Vocabulary</span></td>
+              <td><span class="badge badge-circular">Circular Course</span></td>
+              <td><span class="badge badge-normal">일반 모듈</span></td>
+              <td class="text-center">4</td>
+              <td>-</td>
+              <td class="text-center">5</td>
+              <td class="text-center">10</td>
+              <td>30초</td>
+              <td class="text-center"><span class="status-incomplete">미완료</span></td>
+              <td>홍길동, 2026-01-15</td>
+            </tr>
+            <tr onclick="openModuleEdit('ML01')">
+              <td class="text-center">11</td>
+              <td>ML01</td>
+              <td>지문 듣고 단어 수집(예습)</td>
+              <td><span class="badge badge-listening">Listening</span></td>
+              <td><span class="badge badge-circular">Circular Course</span></td>
+              <td><span class="badge badge-normal">일반 모듈</span></td>
+              <td class="text-center">1</td>
+              <td>1회차 고정</td>
+              <td class="text-center">10</td>
+              <td class="text-center">-</td>
+              <td>-</td>
+              <td class="text-center"><span class="status-complete">완료</span></td>
+              <td>홍길동, 2026-01-15</td>
+            </tr>
+            <tr onclick="openModuleEdit('ML02')">
+              <td class="text-center">12</td>
+              <td>ML02</td>
+              <td>문장 듣고 빈칸 채우기</td>
+              <td><span class="badge badge-listening">Listening</span></td>
+              <td><span class="badge badge-circular">Circular Course</span></td>
+              <td><span class="badge badge-normal">일반 모듈</span></td>
+              <td class="text-center">2</td>
+              <td>-</td>
+              <td class="text-center">5</td>
+              <td class="text-center">15</td>
+              <td>60초</td>
+              <td class="text-center"><span class="status-complete">완료</span></td>
+              <td>홍길동, 2026-01-15</td>
+            </tr>
+            <tr onclick="openModuleEdit('MS01')">
+              <td class="text-center">15</td>
+              <td>MS01</td>
+              <td>지문 번갈아 읽기</td>
+              <td><span class="badge badge-speaking">Speaking</span></td>
+              <td><span class="badge badge-circular">Circular Course</span></td>
+              <td><span class="badge badge-normal">일반 모듈</span></td>
+              <td class="text-center">1</td>
+              <td>1회차 고정</td>
+              <td class="text-center">10</td>
+              <td class="text-center">-</td>
+              <td>-</td>
+              <td class="text-center"><span class="status-complete">완료</span></td>
+              <td>홍길동, 2026-01-15</td>
+            </tr>
+            <tr onclick="openModuleEdit('MS02')">
+              <td class="text-center">17</td>
+              <td>MS02</td>
+              <td>문장 발음 평가</td>
+              <td><span class="badge badge-speaking">Speaking</span></td>
+              <td><span class="badge badge-circular">Circular Course</span></td>
+              <td><span class="badge badge-normal">일반 모듈</span></td>
+              <td class="text-center">2</td>
+              <td>-</td>
+              <td class="text-center">5</td>
+              <td class="text-center">15</td>
+              <td>-</td>
+              <td class="text-center"><span class="status-complete">완료</span></td>
+              <td>홍길동, 2026-01-15</td>
+            </tr>
+            <tr onclick="openModuleEdit('MS03')">
+              <td class="text-center">17</td>
+              <td>MS03</td>
+              <td>쉐도잉</td>
+              <td><span class="badge badge-speaking">Speaking</span></td>
+              <td><span class="badge badge-circular">Circular Course</span></td>
+              <td><span class="badge badge-normal">일반 모듈</span></td>
+              <td class="text-center">3</td>
+              <td>-</td>
+              <td class="text-center">5</td>
+              <td class="text-center">15</td>
+              <td>-</td>
+              <td class="text-center"><span class="status-incomplete">미완료</span></td>
+              <td>홍길동, 2026-01-15</td>
+            </tr>
+            <tr onclick="openModuleEdit('MS04')">
+              <td class="text-center">18</td>
+              <td>MS04</td>
+              <td>AI Reading Comprehension</td>
+              <td><span class="badge badge-speaking">Speaking</span></td>
+              <td><span class="badge badge-circular">Circular Course</span></td>
+              <td><span class="badge badge-ai">AI 모듈</span></td>
+              <td class="text-center">4</td>
+              <td>마지막회차 고정</td>
+              <td class="text-center">20</td>
+              <td class="text-center">30</td>
+              <td>-</td>
+              <td class="text-center"><span class="status-complete">완료</span></td>
+              <td>홍길동, 2026-01-15</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-wrapper">
+        <div class="pagination-info">
+          <span>총 <strong>156</strong>개</span>
+          <select class="page-size-select">
+            <option value="30" selected>30개씩 보기</option>
+            <option value="50">50개씩 보기</option>
+            <option value="80">80개씩 보기</option>
+            <option value="100">100개씩 보기</option>
+            <option value="200">200개씩 보기</option>
+          </select>
+        </div>
+        <div class="pagination-pages">
+          <button class="page-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <button class="page-btn">4</button>
+          <button class="page-btn">5</button>
+          <button class="page-btn">6</button>
+          <button class="page-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Side Peek - Module Edit -->
+  <div class="side-peek-overlay" id="moduleEditOverlay">
+    <div class="side-peek">
+      <div class="side-peek-header">
+        <h2 class="side-peek-title">학습 모듈 수정</h2>
+        <button class="side-peek-close" onclick="closeModuleEdit()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="side-peek-body">
+        <!-- 기본 정보 -->
+        <div class="form-section">
+          <h3 class="form-section-title">기본 정보</h3>
+          
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">학습모듈 ID</label>
+              <input type="text" class="form-input" value="MV01" disabled>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label form-label-required">학습모듈 명</label>
+              <input type="text" class="form-input" value="아는 단어 체크">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label form-label-required">학습 영역</label>
+              <select class="form-select">
+                <option value="vocabulary" selected>Vocabulary</option>
+                <option value="listening">Listening</option>
+                <option value="speaking">Speaking</option>
+                <option value="reading">Reading</option>
+                <option value="grammar">Grammar</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label form-label-required">적용 코스</label>
+              <select class="form-select">
+                <option value="circular" selected>Circular Course</option>
+                <option value="retention">Retention Course</option>
+                <option value="all">All</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">모듈 타입</label>
+              <div class="form-radio-group">
+                <label class="form-radio">
+                  <input type="radio" name="moduleType" value="normal" checked>
+                  <span class="form-radio-label">일반 모듈</span>
+                </label>
+                <label class="form-radio">
+                  <input type="radio" name="moduleType" value="ai">
+                  <span class="form-radio-label">AI 모듈</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label form-label-required">학습 순서</label>
+              <input type="number" class="form-input" id="orderInput" value="1" min="1" onchange="checkOrderDuplicate(this.value)">
+              <p class="form-hint">순서 변경 시 다른 모듈의 순서가 자동으로 조정됩니다.</p>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">회차 고정</label>
+              <select class="form-select">
+                <option value="">- (고정 없음)</option>
+                <option value="first" selected>1회차 고정</option>
+                <option value="last">마지막회차 고정</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">기본 포인트</label>
+              <input type="number" class="form-input" value="10" min="0">
+              <p class="form-hint">모듈 완료 시 받는 기본 포인트</p>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">획득 포인트</label>
+              <input type="number" class="form-input" placeholder="점수 100점일 때" min="0">
+              <p class="form-hint">점수 비율에 따라 지급되는 포인트 (100점 기준)</p>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">문제 당 제한 시간</label>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="number" class="form-input" placeholder="초 단위" min="0" style="flex: 1;">
+                <span style="font-size: 13px; color: var(--font-3);">초</span>
+              </div>
+              <p class="form-hint">비워두면 "제한 시간 없음"으로 표시됩니다.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 화면 메시지 설정 -->
+        <div class="form-section">
+          <h3 class="form-section-title">화면 메시지 설정</h3>
+          
+          <div class="messages-grid">
+            <!-- 모듈 설명 -->
+            <div class="message-field">
+              <label class="message-field-label">
+                모듈 설명
+                <span class="message-status filled">입력완료</span>
+              </label>
+              <textarea class="form-textarea" placeholder="모듈 설명을 입력하세요">학습할 단어 중 이미 알고 있는 단어를 선택하세요.</textarea>
+            </div>
+
+            <!-- 안내 메시지1 -->
+            <div class="message-field">
+              <label class="message-field-label">
+                안내 메시지1
+                <span class="message-status filled">입력완료</span>
+              </label>
+              <textarea class="form-textarea" placeholder="안내 메시지1을 입력하세요">단어를 클릭하여 선택하세요.</textarea>
+            </div>
+
+            <!-- 안내 메시지2 -->
+            <div class="message-field">
+              <label class="message-field-label">
+                안내 메시지2
+                <span class="message-status empty">미입력</span>
+              </label>
+              <textarea class="form-textarea" placeholder="안내 메시지2를 입력하세요"></textarea>
+            </div>
+
+            <!-- 완료 아이콘 -->
+            <div class="message-field">
+              <label class="message-field-label">
+                완료 아이콘
+                <span class="message-status filled">입력완료</span>
+              </label>
+              <input type="text" class="form-input" value="✓" placeholder="완료 아이콘 입력">
+            </div>
+
+            <!-- 완료 안내 -->
+            <div class="message-field">
+              <label class="message-field-label">
+                완료 안내
+                <span class="message-status filled">입력완료</span>
+              </label>
+              <textarea class="form-textarea" placeholder="완료 안내 메시지를 입력하세요">잘하셨습니다! 다음 단계로 넘어가세요.</textarea>
+            </div>
+
+            <!-- 결과 메시지(100) -->
+            <div class="message-field">
+              <label class="message-field-label">
+                결과 메시지(100)
+                <span class="message-status empty">미입력</span>
+              </label>
+              <textarea class="form-textarea" placeholder="100점일 때 결과 메시지"></textarea>
+            </div>
+
+            <!-- 결과 메시지(90-99) -->
+            <div class="message-field">
+              <label class="message-field-label">
+                결과 메시지(90-99)
+                <span class="message-status empty">미입력</span>
+              </label>
+              <textarea class="form-textarea" placeholder="90-99점일 때 결과 메시지"></textarea>
+            </div>
+
+            <!-- 결과 메시지(80-89) -->
+            <div class="message-field">
+              <label class="message-field-label">
+                결과 메시지(80-89)
+                <span class="message-status empty">미입력</span>
+              </label>
+              <textarea class="form-textarea" placeholder="80-89점일 때 결과 메시지"></textarea>
+            </div>
+
+            <!-- 결과 메시지(70-79) -->
+            <div class="message-field">
+              <label class="message-field-label">
+                결과 메시지(70-79)
+                <span class="message-status empty">미입력</span>
+              </label>
+              <textarea class="form-textarea" placeholder="70-79점일 때 결과 메시지"></textarea>
+            </div>
+
+            <!-- 결과 메시지(60-69) -->
+            <div class="message-field">
+              <label class="message-field-label">
+                결과 메시지(60-69)
+                <span class="message-status empty">미입력</span>
+              </label>
+              <textarea class="form-textarea" placeholder="60-69점일 때 결과 메시지"></textarea>
+            </div>
+
+            <!-- 결과 메시지(50-59) -->
+            <div class="message-field">
+              <label class="message-field-label">
+                결과 메시지(50-59)
+                <span class="message-status empty">미입력</span>
+              </label>
+              <textarea class="form-textarea" placeholder="50-59점일 때 결과 메시지"></textarea>
+            </div>
+
+            <!-- 결과 메시지(0-49) -->
+            <div class="message-field">
+              <label class="message-field-label">
+                결과 메시지(0-49)
+                <span class="message-status empty">미입력</span>
+              </label>
+              <textarea class="form-textarea" placeholder="0-49점일 때 결과 메시지"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="side-peek-footer">
+        <button class="btn btn-secondary" onclick="closeModuleEdit()">취소</button>
+        <button class="btn btn-primary" onclick="saveModuleEdit()">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const gnb = document.getElementById('gnb');
+    const floatingSubmenu = document.getElementById('floatingSubmenu');
+    const menuGroups = document.querySelectorAll('.menu-group');
+    let isOverFloating = false;
+    let currentActivePage = 'module-settings';
+
+    const menuData = {
+      'curriculum': { title: '커리큘럼 관리', items: [
+        { page: 'textbook', text: '교재 등록' },
+        { page: 'curriculum-assign', text: '커리큘럼 배정' },
+        { page: 'curriculum-distribute', text: '커리큘럼 배분' }
+      ]},
+      'contents': { title: '콘텐츠 관리', items: [
+        { page: 'circular-course', text: 'Circular Course' },
+        { page: 'retention-course', text: 'Retention Course' }
+      ]},
+      'prompt': { title: 'Prompt 관리', items: [
+        { page: 'content-prompt', text: '콘텐츠 생성 Prompt' },
+        { page: 'module-prompt', text: '학습 모듈 Prompt' }
+      ]},
+      'usage': { title: '이용 현황', items: [
+        { page: 'api-usage', text: 'API 사용량' }
+      ]},
+      'settings': { title: '환경설정', items: [
+        { page: 'module-settings', text: '학습 모듈 설정' }
+      ]}
+    };
+
+    // GNB 빈 영역 클릭
+    gnb.addEventListener('click', (e) => {
+      if (e.target.closest('.submenu-item') || e.target.closest('.menu-group-header')) return;
+      gnb.classList.toggle('collapsed');
+      hideFloatingSubmenu();
+    });
+
+    // 메뉴 그룹 헤더 이벤트
+    menuGroups.forEach(group => {
+      const header = group.querySelector('.menu-group-header');
+      const menuKey = group.dataset.menu;
+
+      header.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!gnb.classList.contains('collapsed')) {
+          group.classList.toggle('open');
+        }
+      });
+
+      header.addEventListener('mouseenter', () => {
+        if (gnb.classList.contains('collapsed')) {
+          showFloatingSubmenu(menuKey, header);
+        }
+      });
+
+      header.addEventListener('mouseleave', () => {
+        if (gnb.classList.contains('collapsed')) {
+          setTimeout(() => { if (!isOverFloating) hideFloatingSubmenu(); }, 50);
+        }
+      });
+    });
+
+    floatingSubmenu.addEventListener('mouseenter', () => { isOverFloating = true; });
+    floatingSubmenu.addEventListener('mouseleave', () => { isOverFloating = false; hideFloatingSubmenu(); });
+
+    function showFloatingSubmenu(menuKey, headerElement) {
+      const data = menuData[menuKey];
+      if (!data) return;
+      const rect = headerElement.getBoundingClientRect();
+      const gnbWidth = gnb.classList.contains('collapsed') ? 56 : 224;
+      floatingSubmenu.style.left = `${gnbWidth + 4}px`;
+      floatingSubmenu.style.top = `${rect.top}px`;
+      let html = `<div class="floating-submenu-title">${data.title}</div>`;
+      data.items.forEach(item => {
+        const isActive = item.page === currentActivePage ? 'active' : '';
+        html += `<a class="floating-item ${isActive}" href="#" data-page="${item.page}"><span class="floating-item-text">${item.text}</span></a>`;
+      });
+      floatingSubmenu.innerHTML = html;
+      floatingSubmenu.classList.add('visible');
+    }
+
+    function hideFloatingSubmenu() {
+      floatingSubmenu.classList.remove('visible');
+    }
+
+    // Module Edit
+    let currentModuleOrder = 1; // 현재 편집 중인 모듈의 원래 순서
+    const existingOrders = [1, 2, 3, 4, 1, 2, 1, 2, 3, 4]; // 시뮬레이션: 각 학습 영역별 기존 순서들
+
+    function openModuleEdit(moduleId) {
+      // 실제로는 서버에서 해당 모듈의 정보를 가져와야 함
+      document.getElementById('moduleEditOverlay').classList.add('show');
+    }
+
+    function closeModuleEdit() {
+      document.getElementById('moduleEditOverlay').classList.remove('show');
+    }
+
+    function checkOrderDuplicate(newOrder) {
+      const order = parseInt(newOrder);
+      
+      if (isNaN(order) || order < 1) {
+        return;
+      }
+      
+      // 현재 편집 중인 모듈의 원래 순서와 다르고, 이미 사용 중인 순서인 경우
+      // 실제로는 같은 학습 영역 & 적용 코스 내에서만 체크해야 함
+      if (order !== currentModuleOrder && existingOrders.includes(order)) {
+        showToast(`학습 순서 ${order}는 이미 사용 중입니다. 저장 시 다른 모듈의 순서가 자동 조정됩니다.`);
+      }
+    }
+
+    function validateOrder() {
+      const orderInput = document.getElementById('orderInput');
+      const order = parseInt(orderInput.value);
+      
+      if (isNaN(order) || order < 1) {
+        alert('학습 순서는 1 이상의 숫자여야 합니다.');
+        return false;
+      }
+      
+      return true;
+    }
+
+    function saveModuleEdit() {
+      // 학습 순서 검증
+      if (!validateOrder()) {
+        return;
+      }
+      
+      if (confirm('이 학습 모듈을 사용하는 모든 곳에 변경사항이 적용됩니다.\n저장하시겠습니까?')) {
+        closeModuleEdit();
+        showToast('학습 모듈 설정이 저장되었습니다.');
+      }
+    }
+
+    // Toast
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    }
+
+    // Overlay 클릭으로 닫기
+    document.getElementById('moduleEditOverlay').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeModuleEdit();
+    });
+  </script>
+</body>
+</html>

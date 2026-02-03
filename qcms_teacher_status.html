@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QCMS - 선생님 현황</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-blue: #4C55EB;
+      --primary-blue-hover: #3D45D9;
+      --primary-blue-light: #EEF0FF;
+      --font-1: #191F28;
+      --font-2: #4E5968;
+      --font-3: #8B95A1;
+      --font-4: #B0B8C1;
+      --bg-f9: #F9FAFB;
+      --bg-f6: #F6F7F9;
+      --bg-f3: #F3F4F6;
+      --line-e: #E5E8EB;
+      --line-d: #D1D6DB;
+      --white: #FFFFFF;
+      --success: #22C55E;
+      --warning: #F59E0B;
+      --error: #EF4444;
+
+      --gnb-width-expanded: 224px;
+      --gnb-width-collapsed: 56px;
+      --transition-fast: 0.15s ease;
+      --transition-normal: 0.25s ease;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-f6);
+      color: var(--font-1);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ======================== GNB ======================== */
+    .gnb {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--gnb-width-expanded);
+      height: 100vh;
+      background: var(--white);
+      border-right: 1px solid var(--line-e);
+      display: flex;
+      flex-direction: column;
+      transition: width var(--transition-normal);
+      z-index: 100;
+    }
+
+    .gnb.collapsed { width: var(--gnb-width-collapsed); }
+
+    .gnb-header {
+      height: 56px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+
+    .gnb-header:hover { background: var(--bg-f9); }
+
+    .gnb-logo {
+      display: flex;
+      align-items: center;
+      opacity: 1;
+      transition: opacity var(--transition-fast);
+    }
+
+    .gnb.collapsed .gnb-logo {
+      opacity: 0;
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .gnb-logo-text { font-size: 18px; font-weight: 700; white-space: nowrap; }
+    .gnb-logo-text span:first-child { color: var(--primary-blue); }
+    .gnb-logo-text span:last-child { color: var(--font-1); }
+
+    .gnb-hamburger {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      opacity: 0;
+      position: absolute;
+      pointer-events: none;
+      transition: opacity var(--transition-fast);
+    }
+
+    .gnb.collapsed .gnb-hamburger {
+      opacity: 1;
+      position: relative;
+      pointer-events: auto;
+    }
+
+    .gnb-hamburger span {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background: var(--font-1);
+      border-radius: 1px;
+    }
+
+    .gnb-nav {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 8px 0;
+    }
+
+    .menu-group { margin-bottom: 4px; position: relative; }
+
+    .menu-group-header {
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+
+    .menu-group-header:hover { background: var(--bg-f9); }
+    .menu-group-header.active { background: var(--bg-f3); }
+
+    .menu-icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-icon svg {
+      width: 20px;
+      height: 20px;
+      color: var(--font-2);
+      transition: color var(--transition-fast);
+    }
+
+    .menu-group-header:hover .menu-icon svg,
+    .menu-group-header.active .menu-icon svg { color: var(--primary-blue); }
+
+    .menu-group-title {
+      margin-left: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--font-1);
+      white-space: nowrap;
+      flex: 1;
+      opacity: 1;
+      transition: opacity var(--transition-fast);
+    }
+
+    .gnb.collapsed .menu-group-title { opacity: 0; }
+
+    .menu-arrow {
+      width: 16px;
+      height: 16px;
+      transition: transform var(--transition-fast), opacity var(--transition-fast);
+    }
+
+    .menu-arrow svg { width: 16px; height: 16px; color: var(--font-3); }
+    .gnb.collapsed .menu-arrow { opacity: 0; }
+    .menu-group.open .menu-arrow { transform: rotate(180deg); }
+
+    .submenu {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height var(--transition-normal);
+    }
+
+    .menu-group.open .submenu { max-height: 500px; }
+    .gnb.collapsed .submenu { max-height: 0 !important; }
+
+    .submenu-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px 8px 52px;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+      text-decoration: none;
+    }
+
+    .submenu-item:hover { background: var(--bg-f9); }
+    .submenu-item.active { background: var(--bg-f3); }
+
+    .submenu-item-text { font-size: 13px; color: var(--font-2); white-space: nowrap; }
+
+    .submenu-item.active .submenu-item-text {
+      color: var(--primary-blue);
+      font-weight: 500;
+    }
+
+    /* Floating Submenu */
+    .floating-submenu {
+      position: fixed;
+      background: var(--white);
+      border: 1px solid var(--line-e);
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      padding: 8px 0;
+      min-width: 180px;
+      z-index: 150;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(-8px);
+      transition: all var(--transition-fast);
+    }
+
+    .floating-submenu.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+
+    .floating-submenu-title {
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--font-3);
+      border-bottom: 1px solid var(--line-e);
+      margin-bottom: 4px;
+    }
+
+    .floating-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+      text-decoration: none;
+    }
+
+    .floating-item:hover { background: var(--bg-f9); }
+    .floating-item.active { background: var(--bg-f3); }
+    .floating-item-text { font-size: 13px; color: var(--font-2); }
+    .floating-item.active .floating-item-text { color: var(--primary-blue); font-weight: 500; }
+
+    /* ======================== Main Content ======================== */
+    .main-wrapper {
+      margin-left: var(--gnb-width-expanded);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: margin-left var(--transition-normal);
+    }
+
+    .gnb.collapsed ~ .main-wrapper { margin-left: var(--gnb-width-collapsed); }
+
+    .fixed-header {
+      flex-shrink: 0;
+      background: var(--bg-f6);
+      padding: 16px 24px 0 24px;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .page-header-left {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .page-title { font-size: 20px; font-weight: 700; color: var(--font-1); }
+    .page-description { font-size: 13px; color: var(--font-3); }
+
+    /* ======================== Content Card ======================== */
+    .content-card {
+      flex: 1;
+      margin: 0 24px 24px 24px;
+      background: var(--white);
+      border-radius: 12px;
+      border: 1px solid var(--line-e);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ======================== Toolbar ======================== */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line-e);
+    }
+
+    .toolbar-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .toolbar-right { display: flex; align-items: center; gap: 8px; }
+
+    .search-box { position: relative; width: 200px; }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--font-3);
+    }
+
+    .search-input {
+      width: 100%;
+      height: 36px;
+      padding: 0 12px 0 36px;
+      border: 1px solid var(--line-e);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--font-1);
+      transition: border-color var(--transition-fast);
+    }
+
+    .search-input::placeholder { color: var(--font-4); }
+    .search-input:focus { outline: none; border-color: var(--primary-blue); }
+
+    .filter-select {
+      height: 36px;
+      padding: 0 32px 0 12px;
+      border: 1px solid var(--line-e);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--font-1);
+      background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B95A1' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 10px center;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .filter-select:focus { outline: none; border-color: var(--primary-blue); }
+
+    .toolbar-divider {
+      width: 1px;
+      height: 20px;
+      background: var(--line-e);
+      margin: 0 4px;
+    }
+
+    /* Searchable Select (교재명 검색 필터) */
+    .searchable-select {
+      position: relative;
+    }
+
+    .searchable-select-btn {
+      height: 36px;
+      padding: 0 32px 0 12px;
+      border: 1px solid var(--line-e);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--font-1);
+      background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B95A1' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 10px center;
+      cursor: pointer;
+      white-space: nowrap;
+      min-width: 160px;
+      text-align: left;
+    }
+
+    .searchable-select-btn:focus { outline: none; border-color: var(--primary-blue); }
+
+    .searchable-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      min-width: 240px;
+      background: var(--white);
+      border: 1px solid var(--line-e);
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      z-index: 50;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-4px);
+      transition: all var(--transition-fast);
+    }
+
+    .searchable-dropdown.open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .searchable-dropdown-search {
+      padding: 8px;
+      border-bottom: 1px solid var(--line-e);
+    }
+
+    .searchable-dropdown-search input {
+      width: 100%;
+      height: 32px;
+      padding: 0 10px 0 32px;
+      border: 1px solid var(--line-e);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--font-1);
+      background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238B95A1' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cpath d='m21 21-4.35-4.35'%3E%3C/path%3E%3C/svg%3E") no-repeat 8px center;
+    }
+
+    .searchable-dropdown-search input::placeholder { color: var(--font-4); }
+    .searchable-dropdown-search input:focus { outline: none; border-color: var(--primary-blue); }
+
+    .searchable-dropdown-list {
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+
+    .searchable-option {
+      padding: 8px 12px;
+      font-size: 13px;
+      color: var(--font-2);
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+
+    .searchable-option:hover { background: var(--bg-f9); }
+    .searchable-option.selected { color: var(--primary-blue); font-weight: 500; background: var(--primary-blue-light); }
+    .searchable-option.hidden { display: none; }
+
+    /* ======================== Buttons ======================== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 36px;
+      padding: 0 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      border: none;
+      white-space: nowrap;
+    }
+
+    .btn svg { width: 16px; height: 16px; }
+
+    .btn-primary { background: var(--primary-blue); color: var(--white); }
+    .btn-primary:hover { background: var(--primary-blue-hover); }
+
+    .btn-secondary {
+      background: var(--white);
+      color: var(--font-2);
+      border: 1px solid var(--line-d);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-f9);
+      border-color: var(--font-3);
+    }
+
+    .btn-outline-primary {
+      background: var(--white);
+      color: var(--primary-blue);
+      border: 1px solid var(--primary-blue);
+    }
+
+    .btn-outline-primary:hover { background: var(--primary-blue-light); }
+
+    /* ======================== Table ======================== */
+    .table-wrapper { flex: 1; overflow: auto; }
+
+    .data-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+
+    .data-table thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--bg-f9);
+    }
+
+    .data-table th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--font-3);
+      border-bottom: 1px solid var(--line-e);
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .data-table td {
+      padding: 10px 16px;
+      font-size: 13px;
+      color: var(--font-2);
+      border-bottom: 1px solid var(--line-e);
+      vertical-align: middle;
+    }
+
+    .data-table tbody tr {
+      transition: background var(--transition-fast);
+      cursor: pointer;
+    }
+
+    .data-table tbody tr:hover { background: var(--bg-f9); }
+
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+
+    /* Column widths */
+    .col-brand { width: 100px; }
+    .col-campus { width: 90px; }
+    .col-teacher { width: 100px; }
+    .col-course { width: 130px; }
+    .col-textbook { width: auto; min-width: 160px; }
+    .col-progress { width: 140px; }
+    .col-recent-hw { width: 160px; }
+    .col-recent-date { width: 120px; }
+    .col-hw-count { width: 100px; text-align: center; }
+
+    /* Sortable Headers */
+    .sortable {
+      cursor: pointer;
+      position: relative;
+      padding-right: 28px !important;
+    }
+
+    .sortable:hover { color: var(--font-2); }
+
+    .sort-icon {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .sort-arrow {
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+    }
+
+    .sort-arrow-up { border-bottom: 5px solid var(--line-d); }
+    .sort-arrow-down { border-top: 5px solid var(--line-d); }
+
+    .sortable.asc .sort-arrow-up { border-bottom-color: var(--primary-blue); }
+    .sortable.desc .sort-arrow-down { border-top-color: var(--primary-blue); }
+
+    /* Progress */
+    .progress-wrapper { display: flex; flex-direction: column; gap: 4px; }
+
+    .progress-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .progress-text { font-size: 13px; color: var(--font-2); font-weight: 500; }
+    .progress-percent { font-size: 12px; color: var(--font-3); }
+
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: var(--bg-f3);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--primary-blue);
+      border-radius: 2px;
+      transition: width var(--transition-normal);
+    }
+
+    .progress-fill.high { background: var(--success); }
+    .progress-fill.mid { background: var(--primary-blue); }
+    .progress-fill.low { background: var(--warning); }
+    .progress-fill.zero { background: var(--line-d); }
+
+    /* Empty cell */
+    .empty-cell { color: var(--font-4); }
+
+    /* ======================== Pagination ======================== */
+    .pagination-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      border-top: 1px solid var(--line-e);
+      background: var(--white);
+      flex-shrink: 0;
+    }
+
+    .pagination-info { display: flex; align-items: center; gap: 10px; }
+    .pagination-info span { font-size: 12px; color: var(--font-2); }
+
+    .page-size-select {
+      height: 28px;
+      padding: 0 24px 0 8px;
+      border: 1px solid var(--line-d);
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--font-1);
+      background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B95A1' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 6px center;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .pagination-pages { display: flex; align-items: center; gap: 4px; }
+
+    .page-btn {
+      min-width: 28px;
+      height: 28px;
+      padding: 0 6px;
+      border: 1px solid var(--line-d);
+      border-radius: 4px;
+      background: var(--white);
+      font-size: 12px;
+      color: var(--font-2);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page-btn:hover { background: var(--bg-f9); border-color: var(--font-3); }
+
+    .page-btn.active {
+      background: var(--primary-blue);
+      border-color: var(--primary-blue);
+      color: var(--white);
+    }
+
+    .page-btn svg { width: 14px; height: 14px; }
+
+    /* ======================== Side Peek ======================== */
+    .side-peek-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 200;
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--transition-normal);
+    }
+
+    .side-peek-overlay.show { opacity: 1; visibility: visible; }
+
+    .side-peek {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 800px;
+      height: 100vh;
+      background: var(--white);
+      box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+      z-index: 201;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform var(--transition-normal);
+    }
+
+    .side-peek-overlay.show .side-peek { transform: translateX(0); }
+
+    .side-peek-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--line-e);
+      flex-shrink: 0;
+    }
+
+    .side-peek-title { font-size: 18px; font-weight: 600; color: var(--font-1); }
+
+    .side-peek-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      color: var(--font-3);
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all var(--transition-fast);
+    }
+
+    .side-peek-close:hover { background: var(--bg-f9); color: var(--font-1); }
+
+    .side-peek-body { flex: 1; overflow-y: auto; padding: 24px; }
+
+    /* Side Peek Info Card */
+    .info-card {
+      background: var(--bg-f9);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+
+    .info-card-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .info-teacher-name { font-size: 16px; font-weight: 600; color: var(--font-1); }
+
+    .info-meta {
+      font-size: 13px;
+      color: var(--font-3);
+    }
+
+    .info-meta-divider { margin: 0 6px; color: var(--line-d); }
+
+    .info-stats {
+      display: flex;
+      gap: 24px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line-e);
+    }
+
+    .info-stat { display: flex; flex-direction: column; gap: 2px; }
+    .info-stat-label { font-size: 11px; color: var(--font-3); font-weight: 500; }
+    .info-stat-value { font-size: 14px; color: var(--font-1); font-weight: 600; }
+
+    /* Side Peek Table */
+    .peek-table { width: 100%; border-collapse: collapse; }
+
+    .peek-table thead { background: var(--bg-f9); }
+
+    .peek-table th {
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--font-3);
+      border-bottom: 1px solid var(--line-e);
+      white-space: nowrap;
+    }
+
+    .peek-table td {
+      padding: 10px 12px;
+      font-size: 13px;
+      color: var(--font-2);
+      border-bottom: 1px solid var(--line-e);
+      vertical-align: middle;
+    }
+
+    .peek-table tbody tr { transition: background var(--transition-fast); }
+    .peek-table tbody tr:hover { background: var(--bg-f9); }
+
+    /* Status Badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .status-completed { background: #DCFCE7; color: #15803D; }
+    .status-progress { background: #DBEAFE; color: #1D4ED8; }
+    .status-not-assigned { background: var(--bg-f3); color: var(--font-3); }
+
+    .peek-col-unit { width: 55px; }
+    .peek-col-section { width: 65px; }
+    .peek-col-status { width: 85px; }
+    .peek-col-title { width: auto; min-width: 120px; }
+    .peek-col-module { width: 50px; text-align: center; }
+    .peek-col-period { width: 165px; }
+    .peek-col-students { width: 55px; text-align: center; }
+    .peek-col-score { width: 58px; text-align: center; }
+
+    /* ======================== Toast ======================== */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--font-1);
+      color: var(--white);
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 400;
+      opacity: 0;
+      transition: all var(--transition-normal);
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+  <!-- ======================== GNB ======================== -->
+  <nav class="gnb" id="gnb">
+    <div class="gnb-header" id="gnbHeader">
+      <div class="gnb-logo">
+        <div class="gnb-logo-text"><span>Q</span><span>CMS</span></div>
+      </div>
+      <div class="gnb-hamburger">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <div class="gnb-nav">
+      <!-- 커리큘럼 관리 -->
+      <div class="menu-group" data-menu="curriculum">
+        <div class="menu-group-header">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+          </div>
+          <span class="menu-group-title">커리큘럼 관리</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item" href="#"><span class="submenu-item-text">분기 설정</span></a>
+          <a class="submenu-item" href="#"><span class="submenu-item-text">교재 등록</span></a>
+          <a class="submenu-item" href="#"><span class="submenu-item-text">커리큘럼 배정</span></a>
+        </div>
+      </div>
+
+      <!-- 콘텐츠 관리 -->
+      <div class="menu-group" data-menu="contents">
+        <div class="menu-group-header">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+          </div>
+          <span class="menu-group-title">콘텐츠 관리</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item" href="#"><span class="submenu-item-text">Circular Course</span></a>
+          <a class="submenu-item" href="#"><span class="submenu-item-text">Retention Course</span></a>
+        </div>
+      </div>
+
+      <!-- Prompt 관리 -->
+      <div class="menu-group" data-menu="prompt">
+        <div class="menu-group-header">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+          </div>
+          <span class="menu-group-title">Prompt 관리</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item" href="#"><span class="submenu-item-text">콘텐츠 생성 Prompt</span></a>
+          <a class="submenu-item" href="#"><span class="submenu-item-text">학습 모듈 Prompt</span></a>
+        </div>
+      </div>
+
+      <!-- 이용 현황 -->
+      <div class="menu-group open" data-menu="usage">
+        <div class="menu-group-header active">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+          </div>
+          <span class="menu-group-title">이용 현황</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item active" href="#"><span class="submenu-item-text">선생님 현황</span></a>
+          <a class="submenu-item" href="#"><span class="submenu-item-text">학생 현황</span></a>
+        </div>
+      </div>
+
+      <!-- 환경설정 -->
+      <div class="menu-group" data-menu="settings">
+        <div class="menu-group-header">
+          <div class="menu-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </div>
+          <span class="menu-group-title">환경설정</span>
+          <div class="menu-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="submenu">
+          <a class="submenu-item" href="#"><span class="submenu-item-text">학습 모듈 설정</span></a>
+          <a class="submenu-item" href="#"><span class="submenu-item-text">미디어 관리</span></a>
+          <a class="submenu-item" href="#"><span class="submenu-item-text">팝업창 설정</span></a>
+          <a class="submenu-item" href="#"><span class="submenu-item-text">권한 관리</span></a>
+          <a class="submenu-item" href="#"><span class="submenu-item-text">알림 관리</span></a>
+          <a class="submenu-item" href="#"><span class="submenu-item-text">코드 관리</span></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Floating Submenu (collapsed GNB용) -->
+  <div class="floating-submenu" id="floatingSubmenu"></div>
+
+  <!-- ======================== Main Content ======================== -->
+  <div class="main-wrapper">
+    <div class="fixed-header">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1 class="page-title">선생님 현황</h1>
+          <span class="page-description">Quantum 서비스를 사용하는 선생님별 숙제 부여 현황을 조회합니다.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="search-box">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <input type="text" class="search-input" placeholder="선생님명으로 검색">
+          </div>
+          <div class="toolbar-divider"></div>
+          <select class="filter-select">
+            <option value="">Course 전체</option>
+            <option value="circular">Circular Course</option>
+            <option value="retention">Retention Course</option>
+          </select>
+          <select class="filter-select">
+            <option value="">브랜드 전체</option>
+            <option value="choisun">최선어학원</option>
+            <option value="creo">CREO</option>
+            <option value="mate-choisun">MATE최선</option>
+            <option value="mate-creo">MATE CREO</option>
+          </select>
+          <select class="filter-select">
+            <option value="">캠퍼스 전체</option>
+            <option value="daechi">대치본원</option>
+            <option value="gangdong">강동하남</option>
+            <option value="ilsan">일산</option>
+            <option value="songpa">송파</option>
+          </select>
+          <!-- 교재명 검색 필터 -->
+          <div class="searchable-select" id="textbookFilter">
+            <button class="searchable-select-btn" onclick="toggleTextbookDropdown()">교재명 전체</button>
+            <div class="searchable-dropdown" id="textbookDropdown">
+              <div class="searchable-dropdown-search">
+                <input type="text" id="textbookSearchInput" placeholder="교재명 검색..." oninput="filterTextbookOptions()">
+              </div>
+              <div class="searchable-dropdown-list" id="textbookList">
+                <div class="searchable-option selected" data-value="" onclick="selectTextbook(this)">전체</div>
+                <div class="searchable-option" data-value="re1" onclick="selectTextbook(this)">Reading Explorer 1</div>
+                <div class="searchable-option" data-value="re2" onclick="selectTextbook(this)">Reading Explorer 2</div>
+                <div class="searchable-option" data-value="re3" onclick="selectTextbook(this)">Reading Explorer 3</div>
+                <div class="searchable-option" data-value="re4" onclick="selectTextbook(this)">Reading Explorer 4</div>
+                <div class="searchable-option" data-value="wp1" onclick="selectTextbook(this)">Word Power 1</div>
+                <div class="searchable-option" data-value="wp2" onclick="selectTextbook(this)">Word Power 2</div>
+                <div class="searchable-option" data-value="wp3" onclick="selectTextbook(this)">Word Power 3</div>
+                <div class="searchable-option" data-value="giu1" onclick="selectTextbook(this)">Grammar in Use 1</div>
+                <div class="searchable-option" data-value="giu2" onclick="selectTextbook(this)">Grammar in Use 2</div>
+                <div class="searchable-option" data-value="lm1" onclick="selectTextbook(this)">Listening Master 1</div>
+                <div class="searchable-option" data-value="lm2" onclick="selectTextbook(this)">Listening Master 2</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrapper">
+        <table class="data-table" id="mainTable">
+          <thead>
+            <tr>
+              <th class="col-brand sortable" data-col="brand" onclick="sortTable(this)">
+                브랜드
+                <div class="sort-icon"><div class="sort-arrow sort-arrow-up"></div><div class="sort-arrow sort-arrow-down"></div></div>
+              </th>
+              <th class="col-campus sortable" data-col="campus" onclick="sortTable(this)">
+                캠퍼스
+                <div class="sort-icon"><div class="sort-arrow sort-arrow-up"></div><div class="sort-arrow sort-arrow-down"></div></div>
+              </th>
+              <th class="col-teacher sortable" data-col="teacher" onclick="sortTable(this)">
+                선생님 이름
+                <div class="sort-icon"><div class="sort-arrow sort-arrow-up"></div><div class="sort-arrow sort-arrow-down"></div></div>
+              </th>
+              <th class="col-course sortable" data-col="course" onclick="sortTable(this)">
+                Course명
+                <div class="sort-icon"><div class="sort-arrow sort-arrow-up"></div><div class="sort-arrow sort-arrow-down"></div></div>
+              </th>
+              <th class="col-textbook sortable" data-col="textbook" onclick="sortTable(this)">
+                교재명
+                <div class="sort-icon"><div class="sort-arrow sort-arrow-up"></div><div class="sort-arrow sort-arrow-down"></div></div>
+              </th>
+              <th class="col-progress sortable" data-col="progress" onclick="sortTable(this)">
+                진도율
+                <div class="sort-icon"><div class="sort-arrow sort-arrow-up"></div><div class="sort-arrow sort-arrow-down"></div></div>
+              </th>
+              <th class="col-recent-hw sortable" data-col="recent-hw" onclick="sortTable(this)">
+                최근 숙제
+                <div class="sort-icon"><div class="sort-arrow sort-arrow-up"></div><div class="sort-arrow sort-arrow-down"></div></div>
+              </th>
+              <th class="col-recent-date sortable" data-col="recent-date" onclick="sortTable(this)">
+                최근 숙제 일자
+                <div class="sort-icon"><div class="sort-arrow sort-arrow-up"></div><div class="sort-arrow sort-arrow-down"></div></div>
+              </th>
+              <th class="col-hw-count sortable" data-col="hw-count" onclick="sortTable(this)">
+                과제 부여 횟수
+                <div class="sort-icon"><div class="sort-arrow sort-arrow-up"></div><div class="sort-arrow sort-arrow-down"></div></div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="openSidePeek(0)">
+              <td>최선어학원</td>
+              <td>대치본원</td>
+              <td>김영희</td>
+              <td>Circular Course</td>
+              <td>Reading Explorer 1</td>
+              <td>
+                <div class="progress-wrapper">
+                  <div class="progress-top"><span class="progress-text">8 / 24</span><span class="progress-percent">33%</span></div>
+                  <div class="progress-bar"><div class="progress-fill mid" style="width:33%"></div></div>
+                </div>
+              </td>
+              <td>Unit1 - Section3</td>
+              <td>2026-01-28</td>
+              <td class="text-center">12</td>
+            </tr>
+            <tr onclick="openSidePeek(1)">
+              <td>최선어학원</td>
+              <td>대치본원</td>
+              <td>김영희</td>
+              <td>Retention Course</td>
+              <td>Word Power 1</td>
+              <td>
+                <div class="progress-wrapper">
+                  <div class="progress-top"><span class="progress-text">15 / 20</span><span class="progress-percent">75%</span></div>
+                  <div class="progress-bar"><div class="progress-fill high" style="width:75%"></div></div>
+                </div>
+              </td>
+              <td>Unit3</td>
+              <td>2026-01-27</td>
+              <td class="text-center">18</td>
+            </tr>
+            <tr onclick="openSidePeek(2)">
+              <td>최선어학원</td>
+              <td>강동하남</td>
+              <td>박지훈</td>
+              <td>Circular Course</td>
+              <td>Reading Explorer 2</td>
+              <td>
+                <div class="progress-wrapper">
+                  <div class="progress-top"><span class="progress-text">20 / 24</span><span class="progress-percent">83%</span></div>
+                  <div class="progress-bar"><div class="progress-fill high" style="width:83%"></div></div>
+                </div>
+              </td>
+              <td>Unit5 - Section2</td>
+              <td>2026-01-30</td>
+              <td class="text-center">24</td>
+            </tr>
+            <tr onclick="openSidePeek(3)">
+              <td>CREO</td>
+              <td>대치본원</td>
+              <td>이수진</td>
+              <td>Circular Course</td>
+              <td>Reading Explorer 1</td>
+              <td>
+                <div class="progress-wrapper">
+                  <div class="progress-top"><span class="progress-text">4 / 24</span><span class="progress-percent">17%</span></div>
+                  <div class="progress-bar"><div class="progress-fill low" style="width:17%"></div></div>
+                </div>
+              </td>
+              <td>Unit1 - Section1</td>
+              <td>2026-01-15</td>
+              <td class="text-center">5</td>
+            </tr>
+            <tr onclick="openSidePeek(4)">
+              <td>CREO</td>
+              <td>일산</td>
+              <td>최민서</td>
+              <td>Circular Course</td>
+              <td>Reading Explorer 3</td>
+              <td>
+                <div class="progress-wrapper">
+                  <div class="progress-top"><span class="progress-text">12 / 18</span><span class="progress-percent">67%</span></div>
+                  <div class="progress-bar"><div class="progress-fill high" style="width:67%"></div></div>
+                </div>
+              </td>
+              <td>Unit3 - Section1</td>
+              <td>2026-01-25</td>
+              <td class="text-center">15</td>
+            </tr>
+            <tr onclick="openSidePeek(5)">
+              <td>MATE최선</td>
+              <td>송파</td>
+              <td>정하늘</td>
+              <td>Retention Course</td>
+              <td>Word Power 2</td>
+              <td>
+                <div class="progress-wrapper">
+                  <div class="progress-top"><span class="progress-text">22 / 30</span><span class="progress-percent">73%</span></div>
+                  <div class="progress-bar"><div class="progress-fill high" style="width:73%"></div></div>
+                </div>
+              </td>
+              <td>Unit5</td>
+              <td>2026-01-29</td>
+              <td class="text-center">20</td>
+            </tr>
+            <tr onclick="openSidePeek(6)">
+              <td>MATE CREO</td>
+              <td>대치본원</td>
+              <td>한소율</td>
+              <td>Circular Course</td>
+              <td>Reading Explorer 1</td>
+              <td>
+                <div class="progress-wrapper">
+                  <div class="progress-top"><span class="progress-text">6 / 24</span><span class="progress-percent">25%</span></div>
+                  <div class="progress-bar"><div class="progress-fill low" style="width:25%"></div></div>
+                </div>
+              </td>
+              <td>Unit2 - Section1</td>
+              <td>2026-01-20</td>
+              <td class="text-center">8</td>
+            </tr>
+            <tr onclick="openSidePeek(7)">
+              <td>CREO</td>
+              <td>강동하남</td>
+              <td>오지현</td>
+              <td>Circular Course</td>
+              <td>Reading Explorer 2</td>
+              <td>
+                <div class="progress-wrapper">
+                  <div class="progress-top"><span class="progress-text">16 / 24</span><span class="progress-percent">67%</span></div>
+                  <div class="progress-bar"><div class="progress-fill high" style="width:67%"></div></div>
+                </div>
+              </td>
+              <td>Unit4 - Section1</td>
+              <td>2026-01-26</td>
+              <td class="text-center">19</td>
+            </tr>
+            <tr onclick="openSidePeek(8)">
+              <td>MATE최선</td>
+              <td>일산</td>
+              <td>송태양</td>
+              <td>Retention Course</td>
+              <td>Word Power 1</td>
+              <td>
+                <div class="progress-wrapper">
+                  <div class="progress-top"><span class="progress-text">10 / 20</span><span class="progress-percent">50%</span></div>
+                  <div class="progress-bar"><div class="progress-fill mid" style="width:50%"></div></div>
+                </div>
+              </td>
+              <td>Unit2</td>
+              <td>2026-01-24</td>
+              <td class="text-center">12</td>
+            </tr>
+            <tr onclick="openSidePeek(9)">
+              <td>최선어학원</td>
+              <td>대치본원</td>
+              <td>김영희</td>
+              <td>Circular Course</td>
+              <td>Reading Explorer 3</td>
+              <td>
+                <div class="progress-wrapper">
+                  <div class="progress-top"><span class="progress-text">0 / 18</span><span class="progress-percent">0%</span></div>
+                  <div class="progress-bar"><div class="progress-fill zero" style="width:0%"></div></div>
+                </div>
+              </td>
+              <td class="empty-cell">-</td>
+              <td class="empty-cell">-</td>
+              <td class="text-center">0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-wrapper">
+        <div class="pagination-info">
+          <span>총 86개</span>
+          <select class="page-size-select">
+            <option value="30">30개씩</option>
+            <option value="50">50개씩</option>
+            <option value="100">100개씩</option>
+          </select>
+        </div>
+        <div class="pagination-pages">
+          <button class="page-btn" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <button class="page-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== Side Peek ======================== -->
+  <div class="side-peek-overlay" id="sidePeekOverlay">
+    <div class="side-peek">
+      <div class="side-peek-header">
+        <h2 class="side-peek-title">숙제 현황 상세</h2>
+        <button class="side-peek-close" onclick="closeSidePeek()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="side-peek-body">
+        <!-- Info Card -->
+        <div class="info-card">
+          <div class="info-card-top">
+            <span class="info-teacher-name" id="peekTeacher">김영희</span>
+          </div>
+          <div class="info-meta">
+            <span id="peekBrand">최선어학원</span>
+            <span class="info-meta-divider">·</span>
+            <span id="peekCampus">대치본원</span>
+            <span class="info-meta-divider">|</span>
+            <span id="peekCourse">Circular Course</span>
+            <span class="info-meta-divider">·</span>
+            <span id="peekTextbook">Reading Explorer 1</span>
+          </div>
+          <div class="info-stats">
+            <div class="info-stat">
+              <span class="info-stat-label">진도율</span>
+              <span class="info-stat-value" id="peekProgress">8 / 24 (33%)</span>
+            </div>
+            <div class="info-stat">
+              <span class="info-stat-label">과제 부여</span>
+              <span class="info-stat-value" id="peekHwCount">12회</span>
+            </div>
+            <div class="info-stat">
+              <span class="info-stat-label">최근 숙제 일자</span>
+              <span class="info-stat-value" id="peekRecentDate">2026-01-28</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detail Table -->
+        <table class="peek-table">
+          <thead>
+            <tr>
+              <th class="peek-col-unit">구분1</th>
+              <th class="peek-col-section">구분2</th>
+              <th class="peek-col-status">Status</th>
+              <th class="peek-col-title">지문 제목</th>
+              <th class="peek-col-module text-center">모듈 개수</th>
+              <th class="peek-col-period">Assign 기간</th>
+              <th class="peek-col-students text-center">학생수</th>
+              <th class="peek-col-score text-center">평균 점수</th>
+            </tr>
+          </thead>
+          <tbody id="peekTableBody">
+            <!-- JS로 동적 렌더링 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== Toast ======================== -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ======================== Script ======================== -->
+  <script>
+    // ---- GNB ----
+    const gnb = document.getElementById('gnb');
+    const floatingSubmenu = document.getElementById('floatingSubmenu');
+    const menuGroups = document.querySelectorAll('.menu-group');
+
+    let currentActivePage = 'teacher-status';
+    let isOverFloating = false;
+
+    const menuData = {
+      'curriculum': { title: '커리큘럼 관리', items: [
+        { page: 'quarter-settings', text: '분기 설정' },
+        { page: 'textbook-register', text: '교재 등록' },
+        { page: 'curriculum-assign', text: '커리큘럼 배정' }
+      ]},
+      'contents': { title: '콘텐츠 관리', items: [
+        { page: 'circular-course', text: 'Circular Course' },
+        { page: 'retention-course', text: 'Retention Course' }
+      ]},
+      'prompt': { title: 'Prompt 관리', items: [
+        { page: 'content-prompt', text: '콘텐츠 생성 Prompt' },
+        { page: 'module-prompt', text: '학습 모듈 Prompt' }
+      ]},
+      'usage': { title: '이용 현황', items: [
+        { page: 'teacher-status', text: '선생님 현황' },
+        { page: 'student-status', text: '학생 현황' }
+      ]},
+      'settings': { title: '환경설정', items: [
+        { page: 'module-settings', text: '학습 모듈 설정' },
+        { page: 'media-manage', text: '미디어 관리' },
+        { page: 'popup-settings', text: '팝업창 설정' },
+        { page: 'auth-manage', text: '권한 관리' },
+        { page: 'noti-manage', text: '알림 관리' },
+        { page: 'code-manage', text: '코드 관리' }
+      ]}
+    };
+
+    gnb.addEventListener('click', (e) => {
+      if (e.target.closest('.submenu-item') || e.target.closest('.menu-group-header')) return;
+      gnb.classList.toggle('collapsed');
+      hideFloatingSubmenu();
+    });
+
+    menuGroups.forEach(group => {
+      const header = group.querySelector('.menu-group-header');
+      const menuKey = group.dataset.menu;
+
+      header.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!gnb.classList.contains('collapsed')) {
+          group.classList.toggle('open');
+        }
+      });
+
+      header.addEventListener('mouseenter', () => {
+        if (gnb.classList.contains('collapsed')) showFloatingSubmenu(menuKey, header);
+      });
+
+      header.addEventListener('mouseleave', () => {
+        if (gnb.classList.contains('collapsed')) {
+          setTimeout(() => { if (!isOverFloating) hideFloatingSubmenu(); }, 50);
+        }
+      });
+    });
+
+    floatingSubmenu.addEventListener('mouseenter', () => { isOverFloating = true; });
+    floatingSubmenu.addEventListener('mouseleave', () => { isOverFloating = false; hideFloatingSubmenu(); });
+
+    function showFloatingSubmenu(menuKey, headerElement) {
+      const data = menuData[menuKey];
+      if (!data) return;
+      const rect = headerElement.getBoundingClientRect();
+      const gnbWidth = gnb.classList.contains('collapsed') ? 56 : 224;
+      floatingSubmenu.style.left = `${gnbWidth + 4}px`;
+      floatingSubmenu.style.top = `${rect.top}px`;
+      let html = `<div class="floating-submenu-title">${data.title}</div>`;
+      data.items.forEach(item => {
+        const isActive = item.page === currentActivePage ? 'active' : '';
+        html += `<a class="floating-item ${isActive}" href="#" data-page="${item.page}"><span class="floating-item-text">${item.text}</span></a>`;
+      });
+      floatingSubmenu.innerHTML = html;
+      floatingSubmenu.classList.add('visible');
+    }
+
+    function hideFloatingSubmenu() {
+      floatingSubmenu.classList.remove('visible');
+    }
+
+    // ---- 교재명 검색 필터 ----
+    function toggleTextbookDropdown() {
+      const dropdown = document.getElementById('textbookDropdown');
+      const isOpen = dropdown.classList.contains('open');
+      if (isOpen) {
+        dropdown.classList.remove('open');
+      } else {
+        dropdown.classList.add('open');
+        document.getElementById('textbookSearchInput').value = '';
+        filterTextbookOptions();
+        setTimeout(() => document.getElementById('textbookSearchInput').focus(), 50);
+      }
+    }
+
+    function filterTextbookOptions() {
+      const query = document.getElementById('textbookSearchInput').value.toLowerCase();
+      const options = document.querySelectorAll('#textbookList .searchable-option');
+      options.forEach(opt => {
+        if (opt.dataset.value === '') {
+          opt.classList.toggle('hidden', query.length > 0);
+        } else {
+          const text = opt.textContent.toLowerCase();
+          opt.classList.toggle('hidden', !text.includes(query));
+        }
+      });
+    }
+
+    function selectTextbook(el) {
+      document.querySelectorAll('#textbookList .searchable-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      const btn = document.querySelector('.searchable-select-btn');
+      btn.textContent = el.dataset.value === '' ? '교재명 전체' : el.textContent;
+      document.getElementById('textbookDropdown').classList.remove('open');
+    }
+
+    // 외부 클릭 시 교재명 드롭다운 닫기
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#textbookFilter')) {
+        document.getElementById('textbookDropdown').classList.remove('open');
+      }
+    });
+
+    // ---- 테이블 정렬 ----
+    let currentSortCol = null;
+    let currentSortDir = null;
+
+    function sortTable(th) {
+      const col = th.dataset.col;
+      const allThs = document.querySelectorAll('.data-table th.sortable');
+
+      if (currentSortCol === col) {
+        if (currentSortDir === 'asc') { currentSortDir = 'desc'; }
+        else if (currentSortDir === 'desc') { currentSortDir = null; currentSortCol = null; }
+      } else {
+        currentSortCol = col;
+        currentSortDir = 'asc';
+      }
+
+      allThs.forEach(t => { t.classList.remove('asc', 'desc'); });
+      if (currentSortDir) th.classList.add(currentSortDir);
+
+      showToast(currentSortDir ? `${th.textContent.trim()} ${currentSortDir === 'asc' ? '오름차순' : '내림차순'} 정렬` : '정렬 초기화');
+    }
+
+    // ---- Side Peek ----
+    const sidePeekData = [
+      // [0] 김영희 - Circular Course - Reading Explorer 1
+      {
+        teacher: '김영희', brand: '최선어학원', campus: '대치본원',
+        course: 'Circular Course', textbook: 'Reading Explorer 1',
+        progress: '8 / 24 (33%)', hwCount: '12회', recentDate: '2026-01-28',
+        details: [
+          { u1: 'Unit1', u2: 'Section1', status: 'Completed', title: 'What a Great Day!', modules: 4, period: '2026-01-05 ~ 2026-01-12', students: '8/10', score: '82' },
+          { u1: 'Unit1', u2: 'Section2', status: 'Completed', title: 'The Amazon River', modules: 3, period: '2026-01-10 ~ 2026-01-18', students: '7/10', score: '76' },
+          { u1: 'Unit1', u2: 'Section3', status: 'In Progress', title: 'Music and Memory', modules: 4, period: '2026-01-22 ~ 2026-02-01', students: '3/10', score: '-' },
+          { u1: 'Unit2', u2: 'Section1', status: 'Completed', title: 'Living in Space', modules: 5, period: '2026-01-12 ~ 2026-01-22', students: '9/10', score: '88' },
+          { u1: 'Unit2', u2: 'Section2', status: 'Completed', title: 'Food Around the World', modules: 3, period: '2026-01-15 ~ 2026-01-25', students: '6/10', score: '71' },
+          { u1: 'Unit2', u2: 'Section3', status: 'Not Assigned', title: 'Ocean Exploration', modules: 4, period: '-', students: '-', score: '-' },
+          { u1: 'Unit3', u2: 'Section1', status: 'Completed', title: 'Animal Migration', modules: 4, period: '2026-01-18 ~ 2026-01-28', students: '10/10', score: '91' },
+          { u1: 'Unit3', u2: 'Section2', status: 'Completed', title: 'Weather Patterns', modules: 3, period: '2026-01-20 ~ 2026-01-28', students: '8/10', score: '79' },
+          { u1: 'Unit3', u2: 'Section3', status: 'Not Assigned', title: 'Ancient Civilizations', modules: 5, period: '-', students: '-', score: '-' },
+          { u1: 'Unit4', u2: 'Section1', status: 'Not Assigned', title: 'Technology Today', modules: 4, period: '-', students: '-', score: '-' },
+          { u1: 'Unit4', u2: 'Section2', status: 'Not Assigned', title: 'Green Energy', modules: 3, period: '-', students: '-', score: '-' },
+          { u1: 'Unit4', u2: 'Section3', status: 'Not Assigned', title: 'The Space Race', modules: 5, period: '-', students: '-', score: '-' }
+        ]
+      },
+      // [1] 김영희 - Retention Course - Word Power 1
+      {
+        teacher: '김영희', brand: '최선어학원', campus: '대치본원',
+        course: 'Retention Course', textbook: 'Word Power 1',
+        progress: '15 / 20 (75%)', hwCount: '18회', recentDate: '2026-01-27',
+        details: [
+          { u1: 'Unit1', u2: '-', status: 'Completed', title: 'Daily Life Vocabulary', modules: 5, period: '2025-12-01 ~ 2025-12-10', students: '10/10', score: '85' },
+          { u1: 'Unit2', u2: '-', status: 'Completed', title: 'School & Education', modules: 4, period: '2025-12-08 ~ 2025-12-18', students: '9/10', score: '78' },
+          { u1: 'Unit3', u2: '-', status: 'In Progress', title: 'Nature & Environment', modules: 5, period: '2026-01-20 ~ 2026-01-30', students: '5/10', score: '-' },
+          { u1: 'Unit4', u2: '-', status: 'Not Assigned', title: 'Science & Technology', modules: 4, period: '-', students: '-', score: '-' },
+          { u1: 'Unit5', u2: '-', status: 'Not Assigned', title: 'Culture & Society', modules: 6, period: '-', students: '-', score: '-' }
+        ]
+      },
+      // [2] 박지훈 - Circular Course - Reading Explorer 2
+      {
+        teacher: '박지훈', brand: '최선어학원', campus: '강동하남',
+        course: 'Circular Course', textbook: 'Reading Explorer 2',
+        progress: '20 / 24 (83%)', hwCount: '24회', recentDate: '2026-01-30',
+        details: [
+          { u1: 'Unit1', u2: 'Section1', status: 'Completed', title: 'Wonders of Nature', modules: 4, period: '2025-12-02 ~ 2025-12-12', students: '12/12', score: '89' },
+          { u1: 'Unit1', u2: 'Section2', status: 'Completed', title: 'Deep Sea Creatures', modules: 3, period: '2025-12-10 ~ 2025-12-20', students: '11/12', score: '84' },
+          { u1: 'Unit1', u2: 'Section3', status: 'Completed', title: 'Mountain Ecosystems', modules: 5, period: '2025-12-15 ~ 2025-12-25', students: '12/12', score: '91' },
+          { u1: 'Unit5', u2: 'Section1', status: 'Completed', title: 'Future Cities', modules: 4, period: '2026-01-20 ~ 2026-01-28', students: '10/12', score: '86' },
+          { u1: 'Unit5', u2: 'Section2', status: 'In Progress', title: 'Smart Transportation', modules: 3, period: '2026-01-25 ~ 2026-02-04', students: '4/12', score: '-' },
+          { u1: 'Unit5', u2: 'Section3', status: 'Not Assigned', title: 'AI in Daily Life', modules: 5, period: '-', students: '-', score: '-' }
+        ]
+      },
+      // [3] 이수진 - Circular Course - Reading Explorer 1
+      {
+        teacher: '이수진', brand: 'CREO', campus: '대치본원',
+        course: 'Circular Course', textbook: 'Reading Explorer 1',
+        progress: '4 / 24 (17%)', hwCount: '5회', recentDate: '2026-01-15',
+        details: [
+          { u1: 'Unit1', u2: 'Section1', status: 'In Progress', title: 'What a Great Day!', modules: 4, period: '2026-01-10 ~ 2026-01-20', students: '2/8', score: '-' },
+          { u1: 'Unit1', u2: 'Section2', status: 'Not Assigned', title: 'The Amazon River', modules: 3, period: '-', students: '-', score: '-' },
+          { u1: 'Unit1', u2: 'Section3', status: 'Not Assigned', title: 'Music and Memory', modules: 4, period: '-', students: '-', score: '-' }
+        ]
+      },
+      // [4] 최민서 - Circular Course - Reading Explorer 3
+      {
+        teacher: '최민서', brand: 'CREO', campus: '일산',
+        course: 'Circular Course', textbook: 'Reading Explorer 3',
+        progress: '12 / 18 (67%)', hwCount: '15회', recentDate: '2026-01-25',
+        details: [
+          { u1: 'Unit1', u2: 'Section1', status: 'Completed', title: 'Extreme Weather', modules: 4, period: '2025-12-05 ~ 2025-12-15', students: '7/8', score: '80' },
+          { u1: 'Unit1', u2: 'Section2', status: 'Completed', title: 'Global Warming Effects', modules: 3, period: '2025-12-12 ~ 2025-12-22', students: '6/8', score: '74' },
+          { u1: 'Unit2', u2: 'Section1', status: 'Completed', title: 'The Human Brain', modules: 5, period: '2026-01-05 ~ 2026-01-15', students: '8/8', score: '88' },
+          { u1: 'Unit3', u2: 'Section1', status: 'In Progress', title: 'Robotics Revolution', modules: 4, period: '2026-01-20 ~ 2026-01-30', students: '3/8', score: '-' },
+          { u1: 'Unit3', u2: 'Section2', status: 'Not Assigned', title: 'Mars Colonization', modules: 3, period: '-', students: '-', score: '-' }
+        ]
+      },
+      // [5] 정하늘 - Retention Course - Word Power 2
+      {
+        teacher: '정하늘', brand: 'MATE최선', campus: '송파',
+        course: 'Retention Course', textbook: 'Word Power 2',
+        progress: '22 / 30 (73%)', hwCount: '20회', recentDate: '2026-01-29',
+        details: [
+          { u1: 'Unit1', u2: '-', status: 'Completed', title: 'Advanced Daily Expressions', modules: 6, period: '2025-11-20 ~ 2025-12-01', students: '15/15', score: '87' },
+          { u1: 'Unit2', u2: '-', status: 'Completed', title: 'Academic Vocabulary', modules: 5, period: '2025-12-01 ~ 2025-12-12', students: '14/15', score: '82' },
+          { u1: 'Unit3', u2: '-', status: 'Completed', title: 'Business English', modules: 6, period: '2025-12-10 ~ 2025-12-22', students: '13/15', score: '79' },
+          { u1: 'Unit4', u2: '-', status: 'Completed', title: 'Media & Communication', modules: 5, period: '2026-01-06 ~ 2026-01-18', students: '15/15', score: '90' },
+          { u1: 'Unit5', u2: '-', status: 'In Progress', title: 'Health & Wellness', modules: 6, period: '2026-01-22 ~ 2026-02-02', students: '7/15', score: '-' },
+          { u1: 'Unit6', u2: '-', status: 'Not Assigned', title: 'Travel & Adventure', modules: 5, period: '-', students: '-', score: '-' }
+        ]
+      },
+      // [6] 한소율 - Circular Course - Reading Explorer 1
+      {
+        teacher: '한소율', brand: 'MATE CREO', campus: '대치본원',
+        course: 'Circular Course', textbook: 'Reading Explorer 1',
+        progress: '6 / 24 (25%)', hwCount: '8회', recentDate: '2026-01-20',
+        details: [
+          { u1: 'Unit1', u2: 'Section1', status: 'Completed', title: 'What a Great Day!', modules: 4, period: '2026-01-05 ~ 2026-01-12', students: '5/6', score: '77' },
+          { u1: 'Unit1', u2: 'Section2', status: 'Completed', title: 'The Amazon River', modules: 3, period: '2026-01-10 ~ 2026-01-18', students: '4/6', score: '72' },
+          { u1: 'Unit2', u2: 'Section1', status: 'In Progress', title: 'Living in Space', modules: 5, period: '2026-01-15 ~ 2026-01-25', students: '2/6', score: '-' },
+          { u1: 'Unit2', u2: 'Section2', status: 'Not Assigned', title: 'Food Around the World', modules: 3, period: '-', students: '-', score: '-' }
+        ]
+      },
+      // [7] 오지현 - Circular Course - Reading Explorer 2
+      {
+        teacher: '오지현', brand: 'CREO', campus: '강동하남',
+        course: 'Circular Course', textbook: 'Reading Explorer 2',
+        progress: '16 / 24 (67%)', hwCount: '19회', recentDate: '2026-01-26',
+        details: [
+          { u1: 'Unit1', u2: 'Section1', status: 'Completed', title: 'Wonders of Nature', modules: 4, period: '2025-12-05 ~ 2025-12-15', students: '9/10', score: '83' },
+          { u1: 'Unit1', u2: 'Section2', status: 'Completed', title: 'Deep Sea Creatures', modules: 3, period: '2025-12-12 ~ 2025-12-20', students: '8/10', score: '78' },
+          { u1: 'Unit4', u2: 'Section1', status: 'In Progress', title: 'History of Flight', modules: 4, period: '2026-01-20 ~ 2026-01-30', students: '4/10', score: '-' },
+          { u1: 'Unit4', u2: 'Section2', status: 'Not Assigned', title: 'The Age of Sail', modules: 3, period: '-', students: '-', score: '-' }
+        ]
+      },
+      // [8] 송태양 - Retention Course - Word Power 1
+      {
+        teacher: '송태양', brand: 'MATE최선', campus: '일산',
+        course: 'Retention Course', textbook: 'Word Power 1',
+        progress: '10 / 20 (50%)', hwCount: '12회', recentDate: '2026-01-24',
+        details: [
+          { u1: 'Unit1', u2: '-', status: 'Completed', title: 'Daily Life Vocabulary', modules: 5, period: '2025-12-10 ~ 2025-12-20', students: '11/11', score: '86' },
+          { u1: 'Unit2', u2: '-', status: 'In Progress', title: 'School & Education', modules: 4, period: '2026-01-18 ~ 2026-01-28', students: '6/11', score: '-' },
+          { u1: 'Unit3', u2: '-', status: 'Not Assigned', title: 'Nature & Environment', modules: 5, period: '-', students: '-', score: '-' },
+          { u1: 'Unit4', u2: '-', status: 'Not Assigned', title: 'Science & Technology', modules: 4, period: '-', students: '-', score: '-' }
+        ]
+      },
+      // [9] 김영희 - Circular Course - Reading Explorer 3 (진도 0%)
+      {
+        teacher: '김영희', brand: '최선어학원', campus: '대치본원',
+        course: 'Circular Course', textbook: 'Reading Explorer 3',
+        progress: '0 / 18 (0%)', hwCount: '0회', recentDate: '-',
+        details: [
+          { u1: 'Unit1', u2: 'Section1', status: 'Not Assigned', title: 'Extreme Weather', modules: 4, period: '-', students: '-', score: '-' },
+          { u1: 'Unit1', u2: 'Section2', status: 'Not Assigned', title: 'Global Warming Effects', modules: 3, period: '-', students: '-', score: '-' },
+          { u1: 'Unit2', u2: 'Section1', status: 'Not Assigned', title: 'The Human Brain', modules: 5, period: '-', students: '-', score: '-' }
+        ]
+      }
+    ];
+
+    function openSidePeek(index) {
+      const data = sidePeekData[index];
+      if (!data) return;
+
+      document.getElementById('peekTeacher').textContent = data.teacher;
+      document.getElementById('peekBrand').textContent = data.brand;
+      document.getElementById('peekCampus').textContent = data.campus;
+      document.getElementById('peekCourse').textContent = data.course;
+      document.getElementById('peekTextbook').textContent = data.textbook;
+      document.getElementById('peekProgress').textContent = data.progress;
+      document.getElementById('peekHwCount').textContent = data.hwCount;
+      document.getElementById('peekRecentDate').textContent = data.recentDate;
+
+      const tbody = document.getElementById('peekTableBody');
+      tbody.innerHTML = data.details.map(d => {
+        let statusClass = '';
+        if (d.status === 'Completed') statusClass = 'status-completed';
+        else if (d.status === 'In Progress') statusClass = 'status-progress';
+        else statusClass = 'status-not-assigned';
+
+        return `<tr>
+          <td>${d.u1}</td>
+          <td>${d.u2}</td>
+          <td><span class="status-badge ${statusClass}">${d.status}</span></td>
+          <td>${d.title}</td>
+          <td class="text-center">${d.modules}</td>
+          <td class="empty-cell">${d.period}</td>
+          <td class="text-center ${d.students === '-' ? 'empty-cell' : ''}">${d.students}</td>
+          <td class="text-center ${d.score === '-' ? 'empty-cell' : ''}">${d.score === '-' ? '-' : d.score + '점'}</td>
+        </tr>`;
+      }).join('');
+
+      document.getElementById('sidePeekOverlay').classList.add('show');
+    }
+
+    function closeSidePeek() {
+      document.getElementById('sidePeekOverlay').classList.remove('show');
+    }
+
+    document.getElementById('sidePeekOverlay').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeSidePeek();
+    });
+
+    // ---- Toast ----
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => { toast.classList.remove('show'); }, 2500);
+    }
+  </script>
+</body>
+</html>

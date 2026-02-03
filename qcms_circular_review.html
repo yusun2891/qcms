@@ -1197,6 +1197,18 @@
       margin-left: 6px;
     }
 
+    /* 문단 레벨 AI 검수 블록 */
+    .paragraph-ai-review {
+      margin-bottom: 12px;
+      padding: 0 0 0 12px;
+      border-left: 3px solid var(--warning);
+      border-radius: 0 8px 8px 0;
+    }
+
+    .paragraph-ai-review .stt-comparison {
+      border-radius: 0 8px 8px 0;
+    }
+
     /* AI 검수 확인 완료 버튼 */
     .btn-confirm-review {
       padding: 4px 10px;
@@ -1404,6 +1416,22 @@
     .module-icon svg {
       width: 14px;
       height: 14px;
+    }
+
+    /* ===== MS04 SUB-SECTIONS (Topic · Summary · Context Words) ===== */
+    .ms04-sub-section {
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--line-1);
+    }
+
+    .ms04-sub-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--font-3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
     }
 
     .context-grid {
@@ -2087,16 +2115,17 @@
         <button class="tab active" data-tab="sentence">
           문장
           <span class="tab-count">12</span>
+          <span class="tab-issue">3</span>
         </button>
         <button class="tab" data-tab="word">
           단어
           <span class="tab-count">8</span>
-          <span class="tab-issue">2</span>
+          <span class="tab-issue">3</span>
         </button>
         <button class="tab" data-tab="ms04">
           MS04
           <span class="tab-count">4</span>
-          <span class="tab-issue">1</span>
+          <span class="tab-issue">2</span>
         </button>
       </div>
     </div>
@@ -2283,6 +2312,29 @@
               </div>
             </div>
             <div class="card-body" id="sentenceList">
+              <!-- 문단 1 그룹 헤더 -->
+              <div class="paragraph-group-header" data-paragraph="1" style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; margin-bottom: 12px; background: var(--bg-2); border-radius: 8px; border: 1px solid var(--line-1);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 13px; font-weight: 600; color: var(--font-1);">문단 1</span>
+                  <span style="font-size: 12px; color: var(--font-3);">2문장</span>
+                  <span class="issue-badge">이슈 1</span>
+                </div>
+              </div>
+
+              <!-- 문단 1: AI 검수 (문단 레벨) -->
+              <div class="paragraph-ai-review" data-paragraph="1">
+                <div class="stt-comparison warning">
+                  <div class="stt-comparison-header">
+                    <div class="stt-comparison-title" style="color: var(--warning);">
+                      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                      AI 검수 · 문단 1
+                    </div>
+                    <button class="btn-confirm-review" onclick="confirmReview(this)">확인 완료</button>
+                  </div>
+                  <div class="stt-content">문장 2가 길어 학습자 이해가 어려울 수 있습니다. 두 문장으로 나누는 것을 권장합니다.</div>
+                </div>
+              </div>
+
               <!-- Sentence 1 -->
               <div class="card sentence-card" data-id="1" data-order="1" style="margin-bottom: 12px;">
                 <div class="card-header" style="padding: 10px 12px;">
@@ -2411,17 +2463,14 @@
                     </div>
                     <div class="stt-content stt-result">These narratives served not only as entertainment but also as a means of preserving history, passing down cultural values, and teaching important life lessons to younger <span class="diff-add">generation</span>.</div>
                   </div>
-                  <!-- AI 검수 -->
-                  <div class="stt-comparison warning">
-                    <div class="stt-comparison-header">
-                      <div class="stt-comparison-title" style="color: var(--warning);">
-                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        AI 검수
-                      </div>
-                      <button class="btn-confirm-review" onclick="confirmReview(this)">확인 완료</button>
-                    </div>
-                    <div class="stt-content">문장이 길어 학습자 이해가 어려울 수 있습니다. 두 문장으로 나누는 것을 권장합니다.</div>
-                  </div>
+                </div>
+              </div>
+
+              <!-- 문단 2 그룹 헤더 -->
+              <div class="paragraph-group-header" data-paragraph="2" style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; margin-bottom: 12px; background: var(--bg-2); border-radius: 8px; border: 1px solid var(--line-1);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 13px; font-weight: 600; color: var(--font-1);">문단 2</span>
+                  <span style="font-size: 12px; color: var(--font-3);">2문장</span>
                 </div>
               </div>
 
@@ -2431,6 +2480,7 @@
                   <div class="card-header-left">
                     <span class="card-num">3</span>
                     <span class="source-tag">문단2</span>
+                    <span class="issue-badge">이슈 1</span>
                     <span class="similarity-badge low" title="STT 유사도">낮음</span>
                   </div>
                   <div class="sentence-actions">
@@ -2493,9 +2543,6 @@
                       <button class="btn-confirm-review" onclick="confirmReview(this)">확인 완료</button>
                     </div>
                     <div class="stt-content stt-result">Today <span class="diff-add">despite</span> the rise of digital media and instant communication the fundamental human <span class="diff-add">needs</span> for stories <span class="diff-add">remain</span> unchanged.</div>
-                    <div class="stt-suggestion">
-                      <strong>💡 제안:</strong> 원본 구간이 맞지 않을 수 있습니다. 원본 음원을 재생하여 구간을 조정하거나, 텍스트를 수정해주세요.
-                    </div>
                   </div>
                 </div>
               </div>
@@ -2850,7 +2897,7 @@
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
                       콘텐츠 전체 재생성
                     </button>
-                    <span class="issue-badge">이슈 2</span>
+                    <span class="issue-badge">이슈 3</span>
                   </div>
                   <span class="source-tag">문단1</span>
                 </div>
@@ -2897,18 +2944,6 @@
                 </div>
               </div>
 
-              <!-- AI 검수 -->
-              <div class="stt-comparison warning" style="margin-bottom: 16px;">
-                <div class="stt-comparison-header">
-                  <div class="stt-comparison-title" style="color: var(--warning);">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    AI 검수
-                  </div>
-                  <button class="btn-confirm-review" onclick="confirmReview(this)">확인 완료</button>
-                </div>
-                <div class="stt-content">1) 예문 3번의 오답 'protect'가 정답과 의미가 유사하여 변별력이 낮습니다. 2) 예문 4번 난이도가 낮습니다.</div>
-              </div>
-
               <!-- 지문 내 빈칸 -->
               <div class="word-section">
                 <div class="word-section-header">
@@ -2917,6 +2952,17 @@
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
                     재생성
                   </button>
+                </div>
+                <!-- AI 검수 -->
+                <div class="stt-comparison warning" style="margin-bottom: 12px;">
+                  <div class="stt-comparison-header">
+                    <div class="stt-comparison-title" style="color: var(--warning);">
+                      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                      AI 검수
+                    </div>
+                    <button class="btn-confirm-review" onclick="confirmReview(this)">확인 완료</button>
+                  </div>
+                  <div class="stt-content">오답 'preventing'이 정답 'preserving'과 어근이 유사하여 혼동을 줄 수 있습니다. 의미적으로 더 먼 오답으로 교체를 권장합니다.</div>
                 </div>
                 <div class="passage-box" data-passage-id="w2-passage">
                   <div class="passage-row">
@@ -2966,6 +3012,17 @@
                     재생성
                   </button>
                 </div>
+                <!-- AI 검수 -->
+                <div class="stt-comparison warning" style="margin-bottom: 12px;">
+                  <div class="stt-comparison-header">
+                    <div class="stt-comparison-title" style="color: var(--warning);">
+                      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                      AI 검수
+                    </div>
+                    <button class="btn-confirm-review" onclick="confirmReview(this)">확인 완료</button>
+                  </div>
+                  <div class="stt-content">예문 1의 문장이 학습 난이도 대비 지나치게 길어 학습자 부담이 클 수 있습니다. 간결하게 수정을 권장합니다.</div>
+                </div>
                 <div class="example-item">
                   <span class="example-num">1</span>
                   <div class="example-content">
@@ -3002,6 +3059,17 @@
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
                     재생성
                   </button>
+                </div>
+                <!-- AI 검수 -->
+                <div class="stt-comparison warning" style="margin-bottom: 12px;">
+                  <div class="stt-comparison-header">
+                    <div class="stt-comparison-title" style="color: var(--warning);">
+                      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                      AI 검수
+                    </div>
+                    <button class="btn-confirm-review" onclick="confirmReview(this)">확인 완료</button>
+                  </div>
+                  <div class="stt-content">예문 1의 오답 'protect'가 정답 'preserve'와 의미가 유사하여 변별력이 낮습니다. 예문 2의 난이도가 학습 레벨 대비 낮습니다.</div>
                 </div>
                 <!-- 예문 1 (적절한 레벨, 이슈) -->
                 <div class="example-item" style="flex-direction: column; gap: 8px;">
@@ -3364,15 +3432,15 @@
 
         <!-- TAB: MS04 -->
         <div class="tab-panel" id="panel-ms04">
-          <!-- Topic -->
+          <!-- Topic · Summary · Context Words (묶음 재생성) -->
           <div class="card">
             <div class="card-header">
               <div class="card-header-left">
                 <span class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></span>
-                <span class="card-title">Topic</span>
+                <span class="card-title">Topic · Summary · Context Words</span>
                 <span class="issue-badge">이슈 1</span>
               </div>
-              <button class="btn btn-sm btn-regen" onclick="regenerate('topic')">
+              <button class="btn btn-sm btn-regen" onclick="regenerate('topic-summary-context')">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
                 재생성
               </button>
@@ -3389,48 +3457,31 @@
                 </div>
                 <div class="stt-content">Topic이 너무 길어 학습 목표 파악이 어려울 수 있습니다. 핵심 주제로 간결하게 수정하는 것을 권장합니다.</div>
               </div>
-              <div class="editable" contenteditable="true">The enduring importance and evolution of storytelling throughout human history</div>
-            </div>
-          </div>
 
-          <!-- Summary -->
-          <div class="card">
-            <div class="card-header">
-              <div class="card-header-left">
-                <span class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></span>
-                <span class="card-title">Summary</span>
+              <!-- Topic -->
+              <div class="ms04-sub-section">
+                <div class="ms04-sub-label">Topic</div>
+                <div class="editable" contenteditable="true">The enduring importance and evolution of storytelling throughout human history</div>
               </div>
-              <button class="btn btn-sm btn-regen" onclick="regenerate('summary')">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-                재생성
-              </button>
-            </div>
-            <div class="card-body">
-              <div class="editable" contenteditable="true" style="min-height: 80px;">This passage explores the art of storytelling, tracing its origins from ancient times when people gathered around fires to share tales. It explains how stories have served multiple purposes: entertainment, historical preservation, cultural transmission, and moral education.</div>
-            </div>
-          </div>
 
-          <!-- Context Words -->
-          <div class="card">
-            <div class="card-header">
-              <div class="card-header-left">
-                <span class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></span>
-                <span class="card-title">Context Words</span>
+              <!-- Summary -->
+              <div class="ms04-sub-section">
+                <div class="ms04-sub-label">Summary</div>
+                <div class="editable" contenteditable="true" style="min-height: 80px;">This passage explores the art of storytelling, tracing its origins from ancient times when people gathered around fires to share tales. It explains how stories have served multiple purposes: entertainment, historical preservation, cultural transmission, and moral education.</div>
               </div>
-              <button class="btn btn-sm btn-regen" onclick="regenerate('context-words')">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-                재생성
-              </button>
-            </div>
-            <div class="card-body">
-              <div class="context-grid">
-                <div class="context-item">
-                  <div class="editable context-term" contenteditable="true">oral tradition</div>
-                  <div class="editable" contenteditable="true" style="font-size: 13px; color: var(--font-2);">The practice of passing down stories through spoken word</div>
-                </div>
-                <div class="context-item">
-                  <div class="editable context-term" contenteditable="true">cultural heritage</div>
-                  <div class="editable" contenteditable="true" style="font-size: 13px; color: var(--font-2);">The legacy of artifacts and attributes inherited from past generations</div>
+
+              <!-- Context Words -->
+              <div class="ms04-sub-section" style="border-bottom: none; padding-bottom: 0;">
+                <div class="ms04-sub-label">Context Words</div>
+                <div class="context-grid">
+                  <div class="context-item">
+                    <div class="editable context-term" contenteditable="true">oral tradition</div>
+                    <div class="editable" contenteditable="true" style="font-size: 13px; color: var(--font-2);">The practice of passing down stories through spoken word</div>
+                  </div>
+                  <div class="context-item">
+                    <div class="editable context-term" contenteditable="true">cultural heritage</div>
+                    <div class="editable" contenteditable="true" style="font-size: 13px; color: var(--font-2);">The legacy of artifacts and attributes inherited from past generations</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -3590,7 +3641,7 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeSplitModal()">취소</button>
-        <button class="btn btn-primary" onclick="confirmSplit()">나누기</button>
+        <button class="btn btn-primary" onclick="confirmSplit()">확인</button>
       </div>
     </div>
   </div>
@@ -3655,6 +3706,10 @@
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
                 재생성
               </button>
+            </div>
+            <div class="field-row">
+              <div class="editable-label">품사 <span class="label-manual">수동 입력</span></div>
+              <div class="editable" contenteditable="true" data-field="word-${newId}-pos" onblur="checkTextChange(this)">품사를 입력하세요</div>
             </div>
             <div class="field-row">
               <div class="editable-label">한글 뜻</div>
@@ -3774,16 +3829,19 @@
                 재생성
               </button>
             </div>
-            <!-- 예문 3 -->
+            <!-- 예문 1 (적절한 레벨) -->
             <div class="example-item" style="flex-direction: column; gap: 8px;">
               <div style="display: flex; gap: 10px; width: 100%;">
-                <span class="example-num">3</span>
+                <span class="example-num">1</span>
                 <div class="example-content" style="flex: 1;">
+                  <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                    <span class="level-label">적절한 레벨</span>
+                  </div>
                   <div class="passage-box" style="margin: 0;" data-passage-id="w${newId}-ex3">
                     <div class="passage-row">
                       <span class="passage-label">원문장</span>
                       <div class="passage-content-wrap">
-                        <div class="editable" contenteditable="true" style="font-size: 13px;" data-field="w${newId}-ex3" data-tts="w${newId}-ex3" data-passage-id="w${newId}-ex3" onblur="checkPassageChange(this)">빈칸 예문 3을 입력하세요.</div>
+                        <div class="editable" contenteditable="true" style="font-size: 13px;" data-field="w${newId}-ex3" data-tts="w${newId}-ex3" data-passage-id="w${newId}-ex3" onblur="checkPassageChange(this)">빈칸 예문 1을 입력하세요.</div>
                         <button class="btn-regen-passage" data-passage-id="w${newId}-ex3" onclick="regeneratePassageContent('w${newId}-ex3')">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
                           빈칸/보기 재생성
@@ -3819,16 +3877,19 @@
                 </div>
               </div>
             </div>
-            <!-- 예문 4 -->
+            <!-- 예문 2 (쉬운 레벨) -->
             <div class="example-item" style="flex-direction: column; gap: 8px;">
               <div style="display: flex; gap: 10px; width: 100%;">
-                <span class="example-num">4</span>
+                <span class="example-num">2</span>
                 <div class="example-content" style="flex: 1;">
+                  <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                    <span class="level-label">쉬운 레벨</span>
+                  </div>
                   <div class="passage-box" style="margin: 0;" data-passage-id="w${newId}-ex4">
                     <div class="passage-row">
                       <span class="passage-label">원문장</span>
                       <div class="passage-content-wrap">
-                        <div class="editable" contenteditable="true" style="font-size: 13px;" data-field="w${newId}-ex4" data-tts="w${newId}-ex4" data-passage-id="w${newId}-ex4" onblur="checkPassageChange(this)">빈칸 예문 4를 입력하세요.</div>
+                        <div class="editable" contenteditable="true" style="font-size: 13px;" data-field="w${newId}-ex4" data-tts="w${newId}-ex4" data-passage-id="w${newId}-ex4" onblur="checkPassageChange(this)">빈칸 예문 2를 입력하세요.</div>
                         <button class="btn-regen-passage" data-passage-id="w${newId}-ex4" onclick="regeneratePassageContent('w${newId}-ex4')">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
                           빈칸/보기 재생성
@@ -4374,15 +4435,11 @@
               </svg>
               STT 분석 결과 (${formatTime(start)} ~ ${formatTime(end)})
             </div>
-            <button class="btn-confirm-review" onclick="confirmReview(this)">확인 완료</button>
+            <div class="stt-comparison-actions">
+              <button class="btn-confirm-review" onclick="confirmReview(this)">확인 완료</button>
+            </div>
           </div>
           <div class="stt-content stt-result">${sttResult.text}</div>
-          ${similarity < 80 ? `
-          <div class="stt-suggestion">
-            <strong>💡 제안:</strong> 원본 구간이 맞지 않을 수 있습니다. 
-            원본 음원을 재생하여 구간을 조정하거나, 텍스트를 수정해주세요.
-          </div>
-          ` : ''}
         `;
         
         // Store STT text for apply function
@@ -4473,26 +4530,45 @@
       }
     }
 
-    // AI 검수 확인 완료
     function confirmReview(btn) {
       const comparison = btn.closest('.stt-comparison');
       if (comparison) {
-        // 해당 카드의 이슈 배지 업데이트
-        const card = btn.closest('.card');
-        if (card) {
-          const issueBadge = card.querySelector('.issue-badge');
-          if (issueBadge) {
-            const currentCount = parseInt(issueBadge.textContent.replace(/[^0-9]/g, '')) || 1;
-            if (currentCount <= 1) {
-              issueBadge.remove();
-            } else {
-              issueBadge.textContent = `이슈 ${currentCount - 1}`;
+        // 문단 레벨 AI 검수인지 확인
+        const paragraphReview = comparison.closest('.paragraph-ai-review');
+        if (paragraphReview) {
+          // 문단 그룹 헤더의 이슈 배지 업데이트
+          const paragraphId = paragraphReview.dataset.paragraph;
+          const groupHeader = document.querySelector(`.paragraph-group-header[data-paragraph="${paragraphId}"]`);
+          if (groupHeader) {
+            const issueBadge = groupHeader.querySelector('.issue-badge');
+            if (issueBadge) {
+              const currentCount = parseInt(issueBadge.textContent.replace(/[^0-9]/g, '')) || 1;
+              if (currentCount <= 1) {
+                issueBadge.remove();
+              } else {
+                issueBadge.textContent = `이슈 ${currentCount - 1}`;
+              }
             }
           }
+          // 패널 제거
+          paragraphReview.remove();
+        } else {
+          // 기존: 문장/단어 카드 레벨 이슈
+          const card = btn.closest('.card');
+          if (card) {
+            const issueBadge = card.querySelector('.issue-badge');
+            if (issueBadge) {
+              const currentCount = parseInt(issueBadge.textContent.replace(/[^0-9]/g, '')) || 1;
+              if (currentCount <= 1) {
+                issueBadge.remove();
+              } else {
+                issueBadge.textContent = `이슈 ${currentCount - 1}`;
+              }
+            }
+          }
+          // 패널 제거
+          comparison.remove();
         }
-        
-        // 패널 제거
-        comparison.remove();
         
         // 상단 상태 배지 업데이트
         updateHeaderStatusBadge();
@@ -5469,8 +5545,10 @@
       showToast('1/5 문장 분리 중...');
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      // 기존 문장 카드 모두 제거
-      sentenceList.querySelectorAll('.sentence-card').forEach(card => card.remove());
+      // 기존 문장 카드 및 문단 AI 검수 블록 모두 제거
+      sentenceList.querySelectorAll('.sentence-card, .paragraph-ai-review').forEach(el => el.remove());
+      // 문단 그룹 헤더 이슈 배지 초기화
+      sentenceList.querySelectorAll('.paragraph-group-header .issue-badge').forEach(el => el.remove());
       
       // 새로운 문장 생성 (데모용 - 실제로는 AI가 분리)
       const newSentences = [
@@ -5583,39 +5661,64 @@
       showToast('5/5 AI 검수 중...');
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      // AI 검수 결과 추가 (일부 문장에만)
-      const cardsArray = Array.from(sentenceCards);
-      const longSentence = cardsArray.find(card => {
-        const text = card.querySelector('.editable')?.textContent || '';
-        return text.length > 100;
-      });
-      
-      if (longSentence) {
-        const cardBody = longSentence.querySelector('.card-body');
-        const aiComment = document.createElement('div');
-        aiComment.className = 'stt-comparison warning';
-        aiComment.innerHTML = `
-          <div class="stt-comparison-header">
-            <div class="stt-comparison-title" style="color: var(--warning);">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-              AI 검수
-            </div>
-            <button class="btn-confirm-review" onclick="confirmReview(this)">확인 완료</button>
-          </div>
-          <div class="stt-content">문장이 길어 학습자 이해가 어려울 수 있습니다. 두 문장으로 나누는 것을 권장합니다.</div>
-        `;
-        cardBody.appendChild(aiComment);
-        
-        // Add issue badge
-        longSentence.classList.add('has-issue');
-        const headerLeft = longSentence.querySelector('.card-header-left');
-        if (!headerLeft.querySelector('.issue-badge')) {
-          const badge = document.createElement('span');
-          badge.className = 'issue-badge';
-          badge.textContent = '이슈 1';
-          headerLeft.appendChild(badge);
+      // AI 검수 결과 추가 (문단 레벨)
+      // 각 문단 그룹에서 긴 문장이 있는지 확인하여 문단 레벨로 AI 검수 추가
+      const paragraphHeaders = sentenceList.querySelectorAll('.paragraph-group-header');
+      paragraphHeaders.forEach(header => {
+        // 해당 문단의 문장 카드들 수집 (다음 paragraph-group-header 전까지)
+        const paragraphCards = [];
+        let sibling = header.nextElementSibling;
+        while (sibling && !sibling.classList.contains('paragraph-group-header')) {
+          if (sibling.classList.contains('sentence-card')) {
+            paragraphCards.push(sibling);
+          }
+          sibling = sibling.nextElementSibling;
         }
-      }
+        
+        // 긴 문장이 있는지 확인
+        const longCard = paragraphCards.find(card => {
+          const text = card.querySelector('.editable')?.textContent || '';
+          return text.length > 100;
+        });
+        
+        if (longCard) {
+          const paragraphId = header.dataset.paragraph;
+          const longCardNum = longCard.querySelector('.card-num')?.textContent || '?';
+          
+          // 문단 레벨 AI 검수 블록 생성
+          const aiReviewBlock = document.createElement('div');
+          aiReviewBlock.className = 'paragraph-ai-review';
+          aiReviewBlock.dataset.paragraph = paragraphId;
+          aiReviewBlock.innerHTML = `
+            <div class="stt-comparison warning">
+              <div class="stt-comparison-header">
+                <div class="stt-comparison-title" style="color: var(--warning);">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                  AI 검수 · 문단 ${paragraphId}
+                </div>
+                <button class="btn-confirm-review" onclick="confirmReview(this)">확인 완료</button>
+              </div>
+              <div class="stt-content">문장 ${longCardNum}이(가) 길어 학습자 이해가 어려울 수 있습니다. 두 문장으로 나누는 것을 권장합니다.</div>
+            </div>
+          `;
+          
+          // 문단 헤더 바로 다음에 삽입
+          if (header.nextSibling) {
+            sentenceList.insertBefore(aiReviewBlock, header.nextSibling);
+          } else {
+            sentenceList.appendChild(aiReviewBlock);
+          }
+          
+          // 문단 그룹 헤더에 이슈 배지 추가
+          const headerInner = header.querySelector('div');
+          if (headerInner && !headerInner.querySelector('.issue-badge')) {
+            const badge = document.createElement('span');
+            badge.className = 'issue-badge';
+            badge.textContent = '이슈 1';
+            headerInner.appendChild(badge);
+          }
+        }
+      });
       
       renumberSentences();
       updatePendingBadge();

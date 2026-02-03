@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QCMS - Prompt 상세 (AI 모듈)</title>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4C55EB;
+      --primary-hover: #3D45D9;
+      --primary-light: #EEF0FF;
+      --font-1: #191F28;
+      --font-2: #4E5968;
+      --font-3: #8B95A1;
+      --font-4: #B0B8C1;
+      --bg-1: #F9FAFB;
+      --bg-2: #F3F4F6;
+      --line-1: #E5E8EB;
+      --line-2: #D1D6DB;
+      --white: #FFFFFF;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --error: #EF4444;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-2);
+      color: var(--font-1);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 56px;
+      background: var(--white);
+      border-bottom: 1px solid var(--line-1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 100;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 12px; }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 10px;
+      background: none;
+      border: none;
+      color: var(--font-2);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .back-btn:hover { background: var(--bg-1); }
+    .back-btn svg { width: 16px; height: 16px; }
+
+    .header-divider { width: 1px; height: 20px; background: var(--line-1); }
+
+    .header-info { display: flex; flex-direction: column; gap: 2px; }
+    .header-info-sub { font-size: 12px; color: var(--font-3); }
+    .header-title-row { display: flex; align-items: center; gap: 8px; }
+    .header-info-title { font-size: 14px; font-weight: 600; color: var(--font-1); }
+
+    .header-right { display: flex; align-items: center; gap: 8px; }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      height: 34px;
+      padding: 0 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+
+    .btn svg { width: 14px; height: 14px; }
+    .btn-primary { background: var(--primary); color: var(--white); }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { background: var(--white); color: var(--font-2); border: 1px solid var(--line-1); }
+    .btn-secondary:hover { background: var(--bg-1); }
+    .btn-sm { height: 30px; padding: 0 12px; font-size: 12px; }
+
+    /* Version Selector */
+    .version-selector { position: relative; }
+    .version-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border: 1px solid var(--line-1);
+      border-radius: 6px;
+      background: var(--white);
+      font-size: 12px;
+      color: var(--font-2);
+      cursor: pointer;
+    }
+    .version-btn:hover { background: var(--bg-1); }
+    .version-btn svg { width: 14px; height: 14px; }
+    .version-badge { padding: 2px 6px; background: var(--primary-light); color: var(--primary); border-radius: 4px; font-weight: 600; font-size: 11px; }
+
+    .version-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      right: 0;
+      width: 280px;
+      background: var(--white);
+      border: 1px solid var(--line-1);
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      z-index: 100;
+      display: none;
+    }
+    .version-dropdown.show { display: block; }
+    .version-dropdown-header { padding: 12px 14px; border-bottom: 1px solid var(--line-1); font-size: 12px; font-weight: 600; color: var(--font-3); }
+    .version-list { max-height: 240px; overflow-y: auto; }
+    .version-item { padding: 10px 14px; cursor: pointer; display: flex; align-items: flex-start; gap: 10px; }
+    .version-item:hover { background: var(--bg-1); }
+    .version-item.current { background: var(--primary-light); }
+    .version-radio { width: 16px; height: 16px; border: 2px solid var(--line-2); border-radius: 50%; flex-shrink: 0; margin-top: 2px; }
+    .version-item.current .version-radio { border-color: var(--primary); background: var(--primary); box-shadow: inset 0 0 0 3px var(--white); }
+    .version-info { flex: 1; }
+    .version-name { font-size: 13px; font-weight: 500; color: var(--font-1); }
+    .version-date { font-size: 11px; color: var(--font-3); margin-top: 2px; }
+    .version-memo { font-size: 12px; color: var(--font-2); margin-top: 4px; }
+    .version-dropdown-footer { padding: 10px 14px; border-top: 1px solid var(--line-1); }
+    .version-history-link { font-size: 12px; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 4px; }
+    .version-history-link:hover { text-decoration: underline; }
+
+    /* Save Button Group */
+    .save-btn-group { display: flex; position: relative; }
+    .save-btn-main { border-radius: 6px 0 0 6px; }
+    .save-btn-dropdown { width: 30px; padding: 0; border-radius: 0 6px 6px 0; border-left: 1px solid rgba(255,255,255,0.2); }
+    .save-dropdown { position: absolute; top: calc(100% + 4px); right: 0; width: 160px; background: var(--white); border: 1px solid var(--line-1); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 100; display: none; }
+    .save-dropdown.show { display: block; }
+    .save-dropdown-item { padding: 10px 14px; font-size: 13px; color: var(--font-2); cursor: pointer; }
+    .save-dropdown-item:hover { background: var(--bg-1); }
+    .save-dropdown-item:first-child { border-radius: 8px 8px 0 0; }
+    .save-dropdown-item:last-child { border-radius: 0 0 8px 8px; }
+
+    /* ===== MAIN LAYOUT ===== */
+    .main-wrapper { margin-top: 56px; height: calc(100vh - 56px); display: flex; overflow: hidden; }
+
+    /* Left Panel */
+    .left-panel { width: 300px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--line-1); display: flex; flex-direction: column; }
+    .panel-section { padding: 16px; border-bottom: 1px solid var(--line-1); }
+    .panel-section-title { font-size: 11px; font-weight: 600; color: var(--font-3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+
+    /* AI Settings */
+    .ai-settings-compact { display: flex; flex-direction: column; gap: 10px; }
+    .setting-row { display: flex; align-items: center; gap: 8px; }
+    .setting-row-label { font-size: 12px; font-weight: 500; color: var(--font-3); width: 85px; flex-shrink: 0; }
+    .setting-row-value { flex: 1; }
+    .setting-select-sm, .setting-input-sm { width: 100%; height: 32px; padding: 0 10px; border: 1px solid var(--line-2); border-radius: 6px; font-size: 13px; color: var(--font-1); background: var(--white); }
+    .setting-select-sm { appearance: none; background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B95A1' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 8px center; padding-right: 28px; cursor: pointer; }
+    .setting-select-sm:focus, .setting-input-sm:focus { outline: none; border-color: var(--primary); }
+    .setting-row-half { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .setting-item-sm { display: flex; flex-direction: column; gap: 4px; }
+    .setting-item-sm label { font-size: 11px; color: var(--font-3); }
+
+    /* Prompt List */
+    .prompt-list-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 16px; padding-bottom: 0; }
+    .prompt-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-bottom: 16px; }
+    .prompt-list-item { padding: 12px; border: 1px solid var(--line-1); border-radius: 8px; cursor: pointer; transition: all 0.15s; }
+    .prompt-list-item:hover { background: var(--bg-1); }
+    .prompt-list-item.active { border-color: var(--primary); background: var(--primary-light); }
+    .prompt-list-item.default { border-left: 3px solid var(--primary); }
+    .prompt-item-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .prompt-item-title { font-size: 13px; font-weight: 600; color: var(--font-1); display: flex; align-items: center; gap: 6px; }
+    .prompt-item-title .star { color: var(--primary); font-size: 12px; }
+    .prompt-item-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 500; }
+    .prompt-item-badge.required { background: var(--primary); color: var(--white); }
+    .prompt-item-conditions { display: flex; flex-direction: column; gap: 4px; }
+    .condition-row-display { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+    .condition-row-label { font-size: 10px; color: var(--font-3); width: 32px; flex-shrink: 0; }
+    .condition-tag { font-size: 11px; padding: 2px 6px; background: var(--bg-1); border-radius: 4px; color: var(--font-2); }
+    .prompt-list-item.active .condition-tag { background: var(--white); }
+    .prompt-item-delete { width: 24px; height: 24px; border: none; background: transparent; color: var(--font-4); cursor: pointer; border-radius: 4px; display: flex; align-items: center; justify-content: center; opacity: 0; }
+    .prompt-list-item:hover .prompt-item-delete { opacity: 1; }
+    .prompt-item-delete:hover { background: #FEE2E2; color: var(--error); }
+    .prompt-item-delete svg { width: 14px; height: 14px; }
+    .add-prompt-btn-sm { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border: 1px dashed var(--line-2); border-radius: 8px; background: transparent; color: var(--font-3); font-size: 13px; cursor: pointer; margin-bottom: 16px; flex-shrink: 0; }
+    .add-prompt-btn-sm:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+    .add-prompt-btn-sm svg { width: 14px; height: 14px; }
+
+    /* Right Panel */
+    .right-panel { flex: 1; background: var(--bg-2); overflow-y: auto; padding: 24px; }
+    .editor-card { background: var(--white); border: 1px solid var(--line-1); border-radius: 12px; }
+    .editor-header { padding: 16px 20px; border-bottom: 1px solid var(--line-1); display: flex; align-items: center; gap: 8px; }
+    .editor-title { font-size: 15px; font-weight: 600; color: var(--font-1); }
+    .editor-header .icon { width: 18px; height: 18px; flex-shrink: 0; }
+    .editor-header .icon.default { color: var(--primary); }
+    .editor-header .icon.exception { color: var(--warning); }
+    .editor-body { padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+
+    /* Notice */
+    .editor-notice { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; background: var(--primary-light); border-radius: 8px; font-size: 13px; color: var(--primary); line-height: 1.5; }
+    .editor-notice svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; }
+
+    /* Condition Editor - Checkbox Style */
+    .condition-editor { background: var(--bg-1); border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 16px; }
+    .condition-editor-row { display: flex; flex-direction: column; gap: 10px; }
+    .condition-editor-header { display: flex; align-items: center; justify-content: space-between; }
+    .condition-editor-label { font-size: 12px; font-weight: 600; color: var(--font-2); }
+    .condition-editor-actions { display: flex; gap: 8px; }
+    .condition-action-link { font-size: 11px; color: var(--primary); cursor: pointer; text-decoration: none; }
+    .condition-action-link:hover { text-decoration: underline; }
+    
+    .checkbox-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .checkbox-item { display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: var(--white); border: 1px solid var(--line-1); border-radius: 6px; cursor: pointer; transition: all 0.15s; min-width: 70px; }
+    .checkbox-item:hover { border-color: var(--primary); }
+    .checkbox-item.checked { background: var(--primary-light); border-color: var(--primary); }
+    .checkbox-item input[type="checkbox"] { display: none; }
+    .checkbox-custom { width: 16px; height: 16px; border: 2px solid var(--line-2); border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+    .checkbox-item.checked .checkbox-custom { background: var(--primary); border-color: var(--primary); }
+    .checkbox-custom svg { width: 10px; height: 10px; color: var(--white); opacity: 0; }
+    .checkbox-item.checked .checkbox-custom svg { opacity: 1; }
+    .checkbox-label { font-size: 13px; color: var(--font-2); }
+    .checkbox-item.checked .checkbox-label { color: var(--primary); font-weight: 500; }
+
+    /* Modified indicator */
+    .prompt-list-item.modified .prompt-item-title::after {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--warning);
+      border-radius: 50%;
+      display: inline-block;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    .condition-apply-row { display: flex; justify-content: flex-end; padding-top: 8px; border-top: 1px solid var(--line-1); margin-top: 4px; }
+
+    /* Code Hints - Vertical Layout */
+    .code-hint-section { background: var(--bg-1); border-radius: 8px; padding: 14px; }
+    .code-hint-label { font-size: 12px; font-weight: 500; color: var(--font-3); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    .code-hint-label svg { width: 14px; height: 14px; color: var(--warning); }
+    .code-hint-group { margin-bottom: 12px; }
+    .code-hint-group:last-child { margin-bottom: 0; }
+    .code-hint-group-title { font-size: 11px; font-weight: 600; color: var(--font-3); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.3px; }
+    .code-hints { display: flex; flex-wrap: wrap; gap: 6px; }
+    .code-hint-chip { font-size: 12px; padding: 5px 10px; background: var(--white); border: 1px solid var(--line-1); border-radius: 4px; font-family: 'Consolas', monospace; color: var(--primary); cursor: pointer; }
+    .code-hint-chip:hover { background: var(--primary-light); border-color: var(--primary); }
+
+    /* Prompt Input */
+    .prompt-input-group { display: flex; flex-direction: column; gap: 8px; }
+    .prompt-input-label { font-size: 13px; font-weight: 500; color: var(--font-2); }
+    .prompt-textarea { width: 100%; min-height: 180px; padding: 14px; border: 1px solid var(--line-2); border-radius: 8px; font-size: 14px; font-family: 'Consolas', 'Monaco', monospace; color: var(--font-1); line-height: 1.6; resize: vertical; }
+    .prompt-textarea:focus { outline: none; border-color: var(--primary); }
+    .prompt-textarea::placeholder { color: var(--font-4); font-family: 'Pretendard', sans-serif; }
+
+    /* Modal */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 200; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: var(--white); border-radius: 12px; width: 480px; max-width: 90%; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+    .modal-header { padding: 16px 20px; border-bottom: 1px solid var(--line-1); font-size: 16px; font-weight: 600; }
+    .modal-body { padding: 20px; max-height: 60vh; overflow-y: auto; }
+    .modal-footer { padding: 16px 20px; border-top: 1px solid var(--line-1); display: flex; justify-content: flex-end; gap: 8px; }
+    .form-group { margin-bottom: 20px; }
+    .form-group:last-child { margin-bottom: 0; }
+    .form-label { display: block; font-size: 13px; font-weight: 500; color: var(--font-2); margin-bottom: 6px; }
+    .form-input, .form-textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--line-2); border-radius: 8px; font-size: 14px; color: var(--font-1); }
+    .form-textarea { min-height: 80px; resize: vertical; }
+    .form-input:focus, .form-textarea:focus { outline: none; border-color: var(--primary); }
+
+    /* Modal Checkbox Grid */
+    .modal-condition-group { margin-bottom: 20px; }
+    .modal-condition-group:last-child { margin-bottom: 0; }
+    .modal-condition-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .modal-condition-label { font-size: 13px; font-weight: 600; color: var(--font-2); }
+    .modal-checkbox-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .modal-checkbox-grid.type-grid { grid-template-columns: repeat(3, 1fr); }
+
+    /* Version History Table */
+    .version-history-table { width: 100%; border-collapse: collapse; }
+    .version-history-table th { padding: 12px 16px; text-align: left; font-size: 12px; font-weight: 600; color: var(--font-3); background: var(--bg-1); border-bottom: 1px solid var(--line-1); }
+    .version-history-table td { padding: 12px 16px; font-size: 13px; color: var(--font-2); border-bottom: 1px solid var(--line-1); vertical-align: middle; }
+    .version-history-table tbody tr:hover { background: var(--bg-1); }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--font-1); color: var(--white); padding: 12px 24px; border-radius: 8px; font-size: 14px; z-index: 300; opacity: 0; transition: all 0.25s; }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <button class="back-btn" onclick="history.back()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+        목록
+      </button>
+      <div class="header-divider"></div>
+      <div class="header-info">
+        <div class="header-info-sub">콘텐츠 입력 · AI - MS04</div>
+        <div class="header-title-row">
+          <span class="header-info-title">주제 생성</span>
+        </div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="version-selector">
+        <button class="version-btn" onclick="toggleVersionDropdown()">
+          <span class="version-badge">v2</span>
+          <span>2026.01.30</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="version-dropdown" id="versionDropdown">
+          <div class="version-dropdown-header">버전 히스토리</div>
+          <div class="version-list">
+            <div class="version-item current" onclick="selectVersion('v2')">
+              <div class="version-radio"></div>
+              <div class="version-info">
+                <div class="version-name">v2 (현재)</div>
+                <div class="version-date">2026.01.30 16:45</div>
+                <div class="version-memo">"Essay 타입 prompt 추가"</div>
+              </div>
+            </div>
+            <div class="version-item" onclick="selectVersion('v1')">
+              <div class="version-radio"></div>
+              <div class="version-info">
+                <div class="version-name">v1</div>
+                <div class="version-date">2026.01.20 11:30</div>
+                <div class="version-memo">"최초 등록"</div>
+              </div>
+            </div>
+          </div>
+          <div class="version-dropdown-footer">
+            <a href="#" class="version-history-link" onclick="openVersionHistoryModal(); return false;">버전 히스토리 전체 보기 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></a>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-secondary" onclick="history.back()">취소</button>
+      <div class="save-btn-group">
+        <button class="btn btn-primary save-btn-main" onclick="savePrompt()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          저장
+        </button>
+        <button class="btn btn-primary save-btn-dropdown" onclick="toggleSaveDropdown(event)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="save-dropdown" id="saveDropdown">
+          <div class="save-dropdown-item" onclick="savePrompt()">저장</div>
+          <div class="save-dropdown-item" onclick="openNewVersionModal()">새 버전으로 저장</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="main-wrapper">
+    <!-- Left Panel -->
+    <div class="left-panel">
+      <div class="panel-section">
+        <div class="panel-section-title">AI 설정</div>
+        <div class="ai-settings-compact">
+          <div class="setting-row">
+            <span class="setting-row-label">AI TYPE</span>
+            <div class="setting-row-value">
+              <select class="setting-select-sm">
+                <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+                <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+                <option value="gemini-2.5-pro" selected>gemini-2.5-pro</option>
+                <option value="gpt-4o">gpt-4o</option>
+                <option value="gpt-4o-mini">gpt-4o-mini</option>
+                <option value="gpt-5.2">gpt-5.2</option>
+              </select>
+            </div>
+          </div>
+          <div class="setting-row-half">
+            <div class="setting-item-sm">
+              <label>TEMPERATURE</label>
+              <input type="number" class="setting-input-sm" value="0.7" step="0.1" min="0" max="2">
+            </div>
+            <div class="setting-item-sm">
+              <label>TOP P</label>
+              <input type="number" class="setting-input-sm" value="0.9" step="0.1" min="0" max="1">
+            </div>
+          </div>
+          <button class="btn btn-primary btn-sm" id="aiSettingSaveBtn" disabled style="width:100%; margin-top: 4px; opacity: 0.4; cursor: not-allowed;" onclick="saveAiSettings()">저장</button>
+        </div>
+      </div>
+
+      <div class="prompt-list-section">
+        <div class="panel-section-title">Prompt 목록</div>
+        <div class="prompt-list">
+          <div class="prompt-list-item default active" data-id="default" onclick="selectPrompt('default')">
+            <div class="prompt-item-header">
+              <span class="prompt-item-title"><span class="star">★</span> 기본 Prompt</span>
+              <span class="prompt-item-badge required">필수</span>
+            </div>
+            <div class="prompt-item-conditions">
+              <span class="condition-tag">모든 난이도 × 타입 기본 적용</span>
+            </div>
+          </div>
+          <div class="prompt-list-item" data-id="exception1" onclick="selectPrompt('exception1')">
+            <div class="prompt-item-header">
+              <span class="prompt-item-title">예외 #1</span>
+              <button class="prompt-item-delete" onclick="deletePrompt(event, 'exception1')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              </button>
+            </div>
+            <div class="prompt-item-conditions">
+              <div class="condition-row-display">
+                <span class="condition-row-label">난이도</span>
+                <span class="condition-tag">BL1</span>
+                <span class="condition-tag">BL2</span>
+                <span class="condition-tag">BL3</span>
+              </div>
+              <div class="condition-row-display">
+                <span class="condition-row-label">타입</span>
+                <span class="condition-tag">Essay</span>
+                <span class="condition-tag">Article</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="add-prompt-btn-sm" onclick="openAddExceptionModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          예외 Prompt 추가
+        </button>
+      </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="right-panel">
+      <!-- Default Editor -->
+      <div class="editor-card" id="editor-default">
+        <div class="editor-header">
+          <svg class="icon default" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <span class="editor-title">기본 Prompt</span>
+        </div>
+        <div class="editor-body">
+          <div class="editor-notice">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span>모든 지문 난이도 × 지문 타입 조합에 기본으로 적용됩니다. 예외 Prompt가 설정된 조합은 예외 Prompt가 우선 적용됩니다.</span>
+          </div>
+          <div class="code-hint-section">
+            <div class="code-hint-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              사용 가능한 치환 변수 (클릭하여 복사)
+            </div>
+            <div class="code-hint-group">
+              <div class="code-hint-group-title">시스템 변수 (원본 데이터)</div>
+              <div class="code-hints">
+                <span class="code-hint-chip" onclick="copyCode('{passage}')">{passage}</span>
+                <span class="code-hint-chip" onclick="copyCode('{paragraph}')">{paragraph}</span>
+                <span class="code-hint-chip" onclick="copyCode('{difficulty_level}')">{difficulty_level}</span>
+                <span class="code-hint-chip" onclick="copyCode('{text_type}')">{text_type}</span>
+                <span class="code-hint-chip" onclick="copyCode('{word}')">{word}</span>
+                <span class="code-hint-chip" onclick="copyCode('{original_sentence}')">{original_sentence}</span>
+                <span class="code-hint-chip" onclick="copyCode('{part_of_speech}')">{part_of_speech}</span>
+                <span class="code-hint-chip" onclick="copyCode('{korean_meaning}')">{korean_meaning}</span>
+                <span class="code-hint-chip" onclick="copyCode('{english_definition}')">{english_definition}</span>
+                <span class="code-hint-chip" onclick="copyCode('{words}')">{words}</span>
+              </div>
+            </div>
+            <div class="code-hint-group">
+              <div class="code-hint-group-title">시스템 변수 (생성 결과)</div>
+              <div class="code-hints">
+                <span class="code-hint-chip" onclick="copyCode('{sentences}')">{sentences}</span>
+                <span class="code-hint-chip" onclick="copyCode('{blank_sentence}')">{blank_sentence}</span>
+                <span class="code-hint-chip" onclick="copyCode('{choices}')">{choices}</span>
+                <span class="code-hint-chip" onclick="copyCode('{examples}')">{examples}</span>
+                <span class="code-hint-chip" onclick="copyCode('{examples_with_blanks}')">{examples_with_blanks}</span>
+                <span class="code-hint-chip" onclick="copyCode('{topic}')">{topic}</span>
+                <span class="code-hint-chip" onclick="copyCode('{summary}')">{summary}</span>
+                <span class="code-hint-chip" onclick="copyCode('{context_words}')">{context_words}</span>
+                <span class="code-hint-chip" onclick="copyCode('{comprehension_questions}')">{comprehension_questions}</span>
+                <span class="code-hint-chip" onclick="copyCode('{question}')">{question}</span>
+                <span class="code-hint-chip" onclick="copyCode('{evidence_sentence}')">{evidence_sentence}</span>
+                <span class="code-hint-chip" onclick="copyCode('{answer}')">{answer}</span>
+                <span class="code-hint-chip" onclick="copyCode('{explanation}')">{explanation}</span>
+                <span class="code-hint-chip" onclick="copyCode('{hints}')">{hints}</span>
+                <span class="code-hint-chip" onclick="copyCode('{transition}')">{transition}</span>
+              </div>
+            </div>
+            <div class="code-hint-group">
+              <div class="code-hint-group-title">지문 난이도별</div>
+              <div class="code-hints">
+                <span class="code-hint-chip" onclick="copyCode('{role}')">{role}</span>
+                <span class="code-hint-chip" onclick="copyCode('{level_instruction}')">{level_instruction}</span>
+                <span class="code-hint-chip" onclick="copyCode('{word_count}')">{word_count}</span>
+              </div>
+            </div>
+            <div class="code-hint-group">
+              <div class="code-hint-group-title">지문 타입별</div>
+              <div class="code-hints">
+                <span class="code-hint-chip" onclick="copyCode('{type_instruction}')">{type_instruction}</span>
+                <span class="code-hint-chip" onclick="copyCode('{type_example}')">{type_example}</span>
+              </div>
+            </div>
+          </div>
+          <div class="prompt-input-group">
+            <label class="prompt-input-label">System Prompt</label>
+            <textarea class="prompt-textarea" placeholder="AI의 역할과 컨텍스트를 설정합니다...">You are a {role} who creates educational content.</textarea>
+          </div>
+          <div class="prompt-input-group">
+            <label class="prompt-input-label">User Prompt</label>
+            <textarea class="prompt-textarea" placeholder="실제 작업 지시 내용을 입력합니다...">다음 조건에 맞는 영어 지문의 주제를 생성해주세요.
+
+[난이도 조건]
+{level_instruction}
+
+[지문 타입]
+{type_instruction}
+
+[타입별 예시]
+{type_example}
+
+[출력 형식]
+- 주제 1개
+- 주제에 대한 간단한 설명</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exception 1 Editor -->
+      <div class="editor-card" id="editor-exception1" style="display:none;">
+        <div class="editor-header">
+          <svg class="icon exception" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span class="editor-title">예외 Prompt #1</span>
+        </div>
+        <div class="editor-body">
+          <!-- Condition Editor with Checkboxes -->
+          <div class="condition-editor">
+            <div class="condition-editor-row">
+              <div class="condition-editor-header">
+                <div class="condition-editor-label">적용 조건 - 지문 난이도</div>
+                <div class="condition-editor-actions">
+                  <span class="condition-action-link" onclick="toggleAllCheckbox('exception1-level', true)">전체 선택</span>
+                  <span class="condition-action-link" onclick="toggleAllCheckbox('exception1-level', false)">선택 해제</span>
+                </div>
+              </div>
+              <div class="checkbox-grid" id="exception1-level">
+                <label class="checkbox-item checked" onclick="toggleCheckbox(this)">
+                  <input type="checkbox" value="BL1" checked>
+                  <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                  <span class="checkbox-label">BL1</span>
+                </label>
+                <label class="checkbox-item checked" onclick="toggleCheckbox(this)">
+                  <input type="checkbox" value="BL2" checked>
+                  <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                  <span class="checkbox-label">BL2</span>
+                </label>
+                <label class="checkbox-item checked" onclick="toggleCheckbox(this)">
+                  <input type="checkbox" value="BL3" checked>
+                  <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                  <span class="checkbox-label">BL3</span>
+                </label>
+                <label class="checkbox-item" onclick="toggleCheckbox(this)">
+                  <input type="checkbox" value="BL4">
+                  <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                  <span class="checkbox-label">BL4</span>
+                </label>
+                <label class="checkbox-item" onclick="toggleCheckbox(this)">
+                  <input type="checkbox" value="BL5">
+                  <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                  <span class="checkbox-label">BL5</span>
+                </label>
+                <label class="checkbox-item" onclick="toggleCheckbox(this)">
+                  <input type="checkbox" value="BL6">
+                  <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                  <span class="checkbox-label">BL6</span>
+                </label>
+                <label class="checkbox-item" onclick="toggleCheckbox(this)">
+                  <input type="checkbox" value="BL7">
+                  <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                  <span class="checkbox-label">BL7</span>
+                </label>
+                <label class="checkbox-item" onclick="toggleCheckbox(this)">
+                  <input type="checkbox" value="BL8">
+                  <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                  <span class="checkbox-label">BL8</span>
+                </label>
+                <label class="checkbox-item" onclick="toggleCheckbox(this)">
+                  <input type="checkbox" value="BL9">
+                  <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                  <span class="checkbox-label">BL9</span>
+                </label>
+                <label class="checkbox-item" onclick="toggleCheckbox(this)">
+                  <input type="checkbox" value="BL10">
+                  <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                  <span class="checkbox-label">BL10</span>
+                </label>
+                <label class="checkbox-item" onclick="toggleCheckbox(this)">
+                  <input type="checkbox" value="BL11">
+                  <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                  <span class="checkbox-label">BL11</span>
+                </label>
+                <label class="checkbox-item" onclick="toggleCheckbox(this)">
+                  <input type="checkbox" value="BL12">
+                  <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                  <span class="checkbox-label">BL12</span>
+                </label>
+              </div>
+            </div>
+            <div class="condition-editor-row">
+              <div class="condition-editor-header">
+                <div class="condition-editor-label">적용 조건 - 지문 타입</div>
+                <div class="condition-editor-actions">
+                  <span class="condition-action-link" onclick="toggleAllCheckbox('exception1-type', true)">전체 선택</span>
+                  <span class="condition-action-link" onclick="toggleAllCheckbox('exception1-type', false)">선택 해제</span>
+                </div>
+              </div>
+              <div class="checkbox-grid" id="exception1-type">
+                <label class="checkbox-item checked" onclick="toggleCheckbox(this)">
+                  <input type="checkbox" value="Essay" checked>
+                  <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                  <span class="checkbox-label">Essay</span>
+                </label>
+                <label class="checkbox-item checked" onclick="toggleCheckbox(this)">
+                  <input type="checkbox" value="Article" checked>
+                  <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                  <span class="checkbox-label">Article</span>
+                </label>
+                <label class="checkbox-item" onclick="toggleCheckbox(this)">
+                  <input type="checkbox" value="News">
+                  <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                  <span class="checkbox-label">News</span>
+                </label>
+                <label class="checkbox-item" onclick="toggleCheckbox(this)">
+                  <input type="checkbox" value="Story">
+                  <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                  <span class="checkbox-label">Story</span>
+                </label>
+                <label class="checkbox-item" onclick="toggleCheckbox(this)">
+                  <input type="checkbox" value="Letter">
+                  <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                  <span class="checkbox-label">Letter</span>
+                </label>
+                <label class="checkbox-item" onclick="toggleCheckbox(this)">
+                  <input type="checkbox" value="Report">
+                  <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                  <span class="checkbox-label">Report</span>
+                </label>
+              </div>
+            </div>
+            <div class="condition-apply-row">
+              <button class="btn btn-primary btn-sm" onclick="applyConditions('exception1')">적용</button>
+            </div>
+          </div>
+
+          <div class="code-hint-section">
+            <div class="code-hint-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              사용 가능한 치환 변수 (클릭하여 복사)
+            </div>
+            <div class="code-hint-group">
+              <div class="code-hint-group-title">시스템 변수 (원본 데이터)</div>
+              <div class="code-hints">
+                <span class="code-hint-chip" onclick="copyCode('{passage}')">{passage}</span>
+                <span class="code-hint-chip" onclick="copyCode('{paragraph}')">{paragraph}</span>
+                <span class="code-hint-chip" onclick="copyCode('{difficulty_level}')">{difficulty_level}</span>
+                <span class="code-hint-chip" onclick="copyCode('{text_type}')">{text_type}</span>
+                <span class="code-hint-chip" onclick="copyCode('{word}')">{word}</span>
+                <span class="code-hint-chip" onclick="copyCode('{original_sentence}')">{original_sentence}</span>
+                <span class="code-hint-chip" onclick="copyCode('{part_of_speech}')">{part_of_speech}</span>
+                <span class="code-hint-chip" onclick="copyCode('{korean_meaning}')">{korean_meaning}</span>
+                <span class="code-hint-chip" onclick="copyCode('{english_definition}')">{english_definition}</span>
+                <span class="code-hint-chip" onclick="copyCode('{words}')">{words}</span>
+              </div>
+            </div>
+            <div class="code-hint-group">
+              <div class="code-hint-group-title">시스템 변수 (생성 결과)</div>
+              <div class="code-hints">
+                <span class="code-hint-chip" onclick="copyCode('{sentences}')">{sentences}</span>
+                <span class="code-hint-chip" onclick="copyCode('{blank_sentence}')">{blank_sentence}</span>
+                <span class="code-hint-chip" onclick="copyCode('{choices}')">{choices}</span>
+                <span class="code-hint-chip" onclick="copyCode('{examples}')">{examples}</span>
+                <span class="code-hint-chip" onclick="copyCode('{examples_with_blanks}')">{examples_with_blanks}</span>
+                <span class="code-hint-chip" onclick="copyCode('{topic}')">{topic}</span>
+                <span class="code-hint-chip" onclick="copyCode('{summary}')">{summary}</span>
+                <span class="code-hint-chip" onclick="copyCode('{context_words}')">{context_words}</span>
+                <span class="code-hint-chip" onclick="copyCode('{comprehension_questions}')">{comprehension_questions}</span>
+                <span class="code-hint-chip" onclick="copyCode('{question}')">{question}</span>
+                <span class="code-hint-chip" onclick="copyCode('{evidence_sentence}')">{evidence_sentence}</span>
+                <span class="code-hint-chip" onclick="copyCode('{answer}')">{answer}</span>
+                <span class="code-hint-chip" onclick="copyCode('{explanation}')">{explanation}</span>
+                <span class="code-hint-chip" onclick="copyCode('{hints}')">{hints}</span>
+                <span class="code-hint-chip" onclick="copyCode('{transition}')">{transition}</span>
+              </div>
+            </div>
+            <div class="code-hint-group">
+              <div class="code-hint-group-title">지문 난이도별</div>
+              <div class="code-hints">
+                <span class="code-hint-chip" onclick="copyCode('{role}')">{role}</span>
+                <span class="code-hint-chip" onclick="copyCode('{level_instruction}')">{level_instruction}</span>
+                <span class="code-hint-chip" onclick="copyCode('{word_count}')">{word_count}</span>
+              </div>
+            </div>
+            <div class="code-hint-group">
+              <div class="code-hint-group-title">지문 타입별</div>
+              <div class="code-hints">
+                <span class="code-hint-chip" onclick="copyCode('{type_instruction}')">{type_instruction}</span>
+                <span class="code-hint-chip" onclick="copyCode('{type_example}')">{type_example}</span>
+              </div>
+            </div>
+          </div>
+          <div class="prompt-input-group">
+            <label class="prompt-input-label">System Prompt</label>
+            <textarea class="prompt-textarea" placeholder="AI의 역할과 컨텍스트를 설정합니다...">You are a beginner-level {role}.</textarea>
+          </div>
+          <div class="prompt-input-group">
+            <label class="prompt-input-label">User Prompt</label>
+            <textarea class="prompt-textarea" placeholder="실제 작업 지시 내용을 입력합니다...">초급 학습자를 위한 {type_instruction} 주제를 생성해주세요.
+
+친숙하고 일상적인 주제로 작성해주세요.
+
+[출력]
+- 주제 1개</textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Exception Prompt Modal -->
+  <div class="modal-overlay" id="addExceptionModal">
+    <div class="modal">
+      <div class="modal-header">예외 Prompt 추가</div>
+      <div class="modal-body">
+        <div class="modal-condition-group">
+          <div class="modal-condition-header">
+            <span class="modal-condition-label">적용 조건 - 지문 난이도</span>
+            <div class="condition-editor-actions">
+              <span class="condition-action-link" onclick="toggleAllCheckbox('modal-level', true)">전체 선택</span>
+              <span class="condition-action-link" onclick="toggleAllCheckbox('modal-level', false)">선택 해제</span>
+            </div>
+          </div>
+          <div class="modal-checkbox-grid" id="modal-level">
+            <label class="checkbox-item" onclick="toggleCheckbox(this)">
+              <input type="checkbox" value="BL1">
+              <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <span class="checkbox-label">BL1</span>
+            </label>
+            <label class="checkbox-item" onclick="toggleCheckbox(this)">
+              <input type="checkbox" value="BL2">
+              <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <span class="checkbox-label">BL2</span>
+            </label>
+            <label class="checkbox-item" onclick="toggleCheckbox(this)">
+              <input type="checkbox" value="BL3">
+              <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <span class="checkbox-label">BL3</span>
+            </label>
+            <label class="checkbox-item" onclick="toggleCheckbox(this)">
+              <input type="checkbox" value="BL4">
+              <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <span class="checkbox-label">BL4</span>
+            </label>
+            <label class="checkbox-item" onclick="toggleCheckbox(this)">
+              <input type="checkbox" value="BL5">
+              <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <span class="checkbox-label">BL5</span>
+            </label>
+            <label class="checkbox-item" onclick="toggleCheckbox(this)">
+              <input type="checkbox" value="BL6">
+              <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <span class="checkbox-label">BL6</span>
+            </label>
+            <label class="checkbox-item" onclick="toggleCheckbox(this)">
+              <input type="checkbox" value="BL7">
+              <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <span class="checkbox-label">BL7</span>
+            </label>
+            <label class="checkbox-item" onclick="toggleCheckbox(this)">
+              <input type="checkbox" value="BL8">
+              <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <span class="checkbox-label">BL8</span>
+            </label>
+            <label class="checkbox-item" onclick="toggleCheckbox(this)">
+              <input type="checkbox" value="BL9">
+              <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <span class="checkbox-label">BL9</span>
+            </label>
+            <label class="checkbox-item" onclick="toggleCheckbox(this)">
+              <input type="checkbox" value="BL10">
+              <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <span class="checkbox-label">BL10</span>
+            </label>
+            <label class="checkbox-item" onclick="toggleCheckbox(this)">
+              <input type="checkbox" value="BL11">
+              <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <span class="checkbox-label">BL11</span>
+            </label>
+            <label class="checkbox-item" onclick="toggleCheckbox(this)">
+              <input type="checkbox" value="BL12">
+              <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <span class="checkbox-label">BL12</span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-condition-group" id="modal-type-group">
+          <div class="modal-condition-header">
+            <span class="modal-condition-label">적용 조건 - 지문 타입</span>
+            <div class="condition-editor-actions">
+              <span class="condition-action-link" onclick="toggleAllCheckbox('modal-type', true)">전체 선택</span>
+              <span class="condition-action-link" onclick="toggleAllCheckbox('modal-type', false)">선택 해제</span>
+            </div>
+          </div>
+          <div class="modal-checkbox-grid type-grid" id="modal-type">
+            <label class="checkbox-item" onclick="toggleCheckbox(this)">
+              <input type="checkbox" value="Essay">
+              <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <span class="checkbox-label">Essay</span>
+            </label>
+            <label class="checkbox-item" onclick="toggleCheckbox(this)">
+              <input type="checkbox" value="Article">
+              <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <span class="checkbox-label">Article</span>
+            </label>
+            <label class="checkbox-item" onclick="toggleCheckbox(this)">
+              <input type="checkbox" value="News">
+              <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <span class="checkbox-label">News</span>
+            </label>
+            <label class="checkbox-item" onclick="toggleCheckbox(this)">
+              <input type="checkbox" value="Story">
+              <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <span class="checkbox-label">Story</span>
+            </label>
+            <label class="checkbox-item" onclick="toggleCheckbox(this)">
+              <input type="checkbox" value="Letter">
+              <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <span class="checkbox-label">Letter</span>
+            </label>
+            <label class="checkbox-item" onclick="toggleCheckbox(this)">
+              <input type="checkbox" value="Report">
+              <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <span class="checkbox-label">Report</span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeAddExceptionModal()">취소</button>
+        <button class="btn btn-primary" onclick="addExceptionPrompt()">추가</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Version Modal -->
+  <div class="modal-overlay" id="newVersionModal">
+    <div class="modal">
+      <div class="modal-header">새 버전으로 저장</div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">버전 번호</label>
+          <input type="text" class="form-input" value="v3" readonly style="background: var(--bg-1);">
+        </div>
+        <div class="form-group">
+          <label class="form-label">메모 (선택)</label>
+          <textarea class="form-textarea" placeholder="이 버전의 주요 변경사항을 입력하세요..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeNewVersionModal()">취소</button>
+        <button class="btn btn-primary" onclick="saveNewVersion()">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Version History Modal -->
+  <div class="modal-overlay" id="versionHistoryModal">
+    <div class="modal" style="width: 640px;">
+      <div class="modal-header">버전 히스토리</div>
+      <div class="modal-body" style="padding: 0;">
+        <table class="version-history-table">
+          <thead>
+            <tr>
+              <th style="width: 70px;">버전</th>
+              <th style="width: 140px;">저장일시</th>
+              <th style="width: 80px;">저장자</th>
+              <th>메모</th>
+              <th style="width: 80px;">액션</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="version-badge">v2</span></td>
+              <td>2026-01-15 14:30</td>
+              <td>홍길동</td>
+              <td>예외 Prompt 조건 수정</td>
+              <td><button class="btn btn-sm btn-secondary" onclick="loadVersion('v2')">불러오기</button></td>
+            </tr>
+            <tr>
+              <td><span class="version-badge">v1</span></td>
+              <td>2026-01-10 09:15</td>
+              <td>홍길동</td>
+              <td>최초 등록</td>
+              <td><button class="btn btn-sm btn-secondary" onclick="loadVersion('v1')">불러오기</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeVersionHistoryModal()">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let currentPromptId = 'default';
+    let exceptionCount = 1;
+
+    // AI Settings change detection + Prompt textarea change detection
+    document.addEventListener('DOMContentLoaded', () => {
+      const aiSettingInputs = document.querySelectorAll('.ai-settings-compact .setting-select-sm, .ai-settings-compact .setting-input-sm');
+      aiSettingInputs.forEach(input => {
+        input.addEventListener('change', enableAiSaveBtn);
+        input.addEventListener('input', enableAiSaveBtn);
+      });
+
+      // Attach textarea listeners for existing editors
+      attachTextareaListeners('editor-default', 'default');
+      attachTextareaListeners('editor-exception1', 'exception1');
+    });
+
+    function enableAiSaveBtn() {
+      const btn = document.getElementById('aiSettingSaveBtn');
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.cursor = 'pointer';
+    }
+
+    function saveAiSettings() {
+      const btn = document.getElementById('aiSettingSaveBtn');
+      if (btn.disabled) return;
+      btn.disabled = true;
+      btn.style.opacity = '0.4';
+      btn.style.cursor = 'not-allowed';
+      showToast('AI 설정이 저장되었습니다.');
+    }
+
+    // Modified indicator for unsaved prompt changes
+    function markAsModified(promptId) {
+      const listItem = document.querySelector(`[data-id="${promptId}"]`);
+      if (listItem) listItem.classList.add('modified');
+    }
+
+    function clearAllModified() {
+      document.querySelectorAll('.prompt-list-item.modified').forEach(item => {
+        item.classList.remove('modified');
+      });
+    }
+
+    function attachTextareaListeners(editorId, promptId) {
+      document.querySelectorAll(`#${editorId} .prompt-textarea`).forEach(ta => {
+        ta.addEventListener('input', () => markAsModified(promptId));
+      });
+    }
+
+    function selectPrompt(id) {
+      currentPromptId = id;
+      document.querySelectorAll('.prompt-list-item').forEach(i => i.classList.remove('active'));
+      document.querySelector(`[data-id="${id}"]`).classList.add('active');
+      document.querySelectorAll('.editor-card').forEach(c => c.style.display = 'none');
+      document.getElementById(`editor-${id}`).style.display = 'block';
+    }
+
+    function deletePrompt(event, id) {
+      event.stopPropagation();
+      if (confirm('이 예외 Prompt를 삭제하시겠습니까?')) {
+        document.querySelector(`[data-id="${id}"]`).remove();
+        document.getElementById(`editor-${id}`).remove();
+        if (currentPromptId === id) selectPrompt('default');
+        showToast('예외 Prompt가 삭제되었습니다.');
+      }
+    }
+
+    // Checkbox toggle
+    function toggleCheckbox(el) {
+      event.preventDefault();
+      el.classList.toggle('checked');
+      const checkbox = el.querySelector('input[type="checkbox"]');
+      checkbox.checked = el.classList.contains('checked');
+    }
+
+    // Toggle all checkboxes
+    function toggleAllCheckbox(containerId, selectAll) {
+      const container = document.getElementById(containerId);
+      const items = container.querySelectorAll('.checkbox-item');
+      items.forEach(item => {
+        const checkbox = item.querySelector('input[type="checkbox"]');
+        if (selectAll) {
+          item.classList.add('checked');
+          checkbox.checked = true;
+        } else {
+          item.classList.remove('checked');
+          checkbox.checked = false;
+        }
+      });
+    }
+
+    // Apply conditions to left panel
+    function applyConditions(promptId) {
+      const levelContainer = document.getElementById(`${promptId}-level`);
+      const typeContainer = document.getElementById(`${promptId}-type`);
+      
+      const selectedLevels = [];
+      const selectedTypes = [];
+      
+      levelContainer.querySelectorAll('.checkbox-item.checked').forEach(item => {
+        selectedLevels.push(item.querySelector('.checkbox-label').textContent);
+      });
+      
+      if (typeContainer) {
+        typeContainer.querySelectorAll('.checkbox-item.checked').forEach(item => {
+          selectedTypes.push(item.querySelector('.checkbox-label').textContent);
+        });
+      }
+      
+      // Update left panel
+      const listItem = document.querySelector(`[data-id="${promptId}"]`);
+      if (listItem) {
+        const conditionsContainer = listItem.querySelector('.prompt-item-conditions');
+        let html = '';
+        
+        if (selectedLevels.length > 0) {
+          html += `<div class="condition-row-display">
+            <span class="condition-row-label">난이도</span>
+            ${selectedLevels.map(l => `<span class="condition-tag">${l}</span>`).join('')}
+          </div>`;
+        }
+        
+        if (selectedTypes.length > 0) {
+          html += `<div class="condition-row-display">
+            <span class="condition-row-label">타입</span>
+            ${selectedTypes.map(t => `<span class="condition-tag">${t}</span>`).join('')}
+          </div>`;
+        }
+        
+        if (html === '') {
+          html = '<span class="condition-tag" style="color:var(--font-4)">조건 미설정</span>';
+        }
+        
+        conditionsContainer.innerHTML = html;
+      }
+      
+      markAsModified(promptId);
+      showToast('적용 조건이 업데이트되었습니다.');
+    }
+
+    // Open Add Exception Modal
+    function openAddExceptionModal() {
+      // Reset all checkboxes
+      toggleAllCheckbox('modal-level', false);
+      toggleAllCheckbox('modal-type', false);
+      document.getElementById('addExceptionModal').classList.add('show');
+    }
+
+    function closeAddExceptionModal() {
+      document.getElementById('addExceptionModal').classList.remove('show');
+    }
+
+    function addExceptionPrompt() {
+      // Get selected values from modal
+      const levelContainer = document.getElementById('modal-level');
+      const typeContainer = document.getElementById('modal-type');
+      
+      const selectedLevels = [];
+      const selectedTypes = [];
+      
+      levelContainer.querySelectorAll('.checkbox-item.checked').forEach(item => {
+        selectedLevels.push(item.querySelector('.checkbox-label').textContent);
+      });
+      
+      typeContainer.querySelectorAll('.checkbox-item.checked').forEach(item => {
+        selectedTypes.push(item.querySelector('.checkbox-label').textContent);
+      });
+      
+      exceptionCount++;
+      const id = `exception${exceptionCount}`;
+      
+      // Create list item
+      let conditionsHtml = '';
+      if (selectedLevels.length > 0) {
+        conditionsHtml += `<div class="condition-row-display">
+          <span class="condition-row-label">난이도</span>
+          ${selectedLevels.map(l => `<span class="condition-tag">${l}</span>`).join('')}
+        </div>`;
+      }
+      if (selectedTypes.length > 0) {
+        conditionsHtml += `<div class="condition-row-display">
+          <span class="condition-row-label">타입</span>
+          ${selectedTypes.map(t => `<span class="condition-tag">${t}</span>`).join('')}
+        </div>`;
+      }
+      if (conditionsHtml === '') {
+        conditionsHtml = '<span class="condition-tag" style="color:var(--font-4)">조건 미설정</span>';
+      }
+      
+      const listItem = document.createElement('div');
+      listItem.className = 'prompt-list-item';
+      listItem.dataset.id = id;
+      listItem.onclick = () => selectPrompt(id);
+      listItem.innerHTML = `
+        <div class="prompt-item-header">
+          <span class="prompt-item-title">예외 #${exceptionCount}</span>
+          <button class="prompt-item-delete" onclick="deletePrompt(event, '${id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+        </div>
+        <div class="prompt-item-conditions">${conditionsHtml}</div>
+      `;
+      document.querySelector('.prompt-list').appendChild(listItem);
+      
+      // Create editor
+      const editor = document.createElement('div');
+      editor.className = 'editor-card';
+      editor.id = `editor-${id}`;
+      editor.style.display = 'none';
+      
+      // Generate checkbox HTML with pre-selected values
+      const levelCheckboxes = ['BL1','BL2','BL3','BL4','BL5','BL6','BL7','BL8','BL9','BL10','BL11','BL12'].map(l => {
+        const isChecked = selectedLevels.includes(l);
+        return `<label class="checkbox-item ${isChecked ? 'checked' : ''}" onclick="toggleCheckbox(this)">
+          <input type="checkbox" value="${l}" ${isChecked ? 'checked' : ''}>
+          <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+          <span class="checkbox-label">${l}</span>
+        </label>`;
+      }).join('');
+      
+      const typeCheckboxes = ['Essay','Article','News','Story','Letter','Report'].map(t => {
+        const isChecked = selectedTypes.includes(t);
+        return `<label class="checkbox-item ${isChecked ? 'checked' : ''}" onclick="toggleCheckbox(this)">
+          <input type="checkbox" value="${t}" ${isChecked ? 'checked' : ''}>
+          <span class="checkbox-custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+          <span class="checkbox-label">${t}</span>
+        </label>`;
+      }).join('');
+      
+      editor.innerHTML = `
+        <div class="editor-header">
+          <svg class="icon exception" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span class="editor-title">예외 Prompt #${exceptionCount}</span>
+        </div>
+        <div class="editor-body">
+          <div class="condition-editor">
+            <div class="condition-editor-row">
+              <div class="condition-editor-header">
+                <div class="condition-editor-label">적용 조건 - 지문 난이도</div>
+                <div class="condition-editor-actions">
+                  <span class="condition-action-link" onclick="toggleAllCheckbox('${id}-level', true)">전체 선택</span>
+                  <span class="condition-action-link" onclick="toggleAllCheckbox('${id}-level', false)">선택 해제</span>
+                </div>
+              </div>
+              <div class="checkbox-grid" id="${id}-level">${levelCheckboxes}</div>
+            </div>
+            <div class="condition-editor-row">
+              <div class="condition-editor-header">
+                <div class="condition-editor-label">적용 조건 - 지문 타입</div>
+                <div class="condition-editor-actions">
+                  <span class="condition-action-link" onclick="toggleAllCheckbox('${id}-type', true)">전체 선택</span>
+                  <span class="condition-action-link" onclick="toggleAllCheckbox('${id}-type', false)">선택 해제</span>
+                </div>
+              </div>
+              <div class="checkbox-grid" id="${id}-type">${typeCheckboxes}</div>
+            </div>
+            <div class="condition-apply-row">
+              <button class="btn btn-primary btn-sm" onclick="applyConditions('${id}')">적용</button>
+            </div>
+          </div>
+          <div class="code-hint-section">
+            <div class="code-hint-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              사용 가능한 치환 변수 (클릭하여 복사)
+            </div>
+            <div class="code-hint-group">
+              <div class="code-hint-group-title">시스템 변수 (원본 데이터)</div>
+              <div class="code-hints">
+                <span class="code-hint-chip" onclick="copyCode('{passage}')">{passage}</span>
+                <span class="code-hint-chip" onclick="copyCode('{paragraph}')">{paragraph}</span>
+                <span class="code-hint-chip" onclick="copyCode('{difficulty_level}')">{difficulty_level}</span>
+                <span class="code-hint-chip" onclick="copyCode('{text_type}')">{text_type}</span>
+                <span class="code-hint-chip" onclick="copyCode('{word}')">{word}</span>
+                <span class="code-hint-chip" onclick="copyCode('{original_sentence}')">{original_sentence}</span>
+                <span class="code-hint-chip" onclick="copyCode('{part_of_speech}')">{part_of_speech}</span>
+                <span class="code-hint-chip" onclick="copyCode('{korean_meaning}')">{korean_meaning}</span>
+                <span class="code-hint-chip" onclick="copyCode('{english_definition}')">{english_definition}</span>
+                <span class="code-hint-chip" onclick="copyCode('{words}')">{words}</span>
+              </div>
+            </div>
+            <div class="code-hint-group">
+              <div class="code-hint-group-title">시스템 변수 (생성 결과)</div>
+              <div class="code-hints">
+                <span class="code-hint-chip" onclick="copyCode('{sentences}')">{sentences}</span>
+                <span class="code-hint-chip" onclick="copyCode('{blank_sentence}')">{blank_sentence}</span>
+                <span class="code-hint-chip" onclick="copyCode('{choices}')">{choices}</span>
+                <span class="code-hint-chip" onclick="copyCode('{examples}')">{examples}</span>
+                <span class="code-hint-chip" onclick="copyCode('{examples_with_blanks}')">{examples_with_blanks}</span>
+                <span class="code-hint-chip" onclick="copyCode('{topic}')">{topic}</span>
+                <span class="code-hint-chip" onclick="copyCode('{summary}')">{summary}</span>
+                <span class="code-hint-chip" onclick="copyCode('{context_words}')">{context_words}</span>
+                <span class="code-hint-chip" onclick="copyCode('{comprehension_questions}')">{comprehension_questions}</span>
+                <span class="code-hint-chip" onclick="copyCode('{question}')">{question}</span>
+                <span class="code-hint-chip" onclick="copyCode('{evidence_sentence}')">{evidence_sentence}</span>
+                <span class="code-hint-chip" onclick="copyCode('{answer}')">{answer}</span>
+                <span class="code-hint-chip" onclick="copyCode('{explanation}')">{explanation}</span>
+                <span class="code-hint-chip" onclick="copyCode('{hints}')">{hints}</span>
+                <span class="code-hint-chip" onclick="copyCode('{transition}')">{transition}</span>
+              </div>
+            </div>
+            <div class="code-hint-group">
+              <div class="code-hint-group-title">지문 난이도별</div>
+              <div class="code-hints">
+                <span class="code-hint-chip" onclick="copyCode('{role}')">{role}</span>
+                <span class="code-hint-chip" onclick="copyCode('{level_instruction}')">{level_instruction}</span>
+                <span class="code-hint-chip" onclick="copyCode('{word_count}')">{word_count}</span>
+              </div>
+            </div>
+            <div class="code-hint-group">
+              <div class="code-hint-group-title">지문 타입별</div>
+              <div class="code-hints">
+                <span class="code-hint-chip" onclick="copyCode('{type_instruction}')">{type_instruction}</span>
+                <span class="code-hint-chip" onclick="copyCode('{type_example}')">{type_example}</span>
+              </div>
+            </div>
+          </div>
+          <div class="prompt-input-group">
+            <label class="prompt-input-label">System Prompt</label>
+            <textarea class="prompt-textarea" placeholder="AI의 역할과 컨텍스트를 설정합니다..."></textarea>
+          </div>
+          <div class="prompt-input-group">
+            <label class="prompt-input-label">User Prompt</label>
+            <textarea class="prompt-textarea" placeholder="실제 작업 지시 내용을 입력합니다..."></textarea>
+          </div>
+        </div>
+      `;
+      document.querySelector('.right-panel').appendChild(editor);
+      
+      // Attach textarea change listeners for new editor
+      attachTextareaListeners(`editor-${id}`, id);
+      markAsModified(id);
+      
+      closeAddExceptionModal();
+      selectPrompt(id);
+      showToast('예외 Prompt가 추가되었습니다.');
+    }
+
+    function toggleVersionDropdown() { document.getElementById('versionDropdown').classList.toggle('show'); document.getElementById('saveDropdown').classList.remove('show'); }
+    function selectVersion(v) { showToast(`버전 ${v}을 불러왔습니다.`); document.getElementById('versionDropdown').classList.remove('show'); }
+    function toggleSaveDropdown(e) { e.stopPropagation(); document.getElementById('saveDropdown').classList.toggle('show'); document.getElementById('versionDropdown').classList.remove('show'); }
+    function savePrompt() { document.getElementById('saveDropdown').classList.remove('show'); clearAllModified(); showToast('Prompt가 저장되었습니다.'); }
+    function openNewVersionModal() { document.getElementById('saveDropdown').classList.remove('show'); document.getElementById('newVersionModal').classList.add('show'); }
+    function closeNewVersionModal() { document.getElementById('newVersionModal').classList.remove('show'); }
+    function saveNewVersion() { closeNewVersionModal(); clearAllModified(); showToast('새 버전 v3이(가) 저장되었습니다.'); }
+    function openVersionHistoryModal() { document.getElementById('versionDropdown').classList.remove('show'); document.getElementById('versionHistoryModal').classList.add('show'); }
+    function closeVersionHistoryModal() { document.getElementById('versionHistoryModal').classList.remove('show'); }
+    function loadVersion(v) {
+      if (confirm(`${v} 버전을 불러오시겠습니까? 현재 편집 중인 내용은 저장되지 않습니다.`)) {
+        closeVersionHistoryModal();
+        clearAllModified();
+        showToast(`버전 ${v}을 불러왔습니다.`);
+      }
+    }
+    function copyCode(code) { navigator.clipboard.writeText(code); showToast(`"${code}" 변수가 복사되었습니다.`); }
+    function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.version-selector')) document.getElementById('versionDropdown').classList.remove('show');
+      if (!e.target.closest('.save-btn-group')) document.getElementById('saveDropdown').classList.remove('show');
+    });
+  </script>
+</body>
+</html>
