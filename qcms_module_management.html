@@ -465,6 +465,7 @@
 
     .status-complete { color: var(--success); font-weight: 500; }
     .status-incomplete { color: var(--font-4); }
+    .status-na { color: var(--font-4); }
 
     /* Pagination */
     .pagination-wrapper {
@@ -741,6 +742,97 @@
       color: var(--font-3);
     }
 
+    /* Brand Mode */
+    .brand-mode-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .brand-mode-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-mode-label {
+      width: 120px;
+      flex-shrink: 0;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--font-2);
+    }
+
+    .brand-mode-select {
+      width: 160px;
+    }
+
+    /* Icon Upload */
+    .icon-upload-area {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .icon-preview {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      border: 1px solid var(--line-e);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-f9);
+    }
+
+    .icon-preview-img {
+      max-width: 48px;
+      max-height: 48px;
+      object-fit: contain;
+    }
+
+    .icon-delete-btn {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1px solid var(--line-d);
+      background: var(--white);
+      color: var(--font-3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition-fast);
+    }
+
+    .icon-delete-btn:hover {
+      background: var(--error);
+      border-color: var(--error);
+      color: var(--white);
+    }
+
+    .icon-upload-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 20px;
+      border: 2px dashed var(--line-d);
+      border-radius: 8px;
+      background: var(--bg-f9);
+    }
+
+    .btn-sm {
+      height: 32px;
+      padding: 0 12px;
+      font-size: 12px;
+    }
+
     /* Toast */
     .toast {
       position: fixed;
@@ -953,7 +1045,7 @@
               <td>MV01</td>
               <td>아는 단어 체크</td>
               <td><span class="badge badge-vocabulary">Vocabulary</span></td>
-              <td><span class="badge badge-circular">Circular Course</span></td>
+              <td><span class="badge badge-all">All</span></td>
               <td><span class="badge badge-normal">일반 모듈</span></td>
               <td class="text-center">1</td>
               <td>1회차 고정</td>
@@ -968,7 +1060,7 @@
               <td>MV02</td>
               <td>플래시카드</td>
               <td><span class="badge badge-vocabulary">Vocabulary</span></td>
-              <td><span class="badge badge-circular">Circular Course</span></td>
+              <td><span class="badge badge-all">All</span></td>
               <td><span class="badge badge-normal">일반 모듈</span></td>
               <td class="text-center">2</td>
               <td>-</td>
@@ -983,7 +1075,7 @@
               <td>MV03</td>
               <td>단어 뜻 맞추기</td>
               <td><span class="badge badge-vocabulary">Vocabulary</span></td>
-              <td><span class="badge badge-circular">Circular Course</span></td>
+              <td><span class="badge badge-all">All</span></td>
               <td><span class="badge badge-normal">일반 모듈</span></td>
               <td class="text-center">3</td>
               <td>-</td>
@@ -998,7 +1090,7 @@
               <td>MV04</td>
               <td>뜻 보고 단어 맞추기</td>
               <td><span class="badge badge-vocabulary">Vocabulary</span></td>
-              <td><span class="badge badge-circular">Circular Course</span></td>
+              <td><span class="badge badge-all">All</span></td>
               <td><span class="badge badge-normal">일반 모듈</span></td>
               <td class="text-center">4</td>
               <td>-</td>
@@ -1009,7 +1101,7 @@
               <td>홍길동, 2026-01-15</td>
             </tr>
             <tr onclick="openModuleEdit('ML01')">
-              <td class="text-center">11</td>
+              <td class="text-center">12</td>
               <td>ML01</td>
               <td>지문 듣고 단어 수집(예습)</td>
               <td><span class="badge badge-listening">Listening</span></td>
@@ -1024,7 +1116,7 @@
               <td>홍길동, 2026-01-15</td>
             </tr>
             <tr onclick="openModuleEdit('ML02')">
-              <td class="text-center">12</td>
+              <td class="text-center">13</td>
               <td>ML02</td>
               <td>문장 듣고 빈칸 채우기</td>
               <td><span class="badge badge-listening">Listening</span></td>
@@ -1039,7 +1131,7 @@
               <td>홍길동, 2026-01-15</td>
             </tr>
             <tr onclick="openModuleEdit('MS01')">
-              <td class="text-center">15</td>
+              <td class="text-center">14</td>
               <td>MS01</td>
               <td>지문 번갈아 읽기</td>
               <td><span class="badge badge-speaking">Speaking</span></td>
@@ -1054,7 +1146,7 @@
               <td>홍길동, 2026-01-15</td>
             </tr>
             <tr onclick="openModuleEdit('MS02')">
-              <td class="text-center">17</td>
+              <td class="text-center">15</td>
               <td>MS02</td>
               <td>문장 발음 평가</td>
               <td><span class="badge badge-speaking">Speaking</span></td>
@@ -1069,7 +1161,7 @@
               <td>홍길동, 2026-01-15</td>
             </tr>
             <tr onclick="openModuleEdit('MS03')">
-              <td class="text-center">17</td>
+              <td class="text-center">16</td>
               <td>MS03</td>
               <td>쉐도잉</td>
               <td><span class="badge badge-speaking">Speaking</span></td>
@@ -1084,7 +1176,7 @@
               <td>홍길동, 2026-01-15</td>
             </tr>
             <tr onclick="openModuleEdit('MS04')">
-              <td class="text-center">18</td>
+              <td class="text-center">17</td>
               <td>MS04</td>
               <td>AI Reading Comprehension</td>
               <td><span class="badge badge-speaking">Speaking</span></td>
@@ -1201,8 +1293,8 @@
 
             <div class="form-group">
               <label class="form-label form-label-required">학습 순서</label>
-              <input type="number" class="form-input" id="orderInput" value="1" min="1" onchange="checkOrderDuplicate(this.value)">
-              <p class="form-hint">순서 변경 시 다른 모듈의 순서가 자동으로 조정됩니다.</p>
+              <input type="number" class="form-input" id="orderInput" value="1" min="1">
+              <p class="form-hint">같은 학습 영역 내 통합 순서입니다. 순서 변경 시 다른 모듈의 순서가 자동으로 조정됩니다.</p>
             </div>
 
             <div class="form-group">
@@ -1233,6 +1325,42 @@
                 <span style="font-size: 13px; color: var(--font-3);">초</span>
               </div>
               <p class="form-hint">비워두면 "제한 시간 없음"으로 표시됩니다.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 브랜드별 콘텐츠 모드 -->
+        <div class="form-section" id="brandModeSection">
+          <h3 class="form-section-title">브랜드별 콘텐츠 모드</h3>
+          
+          <div class="brand-mode-grid">
+            <div class="brand-mode-row">
+              <label class="brand-mode-label">최선어학원</label>
+              <select class="form-select brand-mode-select">
+                <option value="ko" selected>영한 모드</option>
+                <option value="en">영영 모드</option>
+              </select>
+            </div>
+            <div class="brand-mode-row">
+              <label class="brand-mode-label">CREO</label>
+              <select class="form-select brand-mode-select">
+                <option value="ko">영한 모드</option>
+                <option value="en" selected>영영 모드</option>
+              </select>
+            </div>
+            <div class="brand-mode-row">
+              <label class="brand-mode-label">MATE CREO</label>
+              <select class="form-select brand-mode-select">
+                <option value="ko">영한 모드</option>
+                <option value="en" selected>영영 모드</option>
+              </select>
+            </div>
+            <div class="brand-mode-row">
+              <label class="brand-mode-label">MATE 최선</label>
+              <select class="form-select brand-mode-select">
+                <option value="ko" selected>영한 모드</option>
+                <option value="en">영영 모드</option>
+              </select>
             </div>
           </div>
         </div>
@@ -1275,7 +1403,29 @@
                 완료 아이콘
                 <span class="message-status filled">입력완료</span>
               </label>
-              <input type="text" class="form-input" value="✓" placeholder="완료 아이콘 입력">
+              <div class="icon-upload-area">
+                <div class="icon-preview" id="iconPreview">
+                  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='%2322C55E' stroke-width='2'%3E%3Cpath d='M22 11.08V12a10 10 0 1 1-5.93-9.14'%3E%3C/path%3E%3Cpolyline points='22 4 12 14.01 9 11.01'%3E%3C/polyline%3E%3C/svg%3E" alt="완료 아이콘" class="icon-preview-img">
+                  <button class="icon-delete-btn" onclick="deleteIcon()" title="삭제">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
+                </div>
+                <div class="icon-upload-empty" id="iconUploadEmpty" style="display: none;">
+                  <input type="file" id="iconFileInput" accept=".png,.svg,.webp" style="display: none;" onchange="handleIconUpload(this)">
+                  <button class="btn btn-secondary btn-sm" onclick="document.getElementById('iconFileInput').click()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="17 8 12 3 7 8"></polyline>
+                      <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    이미지 업로드
+                  </button>
+                  <p class="form-hint" style="margin-top: 8px; text-align: center;">PNG, SVG, WebP · 최대 500KB · 권장 120×120px</p>
+                </div>
+              </div>
             </div>
 
             <!-- 완료 안내 -->
@@ -1448,11 +1598,9 @@
     }
 
     // Module Edit
-    let currentModuleOrder = 1; // 현재 편집 중인 모듈의 원래 순서
-    const existingOrders = [1, 2, 3, 4, 1, 2, 1, 2, 3, 4]; // 시뮬레이션: 각 학습 영역별 기존 순서들
+    const existingOrders = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]; // 시뮬레이션: 같은 학습 영역 내 기존 순서들
 
     function openModuleEdit(moduleId) {
-      // 실제로는 서버에서 해당 모듈의 정보를 가져와야 함
       document.getElementById('moduleEditOverlay').classList.add('show');
     }
 
@@ -1460,42 +1608,76 @@
       document.getElementById('moduleEditOverlay').classList.remove('show');
     }
 
-    function checkOrderDuplicate(newOrder) {
-      const order = parseInt(newOrder);
-      
-      if (isNaN(order) || order < 1) {
-        return;
-      }
-      
-      // 현재 편집 중인 모듈의 원래 순서와 다르고, 이미 사용 중인 순서인 경우
-      // 실제로는 같은 학습 영역 & 적용 코스 내에서만 체크해야 함
-      if (order !== currentModuleOrder && existingOrders.includes(order)) {
-        showToast(`학습 순서 ${order}는 이미 사용 중입니다. 저장 시 다른 모듈의 순서가 자동 조정됩니다.`);
-      }
-    }
-
-    function validateOrder() {
+    function saveModuleEdit() {
       const orderInput = document.getElementById('orderInput');
       const order = parseInt(orderInput.value);
-      
-      if (isNaN(order) || order < 1) {
-        alert('학습 순서는 1 이상의 숫자여야 합니다.');
-        return false;
+
+      // 학습 순서 중복 여부에 따라 다른 Alert 표시
+      if (existingOrders.includes(order)) {
+        // 순서 중복 있음
+        if (confirm(`학습 순서 ${order}은(는) [Vocabulary] 영역에서 이미 사용 중입니다.\n저장 시 다른 모듈의 순서가 자동 조정됩니다.\n저장하시겠습니까?`)) {
+          closeModuleEdit();
+          showToast('학습 모듈 설정이 저장되었습니다.');
+        }
+      } else {
+        // 순서 중복 없음
+        if (confirm('이 학습 모듈을 사용하는 모든 곳에 변경사항이 적용됩니다.\n저장하시겠습니까?')) {
+          closeModuleEdit();
+          showToast('학습 모듈 설정이 저장되었습니다.');
+        }
       }
-      
-      return true;
     }
 
-    function saveModuleEdit() {
-      // 학습 순서 검증
-      if (!validateOrder()) {
+    // Icon Upload
+    function handleIconUpload(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      // 파일 형식 검증
+      const allowedTypes = ['image/png', 'image/svg+xml', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        alert('PNG, SVG, WebP 파일만 업로드할 수 있습니다.');
+        input.value = '';
         return;
       }
-      
-      if (confirm('이 학습 모듈을 사용하는 모든 곳에 변경사항이 적용됩니다.\n저장하시겠습니까?')) {
-        closeModuleEdit();
-        showToast('학습 모듈 설정이 저장되었습니다.');
+
+      // 파일 크기 검증
+      if (file.size > 500 * 1024) {
+        alert('파일 크기는 500KB 이하여야 합니다.');
+        input.value = '';
+        return;
       }
+
+      // 미리보기 표시
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('iconPreview').querySelector('.icon-preview-img').src = e.target.result;
+        document.getElementById('iconPreview').style.display = 'flex';
+        document.getElementById('iconUploadEmpty').style.display = 'none';
+
+        // 배지 상태 변경
+        const iconLabel = document.getElementById('iconPreview').closest('.message-field').querySelector('.message-status');
+        if (iconLabel) {
+          iconLabel.className = 'message-status filled';
+          iconLabel.textContent = '입력완료';
+        }
+        showToast('아이콘이 업로드되었습니다.');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function deleteIcon() {
+      document.getElementById('iconPreview').style.display = 'none';
+      document.getElementById('iconUploadEmpty').style.display = 'flex';
+      document.getElementById('iconFileInput').value = '';
+
+      // 배지 상태 변경
+      const iconLabel = document.getElementById('iconUploadEmpty').closest('.message-field').querySelector('.message-status');
+      if (iconLabel) {
+        iconLabel.className = 'message-status empty';
+        iconLabel.textContent = '미입력';
+      }
+      showToast('아이콘이 삭제되었습니다.');
     }
 
     // Toast
