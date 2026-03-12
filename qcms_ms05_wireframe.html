@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QCMS - Circular Course 검수 (MS05 탭)</title>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4C55EB;
+      --primary-hover: #3D45D9;
+      --primary-light: #EEF0FF;
+      --font-1: #191F28;
+      --font-2: #4E5968;
+      --font-3: #8B95A1;
+      --font-4: #B0B8C1;
+      --bg-1: #F9FAFB;
+      --bg-2: #F3F4F6;
+      --line-1: #E5E8EB;
+      --line-2: #D1D6DB;
+      --white: #FFFFFF;
+      --success: #10B981;
+      --success-light: #D1FAE5;
+      --warning: #F59E0B;
+      --warning-light: #FEF3C7;
+      --error: #EF4444;
+      --error-light: #FEE2E2;
+      --purple: #7C3AED;
+      --purple-light: #EDE9FE;
+      --blue: #3B82F6;
+      --blue-light: #DBEAFE;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-2);
+      color: var(--font-1);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 56px;
+      background: var(--white);
+      border-bottom: 1px solid var(--line-1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 100;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 12px; }
+
+    .back-btn {
+      display: flex; align-items: center; gap: 4px;
+      padding: 6px 10px; background: none; border: none;
+      color: var(--font-2); font-size: 13px; font-weight: 500;
+      cursor: pointer; border-radius: 6px;
+    }
+    .back-btn:hover { background: var(--bg-1); }
+
+    .header-divider { width: 1px; height: 20px; background: var(--line-1); }
+
+    .header-info { display: flex; flex-direction: column; gap: 2px; }
+    .header-info-sub { font-size: 12px; color: var(--font-3); }
+    .header-info-title { font-size: 14px; font-weight: 600; color: var(--font-1); }
+    .header-title-row { display: flex; align-items: center; gap: 8px; }
+
+    .status-badge {
+      display: inline-flex; align-items: center;
+      padding: 2px 8px; border-radius: 4px;
+      font-size: 11px; font-weight: 600;
+    }
+    .status-badge.status-reviewing { background: var(--warning-light); color: var(--warning); }
+
+    .header-right { display: flex; align-items: center; gap: 8px; }
+
+    .history-btn-group {
+      display: flex; align-items: center;
+      background: var(--bg-1); border: 1px solid var(--line-1);
+      border-radius: 6px; overflow: hidden;
+    }
+    .history-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 34px; height: 32px; background: none; border: none;
+      color: var(--font-2); cursor: pointer;
+    }
+    .history-btn:disabled { color: var(--font-4); cursor: not-allowed; }
+    .history-btn:first-child { border-right: 1px solid var(--line-1); }
+    .history-btn svg { width: 16px; height: 16px; }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 5px; height: 34px; padding: 0 14px; border-radius: 6px;
+      font-size: 13px; font-weight: 500; cursor: pointer; border: none;
+      transition: all 0.15s;
+    }
+    .btn svg { width: 14px; height: 14px; }
+    .btn-primary { background: var(--primary); color: var(--white); }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { background: var(--white); color: var(--font-2); border: 1px solid var(--line-1); }
+    .btn-secondary:hover { background: var(--bg-1); border-color: var(--line-2); }
+    .btn-sm { height: 28px; padding: 0 10px; font-size: 12px; }
+    .btn-regen { background: var(--bg-1); color: var(--font-2); border: 1px solid var(--line-1); }
+    .btn-regen:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+
+    /* ===== LAYOUT ===== */
+    .main {
+      margin-top: 56px;
+      height: calc(100vh - 56px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== TABS ===== */
+    .tabs-wrap {
+      background: var(--white);
+      border-bottom: 1px solid var(--line-1);
+      padding: 0 20px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .tabs { display: flex; }
+    .tab {
+      display: flex; align-items: center; gap: 6px;
+      padding: 14px 20px; font-size: 14px; font-weight: 500;
+      color: var(--font-3); background: none; border: none;
+      cursor: pointer; position: relative;
+    }
+    .tab:hover { color: var(--font-2); }
+    .tab.active { color: var(--primary); }
+    .tab.active::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+      height: 2px; background: var(--primary);
+    }
+    .tab-count {
+      padding: 2px 6px; background: var(--bg-2);
+      border-radius: 4px; font-size: 11px; font-weight: 600;
+    }
+    .tab.active .tab-count { background: var(--primary-light); color: var(--primary); }
+    .tab-issue {
+      padding: 2px 6px; background: var(--error);
+      border-radius: 4px; font-size: 11px; font-weight: 600; color: var(--white);
+    }
+    .tab-issue-badge {
+      padding: 2px 6px; background: var(--warning);
+      border-radius: 4px; font-size: 11px; font-weight: 600;
+      color: var(--white); margin-left: 4px;
+    }
+
+    /* ===== CONTENT LAYOUT ===== */
+    .content-wrapper { flex: 1; display: flex; overflow: hidden; position: relative; }
+
+    .source-panel {
+      width: 360px; min-width: 360px;
+      background: var(--white); border-right: 1px solid var(--line-1);
+      display: flex; flex-direction: column;
+      transition: width 0.3s ease, min-width 0.3s ease;
+    }
+    .source-panel.collapsed { width: 0; min-width: 0; border-right: none; }
+    .source-panel.collapsed .source-panel-header,
+    .source-panel.collapsed .source-panel-content { opacity: 0; visibility: hidden; }
+
+    .source-panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; border-bottom: 1px solid var(--line-1);
+      background: var(--bg-1); flex-shrink: 0;
+    }
+    .source-panel-title { font-size: 13px; font-weight: 600; color: var(--font-1); }
+    .source-panel-toggle {
+      display: flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; background: var(--bg-2);
+      border: none; border-radius: 6px; cursor: pointer;
+    }
+    .source-panel-toggle:hover { background: var(--line-1); }
+    .source-panel-toggle svg { width: 14px; height: 14px; color: var(--font-2); }
+
+    .source-panel-content { flex: 1; overflow-y: auto; padding: 16px; }
+    .source-paragraph { margin-bottom: 16px; }
+    .source-paragraph:last-child { margin-bottom: 0; }
+    .source-paragraph-label {
+      display: inline-block; padding: 2px 6px;
+      background: var(--primary-light); color: var(--primary);
+      font-size: 10px; font-weight: 600; border-radius: 4px; margin-bottom: 8px;
+    }
+    .source-paragraph-text { font-size: 13px; line-height: 1.7; color: var(--font-1); }
+
+    .source-toggle-collapsed {
+      position: fixed; left: 0; top: 50%; transform: translateY(-50%);
+      width: 28px; height: 90px;
+      background: var(--white); border: 1px solid var(--line-1); border-left: none;
+      border-radius: 0 8px 8px 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+      cursor: pointer; z-index: 1000; box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .source-toggle-collapsed svg { width: 16px; height: 16px; color: var(--primary); }
+    .source-toggle-collapsed span {
+      writing-mode: vertical-rl; text-orientation: mixed;
+      font-size: 11px; font-weight: 600; color: var(--font-2);
+    }
+    .content-wrapper.panel-collapsed .source-toggle-collapsed { opacity: 1; pointer-events: auto; }
+
+    .content { flex: 1; overflow-y: auto; padding: 20px; }
+    .content-inner { max-width: 100%; margin: 0 auto; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ===== CARD ===== */
+    .card {
+      background: var(--white); border: 1px solid var(--line-1);
+      border-radius: 10px; margin-bottom: 16px;
+    }
+    .card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; border-bottom: 1px solid var(--line-1);
+      background: var(--bg-1); border-radius: 10px 10px 0 0;
+    }
+    .card-header-left { display: flex; align-items: center; gap: 10px; }
+    .card-title { font-size: 13px; font-weight: 600; color: var(--font-1); }
+    .card-num {
+      width: 24px; height: 24px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--primary); border-radius: 6px;
+      font-size: 12px; font-weight: 600; color: var(--white);
+    }
+    .card-body { padding: 16px; }
+
+    /* ===== MODULE ICON ===== */
+    .module-icon {
+      width: 24px; height: 24px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--primary-light); border-radius: 6px; color: var(--primary);
+    }
+    .module-icon svg { width: 14px; height: 14px; }
+
+    /* ===== ISSUE BADGE ===== */
+    .issue-badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 3px 8px; background: var(--error-light);
+      border-radius: 4px; font-size: 11px; font-weight: 600; color: var(--error);
+    }
+
+    /* ===== EDITABLE ===== */
+    .editable {
+      padding: 8px 10px; border: 1px solid transparent;
+      border-radius: 6px; font-size: 14px; line-height: 1.6;
+      color: var(--font-1); cursor: text; transition: all 0.15s; min-height: 38px;
+    }
+    .editable:hover { background: var(--bg-1); border-color: var(--line-1); }
+    .editable:focus { outline: none; background: var(--white); border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+    .editable.changed { border-color: var(--warning); background: var(--warning-light); }
+
+    /* ===== SUB-SECTIONS ===== */
+    .ms05-sub-section {
+      padding-bottom: 16px; margin-bottom: 16px;
+      border-bottom: 1px solid var(--line-1);
+    }
+    .ms05-sub-label {
+      font-size: 12px; font-weight: 600; color: var(--font-3);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+    }
+
+    /* ===== AUDIO ===== */
+    .audio-row { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+    .audio-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--font-3); }
+    .audio-item.need-regen { color: var(--warning); }
+    .play-btn {
+      width: 24px; height: 24px;
+      display: flex; align-items: center; justify-content: center;
+      border: none; border-radius: 50%; cursor: pointer;
+    }
+    .play-btn:hover { transform: scale(1.1); }
+    .play-btn svg { width: 10px; height: 10px; fill: var(--white); }
+    .play-btn.tts { background: var(--blue); }
+    .play-btn.need-regen { background: var(--warning); }
+    .audio-time { font-size: 12px; font-family: 'SF Mono', Monaco, monospace; color: var(--font-3); }
+    .regen-mini {
+      width: 20px; height: 20px;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: none; color: var(--font-3);
+      cursor: pointer; border-radius: 4px;
+    }
+    .regen-mini:hover { background: var(--bg-2); color: var(--primary); }
+    .regen-mini svg { width: 14px; height: 14px; }
+
+    /* ===== AI 검수 ===== */
+    .stt-comparison {
+      margin-top: 0; padding: 12px;
+      background: var(--bg-1); border-radius: 8px; border: 1px solid var(--line-1);
+    }
+    .stt-comparison.warning { background: var(--warning-light); border-color: var(--warning); }
+    .stt-comparison-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+    }
+    .stt-comparison-title {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 600;
+    }
+    .stt-comparison-title svg { width: 14px; height: 14px; }
+    .stt-content {
+      flex: 1; font-size: 13px; line-height: 1.5; color: var(--font-1);
+      padding: 6px 10px; background: var(--white);
+      border-radius: 6px; border: 1px solid var(--line-1);
+    }
+    .btn-confirm-review {
+      padding: 4px 10px; font-size: 12px; font-weight: 500;
+      color: var(--font-2); background: var(--bg-1);
+      border: 1px solid var(--line-1); border-radius: 4px; cursor: pointer;
+    }
+    .btn-confirm-review:hover { background: var(--bg-2); border-color: var(--line-2); }
+
+    /* ===== SENTENCE ITEM (문장 영역) ===== */
+    .sentence-item {
+      padding: 14px; background: var(--bg-1);
+      border-radius: 10px; margin-bottom: 10px;
+    }
+    .sentence-item:last-child { margin-bottom: 0; }
+
+    .sentence-header {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+    }
+    .sentence-num {
+      width: 22px; height: 22px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--white); border: 1px solid var(--line-2);
+      border-radius: 5px; font-size: 11px; font-weight: 600; color: var(--font-2);
+    }
+    .sentence-type {
+      padding: 2px 8px; border-radius: 4px;
+      font-size: 11px; font-weight: 600;
+    }
+    .sentence-type.passage { background: var(--primary-light); color: var(--primary); }
+    .sentence-type.example { background: var(--purple-light); color: var(--purple); }
+
+    .sentence-field { margin-bottom: 8px; }
+    .sentence-field:last-child { margin-bottom: 0; }
+    .sentence-field-label {
+      font-size: 11px; font-weight: 600; color: var(--font-3);
+      text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 4px;
+    }
+
+    .blank-preview {
+      padding: 8px 10px; background: var(--white);
+      border: 1px solid var(--line-1); border-radius: 6px;
+      font-size: 14px; line-height: 1.6; color: var(--font-1);
+    }
+    .blank-slot {
+      display: inline-block; padding: 1px 12px;
+      background: var(--warning-light); border-radius: 4px;
+      border-bottom: 2px solid var(--warning);
+      font-weight: 500; color: var(--warning);
+      min-width: 80px; text-align: center;
+    }
+
+    /* ===== TOAST ===== */
+    .toast {
+      position: fixed; bottom: 20px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      padding: 10px 20px; background: var(--font-1); color: var(--white);
+      border-radius: 8px; font-size: 13px; font-weight: 500;
+      opacity: 0; transition: all 0.3s; z-index: 1000;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <button class="back-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        목록
+      </button>
+      <div class="header-divider"></div>
+      <div class="header-info">
+        <span class="header-info-sub">Reading Explorer 3 · Unit 5 · Lesson 1</span>
+        <div class="header-title-row">
+          <span class="header-info-title">The Art of Storytelling</span>
+          <span class="status-badge status-reviewing">검수중</span>
+        </div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="history-btn-group">
+        <button class="history-btn" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>
+        </button>
+        <button class="history-btn" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"></path><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"></path></svg>
+        </button>
+      </div>
+      <button class="btn btn-secondary">임시 저장</button>
+      <button class="btn btn-primary">검수 완료</button>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Tabs -->
+    <div class="tabs-wrap">
+      <div class="tabs">
+        <button class="tab" data-tab="sentence">
+          문장
+          <span class="tab-count">12</span>
+        </button>
+        <button class="tab" data-tab="word">
+          단어
+          <span class="tab-count">8</span>
+        </button>
+        <button class="tab" data-tab="ms04">
+          MS04
+          <span class="tab-count">4</span>
+        </button>
+        <button class="tab active" data-tab="ms05">
+          MS05
+          <span class="tab-count">3</span>
+          <span class="tab-issue">3</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Content Wrapper -->
+    <div class="content-wrapper" id="contentWrapper">
+      <!-- 접힌 상태에서 보이는 펼치기 버튼 -->
+      <button class="source-toggle-collapsed" onclick="toggleSourcePanel()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        <span>지문</span>
+      </button>
+
+      <!-- 좌측 원본 지문 패널 -->
+      <div class="source-panel" id="sourcePanel">
+        <div class="source-panel-header">
+          <span class="source-panel-title">원본 지문</span>
+          <button class="source-panel-toggle" onclick="toggleSourcePanel()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+        </div>
+        <div class="source-panel-content">
+          <div class="source-paragraph">
+            <span class="source-paragraph-label">문단 1</span>
+            <p class="source-paragraph-text">Storytelling is one of the oldest forms of human communication, dating back thousands of years to when our ancestors gathered around fires to share tales of the hunt. These narratives served not only as entertainment but also as a means of preserving history, passing down cultural values, and teaching important life lessons to younger generations.</p>
+          </div>
+          <div class="source-paragraph">
+            <span class="source-paragraph-label">문단 2</span>
+            <p class="source-paragraph-text">Today, despite the rise of digital media and instant communication, the fundamental human need for stories remains unchanged. From podcasts to social media, we continue to share our experiences through narrative structures that would be recognizable to our distant ancestors.</p>
+          </div>
+          <div class="source-paragraph">
+            <span class="source-paragraph-label">문단 3</span>
+            <p class="source-paragraph-text">The power of storytelling lies in its ability to create emotional connections. When we hear a well-told story, our brains release oxytocin, the hormone associated with empathy and social bonding. This biological response explains why stories can change minds and inspire action in ways that facts and statistics alone cannot.</p>
+          </div>
+          <div class="source-paragraph">
+            <span class="source-paragraph-label">문단 4</span>
+            <p class="source-paragraph-text">Modern researchers have found that narrative thinking is fundamentally different from logical thinking. While logical thinking helps us analyze and solve problems, narrative thinking helps us understand ourselves and others, make sense of our experiences, and imagine possible futures.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 우측 콘텐츠 영역 -->
+      <div class="content">
+        <div class="content-inner">
+
+        <!-- TAB: MS05 -->
+        <div class="tab-panel active" id="panel-ms05">
+
+          <!-- ===== Pattern 1 ===== -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-header-left">
+                <span class="card-num">1</span>
+                <span class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg></span>
+                <span class="card-title">Pattern 1: not only A but also B</span>
+                <span class="issue-badge">이슈 2</span>
+              </div>
+              <button class="btn btn-sm btn-regen" onclick="regenerate('pattern-1')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                재생성
+              </button>
+            </div>
+            <div class="card-body">
+              <!-- AI 검수: 패턴 정보 -->
+              <div class="stt-comparison warning" style="margin-bottom: 16px;">
+                <div class="stt-comparison-header">
+                  <div class="stt-comparison-title" style="color: var(--warning);">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    AI 검수 · 표현
+                  </div>
+                  <button class="btn-confirm-review" onclick="confirmReview(this)">확인 완료</button>
+                </div>
+                <div class="stt-content">"not only A but also B"는 해당 지문에서 핵심 패턴으로 적합합니다. 다만 영영 풀이에서 "in addition to"를 활용하면 학습자에게 더 직관적일 수 있습니다.</div>
+              </div>
+
+              <!-- 패턴 정보 섹션 -->
+              <div class="ms05-sub-section">
+                <div class="ms05-sub-label">영어 표현</div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div class="editable" contenteditable="true" style="font-size: 16px; font-weight: 600; flex: 1;">not only A but also B</div>
+                  <div class="audio-item">
+                    <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                    <span class="audio-time">0:02</span>
+                    <button class="regen-mini" title="TTS 재생성"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="ms05-sub-section">
+                <div class="ms05-sub-label">뜻 (영한)</div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div class="editable" contenteditable="true" style="flex: 1;">A뿐만 아니라 B도</div>
+                  <div class="audio-item">
+                    <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                    <span class="audio-time">0:02</span>
+                    <button class="regen-mini" title="TTS 재생성"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="ms05-sub-section" style="border-bottom: 2px solid var(--line-1); padding-bottom: 20px; margin-bottom: 20px;">
+                <div class="ms05-sub-label">뜻 (영영)</div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div class="editable" contenteditable="true" style="flex: 1;">used to emphasize that something is true in addition to something else</div>
+                  <div class="audio-item">
+                    <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                    <span class="audio-time">0:04</span>
+                    <button class="regen-mini" title="TTS 재생성"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 문장 섹션 -->
+              <div class="ms05-sub-label" style="margin-bottom: 12px;">문장 (3)</div>
+
+              <!-- AI 검수: 문장 -->
+              <div class="stt-comparison warning" style="margin-bottom: 16px;">
+                <div class="stt-comparison-header">
+                  <div class="stt-comparison-title" style="color: var(--warning);">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    AI 검수 · 문장
+                  </div>
+                  <button class="btn-confirm-review" onclick="confirmReview(this)">확인 완료</button>
+                </div>
+                <div class="stt-content">추가 예문2의 빈칸 문장에서 패턴 "not only A but also B" 중 "not only"만 빈칸 처리되었습니다. 패턴 전체가 빈칸이 되도록 수정을 권장합니다.</div>
+              </div>
+
+              <!-- 문장 1: 지문 문장 -->
+              <div class="sentence-item">
+                <div class="sentence-header">
+                  <span class="sentence-num">1</span>
+                  <span class="sentence-type passage">지문 문장</span>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">영문 원문</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px;">These narratives served not only as entertainment but also as a means of preserving history, passing down cultural values, and teaching important life lessons to younger generations.</div>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">빈칸 문장</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px;">These narratives served ______ as entertainment ______ as a means of preserving history, passing down cultural values, and teaching important life lessons to younger generations.</div>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">한국어 해석</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px; color: var(--font-2);">이러한 이야기들은 오락으로서뿐만 아니라 역사를 보존하고, 문화적 가치를 전달하며, 어린 세대에게 중요한 삶의 교훈을 가르치는 수단으로도 쓰였다.</div>
+                </div>
+                <div class="audio-row">
+                  <div class="audio-item">
+                    <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                    <span style="font-size: 11px; color: var(--font-4);">TTS</span>
+                    <span class="audio-time">0:08</span>
+                    <button class="regen-mini" title="TTS 재생성"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 문장 2: 추가 예문1 -->
+              <div class="sentence-item">
+                <div class="sentence-header">
+                  <span class="sentence-num">2</span>
+                  <span class="sentence-type example">추가 예문1</span>
+                  <button class="btn btn-sm btn-regen" style="margin-left: auto;" onclick="regenerateExample(this)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                    재생성
+                  </button>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">영문 원문</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px;">She is not only a talented singer but also a skilled dancer.</div>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">빈칸 문장</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px;">She is ______ a talented singer ______ a skilled dancer.</div>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">한국어 해석</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px; color: var(--font-2);">그녀는 재능 있는 가수일 뿐만 아니라 숙련된 댄서이기도 하다.</div>
+                </div>
+                <div class="audio-row">
+                  <div class="audio-item">
+                    <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                    <span style="font-size: 11px; color: var(--font-4);">TTS</span>
+                    <span class="audio-time">0:04</span>
+                    <button class="regen-mini" title="TTS 재생성"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 문장 3: 추가 예문2 -->
+              <div class="sentence-item">
+                <div class="sentence-header">
+                  <span class="sentence-num">3</span>
+                  <span class="sentence-type example">추가 예문2</span>
+                  <button class="btn btn-sm btn-regen" style="margin-left: auto;" onclick="regenerateExample(this)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                    재생성
+                  </button>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">영문 원문</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px;">The new park is not only beautiful but also a great place for families to spend time together.</div>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">빈칸 문장</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px;">The new park is ______ beautiful ______ a great place for families to spend time together.</div>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">한국어 해석</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px; color: var(--font-2);">새 공원은 아름다울 뿐만 아니라 가족들이 함께 시간을 보내기에도 좋은 장소이다.</div>
+                </div>
+                <div class="audio-row">
+                  <div class="audio-item">
+                    <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                    <span style="font-size: 11px; color: var(--font-4);">TTS</span>
+                    <span class="audio-time">0:05</span>
+                    <button class="regen-mini" title="TTS 재생성"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ===== Pattern 2 ===== -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-header-left">
+                <span class="card-num">2</span>
+                <span class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg></span>
+                <span class="card-title">Pattern 2: date back to</span>
+                <span class="issue-badge">이슈 1</span>
+              </div>
+              <button class="btn btn-sm btn-regen" onclick="regenerate('pattern-2')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                재생성
+              </button>
+            </div>
+            <div class="card-body">
+              <!-- 패턴 정보에는 이슈 없음 (AI 검수 미표시) -->
+
+              <!-- 패턴 정보 -->
+              <div class="ms05-sub-section">
+                <div class="ms05-sub-label">영어 표현</div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div class="editable" contenteditable="true" style="font-size: 16px; font-weight: 600; flex: 1;">date back to</div>
+                  <div class="audio-item">
+                    <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                    <span class="audio-time">0:01</span>
+                    <button class="regen-mini" title="TTS 재생성"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+                  </div>
+                </div>
+              </div>
+              <div class="ms05-sub-section">
+                <div class="ms05-sub-label">뜻 (영한)</div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div class="editable" contenteditable="true" style="flex: 1;">~까지 거슬러 올라가다</div>
+                  <div class="audio-item">
+                    <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                    <span class="audio-time">0:03</span>
+                    <button class="regen-mini" title="TTS 재생성"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+                  </div>
+                </div>
+              </div>
+              <div class="ms05-sub-section" style="border-bottom: 2px solid var(--line-1); padding-bottom: 20px; margin-bottom: 20px;">
+                <div class="ms05-sub-label">뜻 (영영)</div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div class="editable" contenteditable="true" style="flex: 1;">to have existed since a particular time in the past</div>
+                  <div class="audio-item">
+                    <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                    <span class="audio-time">0:03</span>
+                    <button class="regen-mini" title="TTS 재생성"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 문장 섹션 -->
+              <div class="ms05-sub-label" style="margin-bottom: 12px;">문장 (3)</div>
+
+              <!-- AI 검수: 문장 -->
+              <div class="stt-comparison warning" style="margin-bottom: 16px;">
+                <div class="stt-comparison-header">
+                  <div class="stt-comparison-title" style="color: var(--warning);">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    AI 검수 · 문장
+                  </div>
+                  <button class="btn-confirm-review" onclick="confirmReview(this)">확인 완료</button>
+                </div>
+                <div class="stt-content">추가 예문1의 한국어 해석에서 "거슬러 올라간다"보다 "~까지 거슬러 올라간다"로 수정하면 패턴의 뉘앙스가 더 정확해집니다.</div>
+              </div>
+
+              <div class="sentence-item">
+                <div class="sentence-header">
+                  <span class="sentence-num">1</span>
+                  <span class="sentence-type passage">지문 문장</span>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">영문 원문</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px;">Storytelling is one of the oldest forms of human communication, dating back thousands of years to when our ancestors gathered around fires.</div>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">빈칸 문장</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px;">Storytelling is one of the oldest forms of human communication, ______ thousands of years to when our ancestors gathered around fires.</div>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">한국어 해석</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px; color: var(--font-2);">이야기하기는 인간 소통의 가장 오래된 형태 중 하나로, 조상들이 모닥불 주위에 모였던 수천 년 전까지 거슬러 올라간다.</div>
+                </div>
+                <div class="audio-row">
+                  <div class="audio-item">
+                    <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                    <span style="font-size: 11px; color: var(--font-4);">TTS</span>
+                    <span class="audio-time">0:07</span>
+                    <button class="regen-mini" title="TTS 재생성"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="sentence-item">
+                <div class="sentence-header">
+                  <span class="sentence-num">2</span>
+                  <span class="sentence-type example">추가 예문1</span>
+                  <button class="btn btn-sm btn-regen" style="margin-left: auto;" onclick="regenerateExample(this)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                    재생성
+                  </button>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">영문 원문</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px;">The tradition of wearing masks during festivals dates back to ancient Rome.</div>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">빈칸 문장</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px;">The tradition of wearing masks during festivals ______ ancient Rome.</div>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">한국어 해석</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px; color: var(--font-2);">축제 때 가면을 쓰는 전통은 고대 로마까지 거슬러 올라간다.</div>
+                </div>
+                <div class="audio-row">
+                  <div class="audio-item">
+                    <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                    <span style="font-size: 11px; color: var(--font-4);">TTS</span>
+                    <span class="audio-time">0:04</span>
+                    <button class="regen-mini" title="TTS 재생성"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="sentence-item">
+                <div class="sentence-header">
+                  <span class="sentence-num">3</span>
+                  <span class="sentence-type example">추가 예문2</span>
+                  <button class="btn btn-sm btn-regen" style="margin-left: auto;" onclick="regenerateExample(this)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                    재생성
+                  </button>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">영문 원문</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px;">This recipe dates back to my grandmother's time in the countryside.</div>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">빈칸 문장</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px;">This recipe ______ my grandmother's time in the countryside.</div>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">한국어 해석</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px; color: var(--font-2);">이 레시피는 할머니가 시골에 살던 시절까지 거슬러 올라간다.</div>
+                </div>
+                <div class="audio-row">
+                  <div class="audio-item">
+                    <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                    <span style="font-size: 11px; color: var(--font-4);">TTS</span>
+                    <span class="audio-time">0:04</span>
+                    <button class="regen-mini" title="TTS 재생성"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== Pattern 3 ===== -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-header-left">
+                <span class="card-num">3</span>
+                <span class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg></span>
+                <span class="card-title">Pattern 3: make sense of</span>
+              </div>
+              <button class="btn btn-sm btn-regen" onclick="regenerate('pattern-3')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                재생성
+              </button>
+            </div>
+            <div class="card-body">
+              <!-- 패턴 정보 -->
+              <div class="ms05-sub-section">
+                <div class="ms05-sub-label">영어 표현</div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div class="editable" contenteditable="true" style="font-size: 16px; font-weight: 600; flex: 1;">make sense of</div>
+                  <div class="audio-item">
+                    <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                    <span class="audio-time">0:01</span>
+                    <button class="regen-mini" title="TTS 재생성"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+                  </div>
+                </div>
+              </div>
+              <div class="ms05-sub-section">
+                <div class="ms05-sub-label">뜻 (영한)</div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div class="editable" contenteditable="true" style="flex: 1;">~을 이해하다, ~의 의미를 파악하다</div>
+                  <div class="audio-item">
+                    <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                    <span class="audio-time">0:04</span>
+                    <button class="regen-mini" title="TTS 재생성"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+                  </div>
+                </div>
+              </div>
+              <div class="ms05-sub-section" style="border-bottom: 2px solid var(--line-1); padding-bottom: 20px; margin-bottom: 20px;">
+                <div class="ms05-sub-label">뜻 (영영)</div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div class="editable" contenteditable="true" style="flex: 1;">to understand something that is difficult or complicated</div>
+                  <div class="audio-item">
+                    <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                    <span class="audio-time">0:03</span>
+                    <button class="regen-mini" title="TTS 재생성"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 문장 섹션 -->
+              <div class="ms05-sub-label" style="margin-bottom: 12px;">문장 (3)</div>
+
+              <div class="sentence-item">
+                <div class="sentence-header">
+                  <span class="sentence-num">1</span>
+                  <span class="sentence-type passage">지문 문장</span>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">영문 원문</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px;">Narrative thinking helps us understand ourselves and others, make sense of our experiences, and imagine possible futures.</div>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">빈칸 문장</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px;">Narrative thinking helps us understand ourselves and others, ______ our experiences, and imagine possible futures.</div>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">한국어 해석</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px; color: var(--font-2);">서사적 사고는 우리 자신과 타인을 이해하고, 경험의 의미를 파악하며, 가능한 미래를 상상하는 데 도움을 준다.</div>
+                </div>
+                <div class="audio-row">
+                  <div class="audio-item">
+                    <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                    <span style="font-size: 11px; color: var(--font-4);">TTS</span>
+                    <span class="audio-time">0:06</span>
+                    <button class="regen-mini" title="TTS 재생성"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="sentence-item">
+                <div class="sentence-header">
+                  <span class="sentence-num">2</span>
+                  <span class="sentence-type example">추가 예문1</span>
+                  <button class="btn btn-sm btn-regen" style="margin-left: auto;" onclick="regenerateExample(this)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                    재생성
+                  </button>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">영문 원문</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px;">It took me a while to make sense of the instructions for the new game.</div>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">빈칸 문장</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px;">It took me a while to ______ the instructions for the new game.</div>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">한국어 해석</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px; color: var(--font-2);">새 게임의 설명서를 이해하는 데 시간이 좀 걸렸다.</div>
+                </div>
+                <div class="audio-row">
+                  <div class="audio-item">
+                    <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                    <span style="font-size: 11px; color: var(--font-4);">TTS</span>
+                    <span class="audio-time">0:04</span>
+                    <button class="regen-mini" title="TTS 재생성"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="sentence-item">
+                <div class="sentence-header">
+                  <span class="sentence-num">3</span>
+                  <span class="sentence-type example">추가 예문2</span>
+                  <button class="btn btn-sm btn-regen" style="margin-left: auto;" onclick="regenerateExample(this)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                    재생성
+                  </button>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">영문 원문</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px;">Scientists are trying to make sense of the data they collected from the experiment.</div>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">빈칸 문장</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px;">Scientists are trying to ______ the data they collected from the experiment.</div>
+                </div>
+                <div class="sentence-field">
+                  <div class="sentence-field-label">한국어 해석</div>
+                  <div class="editable" contenteditable="true" style="font-size: 13px; color: var(--font-2);">과학자들은 실험에서 수집한 데이터를 이해하려고 노력하고 있다.</div>
+                </div>
+                <div class="audio-row">
+                  <div class="audio-item">
+                    <button class="play-btn tts"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg></button>
+                    <span style="font-size: 11px; color: var(--font-4);">TTS</span>
+                    <span class="audio-time">0:05</span>
+                    <button class="regen-mini" title="TTS 재생성"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // Source Panel Toggle
+    function toggleSourcePanel() {
+      const panel = document.getElementById('sourcePanel');
+      const wrapper = document.getElementById('contentWrapper');
+      panel.classList.toggle('collapsed');
+      wrapper.classList.toggle('panel-collapsed');
+    }
+
+    // Tab Switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        const target = tab.getAttribute('data-tab');
+        const panel = document.getElementById('panel-' + target);
+        if (panel) panel.classList.add('active');
+      });
+    });
+
+    // Regenerate
+    function regenerate(target) {
+      if (!confirm('재생성하면 기존 콘텐츠가 대체됩니다. 계속하시겠습니까?')) return;
+      showToast('재생성 중...');
+    }
+
+    // Regenerate single example
+    function regenerateExample(btn) {
+      if (!confirm('이 예문을 재생성하시겠습니까?')) return;
+      showToast('예문 재생성 중...');
+    }
+
+    // Confirm Review
+    function confirmReview(btn) {
+      const comp = btn.closest('.stt-comparison');
+      comp.style.opacity = '0.5';
+      comp.style.pointerEvents = 'none';
+      btn.textContent = '확인 완료됨';
+      btn.disabled = true;
+      showToast('AI 검수 확인 완료');
+    }
+
+    // Toast
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+  </script>
+</body>
+</html>
